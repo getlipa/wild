@@ -1,0 +1,19 @@
+use perro::{PError, PResult};
+use std::fmt::{Display, Formatter};
+
+#[derive(Debug, PartialEq, Eq)]
+pub enum AuthRuntimeErrorCode {
+    AuthServiceError,
+    NetworkError,
+    GenericError,
+}
+
+impl Display for AuthRuntimeErrorCode {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{:?}", self)
+    }
+}
+
+pub type AuthError = PError<AuthRuntimeErrorCode>;
+
+pub type AuthResult<T> = PResult<T, AuthRuntimeErrorCode>;
