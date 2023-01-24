@@ -30,6 +30,7 @@ pub(crate) struct AuthProvider {
     auth_keypair: KeyPair,
     client: Client,
     refresh_token: Option<String>,
+    wallet_pubkey_id: Option<String>,
 }
 
 impl AuthProvider {
@@ -47,6 +48,7 @@ impl AuthProvider {
             auth_keypair,
             client,
             refresh_token: None,
+            wallet_pubkey_id: None,
         })
     }
 
@@ -68,8 +70,14 @@ impl AuthProvider {
         Ok(access_token)
     }
 
-    fn run_auth_flow(&self) -> AuthResult<(String, String)> {
+    pub fn get_wallet_pubkey_id(&self) -> Option<String> {
+        self.wallet_pubkey_id.clone()
+    }
+
+    fn run_auth_flow(&mut self) -> AuthResult<(String, String)> {
         let (access_token, refresh_token, wallet_pub_key_id) = self.start_basic_session()?;
+
+        self.wallet_pubkey_id = Some(wallet_pub_key_id.clone());
 
         match self.auth_level {
             AuthLevel::Pseudonymous => Ok((access_token, refresh_token)),

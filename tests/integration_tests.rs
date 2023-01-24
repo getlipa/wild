@@ -30,6 +30,9 @@ fn test_invalid_url() {
     )
     .unwrap();
 
+    let id = auth.get_wallet_pubkey_id();
+    assert!(id.is_none());
+
     let result = auth.query_token();
     assert!(matches!(
         result,
@@ -52,13 +55,21 @@ fn test_basic_auth() {
     )
     .unwrap();
 
+    let id = auth.get_wallet_pubkey_id();
+    assert!(id.is_none());
+
     let token = auth.query_token().unwrap();
     let next_token = auth.query_token().unwrap();
     assert_eq!(token, next_token);
 
+    let id = auth.get_wallet_pubkey_id();
+    assert!(id.is_some());
+
     sleep(Duration::from_secs(1));
     let refreshed_token = auth.refresh_token().unwrap();
     assert_ne!(token, refreshed_token);
+
+    assert_eq!(auth.get_wallet_pubkey_id(), id);
 }
 
 #[test]
@@ -73,13 +84,21 @@ fn test_owner_auth() {
     )
     .unwrap();
 
+    let id = auth.get_wallet_pubkey_id();
+    assert!(id.is_none());
+
     let token = auth.query_token().unwrap();
     let next_token = auth.query_token().unwrap();
     assert_eq!(token, next_token);
 
+    let id = auth.get_wallet_pubkey_id();
+    assert!(id.is_some());
+
     sleep(Duration::from_secs(1));
     let refreshed_token = auth.refresh_token().unwrap();
     assert_ne!(token, refreshed_token);
+
+    assert_eq!(auth.get_wallet_pubkey_id(), id);
 }
 
 #[test]
@@ -95,13 +114,21 @@ fn test_employee_auth() {
     )
     .unwrap();
 
+    let id = auth.get_wallet_pubkey_id();
+    assert!(id.is_none());
+
     let token = auth.query_token().unwrap();
     let next_token = auth.query_token().unwrap();
     assert_eq!(token, next_token);
 
+    let id = auth.get_wallet_pubkey_id();
+    assert!(id.is_some());
+
     sleep(Duration::from_secs(1));
     let refreshed_token = auth.refresh_token().unwrap();
     assert_ne!(token, refreshed_token);
+
+    assert_eq!(auth.get_wallet_pubkey_id(), id);
 }
 
 fn generate_keys() -> (KeyPair, KeyPair) {

@@ -63,6 +63,10 @@ impl Auth {
             .ok_or_permanent_failure("Newly refreshed token is not valid long enough")
     }
 
+    pub fn get_wallet_pubkey_id(&self) -> Option<String> {
+        self.provider.lock().unwrap().get_wallet_pubkey_id()
+    }
+
     // Not exposed in UDL, used in tests.
     pub fn refresh_token(&self) -> AuthResult<String> {
         let mut provider = self.provider.lock().unwrap();
