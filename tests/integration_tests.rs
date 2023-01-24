@@ -24,7 +24,7 @@ fn test_invalid_url() {
 
     let auth = Auth::new(
         "localhost:9".to_string(),
-        AuthLevel::Basic,
+        AuthLevel::Pseudonymous,
         wallet_keypair,
         auth_keypair,
     )
@@ -46,7 +46,7 @@ fn test_basic_auth() {
 
     let auth = Auth::new(
         get_backend_url(),
-        AuthLevel::Basic,
+        AuthLevel::Pseudonymous,
         wallet_keypair,
         auth_keypair,
     )
