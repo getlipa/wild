@@ -18,7 +18,7 @@ const INVALID_INVITATION_EXCEPTION_CODE: &str = "invalid-invitation-exception";
 const REMOTE_SCHEMA_ERROR_CODE: &str = "remote-schema-error";
 
 pub enum AuthLevel {
-    Basic,
+    Pseudonymous,
     Owner,
     Employee,
 }
@@ -72,7 +72,7 @@ impl AuthProvider {
         let (access_token, refresh_token, wallet_pub_key_id) = self.start_basic_session()?;
 
         match self.auth_level {
-            AuthLevel::Basic => Ok((access_token, refresh_token)),
+            AuthLevel::Pseudonymous => Ok((access_token, refresh_token)),
             AuthLevel::Owner => self.start_priviledged_session(access_token, wallet_pub_key_id),
             AuthLevel::Employee => {
                 let owner_pub_key_id =
