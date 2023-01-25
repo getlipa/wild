@@ -102,6 +102,25 @@ fn test_owner_auth() {
 }
 
 #[test]
+fn test_employee_with_no_owner_auth() {
+    let (wallet_keypair, auth_keypair) = generate_keys();
+
+    let auth = Auth::new(
+        get_backend_url(),
+        AuthLevel::Employee,
+        wallet_keypair,
+        auth_keypair,
+    )
+    .unwrap();
+
+    let id = auth.get_wallet_pubkey_id();
+    assert!(id.is_none());
+
+    let result = auth.query_token();
+    assert!(matches!(result, Err(AuthError::InvalidInput { .. })));
+}
+
+#[test]
 #[ignore]
 fn test_employee_auth() {
     let (wallet_keypair, auth_keypair) = generate_keys();
