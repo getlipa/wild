@@ -83,13 +83,10 @@ impl AuthProvider {
             AuthLevel::Pseudonymous => Ok((access_token, refresh_token)),
             AuthLevel::Owner => self.start_priviledged_session(access_token, wallet_pub_key_id),
             AuthLevel::Employee => {
-                let owner_pub_key_id =
-                    self.get_business_owner(access_token.clone(), wallet_pub_key_id)?;
-                if let Some(owner_pub_key_id) = owner_pub_key_id {
-                    self.start_priviledged_session(access_token, owner_pub_key_id)
-                } else {
-                    panic!("Employee does not belong to any owner");
-                }
+                let owner_pub_key_id = self
+                    .get_business_owner(access_token.clone(), wallet_pub_key_id)?
+                    .ok_or_invalid_input("Employee does not belong to any owner")?;
+                self.start_priviledged_session(access_token, owner_pub_key_id)
             }
         }
     }
