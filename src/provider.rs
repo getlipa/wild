@@ -297,7 +297,7 @@ fn build_client(access_token: Option<&str>) -> AuthResult<Client> {
 
     let mut builder = Client::builder().user_agent(user_agent).timeout(timeout);
     if let Some(access_token) = access_token {
-        let value = HeaderValue::from_str(&format!("Bearer {}", access_token))
+        let value = HeaderValue::from_str(&format!("Bearer {access_token}"))
             .map_to_permanent_failure("Failed to build header value from str")?;
         builder = builder.default_headers(std::iter::once((AUTHORIZATION, value)).collect());
     }
@@ -350,8 +350,7 @@ fn map_error_code(code: &str) -> AuthError {
             permanent_failure("A remote schema call has failed on the backend")
         }
         _ => permanent_failure(format!(
-            "Unexpected backend response: unknown error code {}",
-            code
+            "Unexpected backend response: unknown error code {code}"
         )),
     }
 }

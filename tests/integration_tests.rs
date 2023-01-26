@@ -153,7 +153,7 @@ fn test_employee_auth() {
 fn generate_keys() -> (KeyPair, KeyPair) {
     println!("Generating keys ...");
     let mnemonic = generate_mnemonic();
-    println!("mnemonic: {:?}", mnemonic);
+    println!("mnemonic: {mnemonic:?}");
     let wallet_keys = derive_keys(Network::Testnet, mnemonic).wallet_keypair;
     let auth_keys = generate_keypair();
 
