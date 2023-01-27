@@ -1,0 +1,77 @@
+name: Static code analysis
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+
+jobs:
+  security-audit:
+    name: Security audit
+    runs-on: ubuntu-latest
+    steps:
+      - name: rust-toolchain
+        uses: actions-rs/toolchain@v1.0.6
+        with:
+          toolchain: stable
+      - name: Install security audit
+        run: cargo install cargo-audit
+      - uses: actions/checkout@v3
+      - name: Run security audit
+        run: cargo audit
+  fmt_check:
+    name: Check code formatting
+    runs-on: ubuntu-latest
+    steps:
+      - name: rust-toolchain
+        uses: actions-rs/toolchain@v1.0.6
+        with:
+          toolchain: stable
+          components: rustfmt
+      - uses: actions/checkout@v3
+      - name: Check code formatting
+        run: make fmt
+  clippy_check:
+    name: Clippy check
+    runs-on: ubuntu-latest
+    steps:
+      - name: rust-toolchain
+        uses: actions-rs/toolchain@v1.0.6
+        with:
+          toolchain: stable
+          components: clippy
+      - name: Install Protoc
+        uses: arduino/setup-protoc@v1
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          submodules: true
+      - name: Clippy
+        run: make clippy
+  unused_dependencies:
+    name: Look for unused dependencies
+    runs-on: ubuntu-latest
+    steps:
+      - name: rust-toolchain
+        uses: actions-rs/toolchain@v1.0.6
+        with:
+          toolchain: nightly
+          override: true
+      - name: Install Protoc
+        uses: arduino/setup-protoc@v1
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Install unused dependency checker
+        run: cargo install cargo-udeps --locked
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Run unused dependency checker
+        run: make udeps

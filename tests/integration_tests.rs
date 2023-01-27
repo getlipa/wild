@@ -121,6 +121,7 @@ fn test_employee_with_no_owner_auth() {
 }
 
 #[test]
+// Is being ignored because it involves preceding manual steps (being invited and accept the invite).
 #[ignore]
 fn test_employee_auth() {
     let (wallet_keypair, auth_keypair) = generate_keys();
