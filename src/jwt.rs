@@ -1,5 +1,4 @@
-use crate::errors::AuthResult;
-
+use crate::errors::Result;
 use base64::{engine::general_purpose, Engine as _};
 use perro::{MapToError, OptionToError};
 use serde_json::Value;
@@ -11,7 +10,7 @@ pub(crate) struct Token {
     pub expires_at: SystemTime,
 }
 
-pub(crate) fn parse_token(raw_token: String) -> AuthResult<Token> {
+pub(crate) fn parse_token(raw_token: String) -> Result<Token> {
     let splitted_jwt_strings: Vec<_> = raw_token.split('.').collect();
 
     let jwt_body = splitted_jwt_strings.get(1).ok_or_invalid_input(
@@ -37,7 +36,7 @@ pub(crate) fn parse_token(raw_token: String) -> AuthResult<Token> {
     })
 }
 
-fn get_expiry(jwt_body: &Value) -> AuthResult<SystemTime> {
+fn get_expiry(jwt_body: &Value) -> Result<SystemTime> {
     let expiry = jwt_body
         .as_object()
         .ok_or_invalid_input("Failed to get JWT body json object")?

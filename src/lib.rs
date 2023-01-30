@@ -7,7 +7,7 @@ mod signing;
 
 pub use provider::AuthLevel;
 
-use crate::errors::{AuthResult, AuthRuntimeErrorCode};
+use crate::errors::{AuthRuntimeErrorCode, Result};
 use crate::jwt::parse_token;
 use crate::provider::AuthProvider;
 use crate::secrets::KeyPair;
@@ -34,7 +34,7 @@ impl Auth {
         auth_level: AuthLevel,
         wallet_keypair: KeyPair,
         auth_keypair: KeyPair,
-    ) -> AuthResult<Self> {
+    ) -> Result<Self> {
         let provider = AuthProvider::new(backend_url, auth_level, wallet_keypair, auth_keypair)?;
         let expired_token = AdjustedToken {
             raw: String::new(),
@@ -46,7 +46,7 @@ impl Auth {
         })
     }
 
-    pub fn query_token(&self) -> AuthResult<String> {
+    pub fn query_token(&self) -> Result<String> {
         if let Some(token) = self.get_token_if_valid()? {
             return Ok(token);
         }
@@ -68,7 +68,7 @@ impl Auth {
     }
 
     // Not exposed in UDL, used in tests.
-    pub fn refresh_token(&self) -> AuthResult<String> {
+    pub fn refresh_token(&self) -> Result<String> {
         let mut provider = self.provider.lock().unwrap();
         let token = adjust_token(provider.query_token()?)?;
         *self.token.lock().unwrap() = token;
@@ -76,7 +76,7 @@ impl Auth {
             .ok_or_permanent_failure("Newly refreshed token is not valid long enough")
     }
 
-    fn get_token_if_valid(&self) -> AuthResult<Option<String>> {
+    fn get_token_if_valid(&self) -> Result<Option<String>> {
         let now = SystemTime::now();
         let token = self.token.lock().unwrap();
         if now < token.expires_at {
@@ -87,7 +87,7 @@ impl Auth {
     }
 }
 
-fn adjust_token(raw_token: String) -> AuthResult<AdjustedToken> {
+fn adjust_token(raw_token: String) -> Result<AdjustedToken> {
     let token = parse_token(raw_token).map_to_runtime_error(
         AuthRuntimeErrorCode::AuthServiceError,
         "Auth service returned invalid JWT",
@@ -111,7 +111,7 @@ fn adjust_token(raw_token: String) -> AuthResult<AdjustedToken> {
     })
 }
 
-fn compute_leeway(period: Duration) -> AuthResult<Duration> {
+fn compute_leeway(period: Duration) -> Result<Duration> {
     let leeway_10_percents = period
         .checked_div(100 / 10)
         .ok_or_permanent_failure("Failed to divide duration")?;
@@ -136,7 +136,7 @@ mod tests {
 
     #[test]
     #[rustfmt::skip]
-    fn test_compute_leeway() -> AuthResult<()> {
+    fn test_compute_leeway() -> Result<()> {
         assert_eq!(compute_leeway(secs(    10))?, secs( 5));
         assert_eq!(compute_leeway(secs(    20))?, secs(10));
         assert_eq!(compute_leeway(secs(    30))?, secs(10));

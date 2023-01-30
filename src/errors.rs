@@ -1,4 +1,3 @@
-use perro::{PError, PResult};
 use std::fmt::{Display, Formatter};
 
 #[derive(Debug, PartialEq, Eq)]
@@ -14,6 +13,6 @@ impl Display for AuthRuntimeErrorCode {
     }
 }
 
-pub type AuthError = PError<AuthRuntimeErrorCode>;
+pub type Error = perro::Error<AuthRuntimeErrorCode>;
 
-pub type AuthResult<T> = PResult<T, AuthRuntimeErrorCode>;
+pub type Result<T> = std::result::Result<T, perro::Error<AuthRuntimeErrorCode>>;
