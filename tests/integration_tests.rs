@@ -1,5 +1,5 @@
 use bdk::bitcoin::Network;
-use honey_badger::errors::{AuthError, AuthRuntimeErrorCode};
+use honey_badger::errors::{AuthRuntimeErrorCode, Error};
 use honey_badger::secrets::{derive_keys, generate_keypair, generate_mnemonic, KeyPair};
 use honey_badger::{Auth, AuthLevel};
 use simplelog::TestLogger;
@@ -36,7 +36,7 @@ fn test_invalid_url() {
     let result = auth.query_token();
     assert!(matches!(
         result,
-        Err(AuthError::RuntimeError {
+        Err(Error::RuntimeError {
             code: AuthRuntimeErrorCode::NetworkError,
             ..
         })
@@ -117,7 +117,7 @@ fn test_employee_with_no_owner_auth() {
     assert!(id.is_none());
 
     let result = auth.query_token();
-    assert!(matches!(result, Err(AuthError::InvalidInput { .. })));
+    assert!(matches!(result, Err(Error::InvalidInput { .. })));
 }
 
 #[test]

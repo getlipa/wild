@@ -1,4 +1,4 @@
-use crate::errors::{AuthError, AuthResult, AuthRuntimeErrorCode};
+use crate::errors::{AuthRuntimeErrorCode, Error, Result};
 use crate::graphql::*;
 use crate::secrets::KeyPair;
 use crate::signing::sign;
@@ -39,7 +39,7 @@ impl AuthProvider {
         auth_level: AuthLevel,
         wallet_keypair: KeyPair,
         auth_keypair: KeyPair,
-    ) -> AuthResult<Self> {
+    ) -> Result<Self> {
         let client = build_client(None)?;
         Ok(AuthProvider {
             backend_url,
@@ -52,12 +52,12 @@ impl AuthProvider {
         })
     }
 
-    pub fn query_token(&mut self) -> AuthResult<String> {
+    pub fn query_token(&mut self) -> Result<String> {
         let (access_token, refresh_token) = match self.refresh_token.clone() {
             Some(refresh_token) => {
                 match self.refresh_session(refresh_token) {
                     // Tolerate authentication errors and retry auth flow.
-                    Err(AuthError::RuntimeError {
+                    Err(Error::RuntimeError {
                         code: AuthRuntimeErrorCode::AuthServiceError,
                         ..
                     }) => self.run_auth_flow(),
@@ -74,7 +74,7 @@ impl AuthProvider {
         self.wallet_pubkey_id.clone()
     }
 
-    fn run_auth_flow(&mut self) -> AuthResult<(String, String)> {
+    fn run_auth_flow(&mut self) -> Result<(String, String)> {
         let (access_token, refresh_token, wallet_pub_key_id) = self.start_basic_session()?;
 
         self.wallet_pubkey_id = Some(wallet_pub_key_id.clone());
@@ -91,7 +91,7 @@ impl AuthProvider {
         }
     }
 
-    fn start_basic_session(&self) -> AuthResult<(String, String, String)> {
+    fn start_basic_session(&self) -> Result<(String, String, String)> {
         let challenge = self.request_challenge()?;
 
         let challenge_with_prefix = add_bitcoin_message_prefix(&challenge);
@@ -144,7 +144,7 @@ impl AuthProvider {
         &self,
         access_token: String,
         owner_pub_key_id: String,
-    ) -> AuthResult<(String, String)> {
+    ) -> Result<(String, String)> {
         let challenge = self.request_challenge()?;
 
         let challenge_with_prefix = add_bitcoin_message_prefix(&challenge);
@@ -211,7 +211,7 @@ impl AuthProvider {
         &self,
         access_token: String,
         wallet_pub_key_id: String,
-    ) -> AuthResult<Option<String>> {
+    ) -> Result<Option<String>> {
         info!("Getting business owner ...");
         let variables = get_business_owner::Variables {
             owner_wallet_pub_key_id: wallet_pub_key_id,
@@ -235,7 +235,7 @@ impl AuthProvider {
         Ok(result)
     }
 
-    fn refresh_session(&self, refresh_token: String) -> AuthResult<(String, String)> {
+    fn refresh_session(&self, refresh_token: String) -> Result<(String, String)> {
         // Refresh session.
         info!("Refreshing session ...");
         let variables = refresh_session::Variables { refresh_token };
@@ -265,7 +265,7 @@ impl AuthProvider {
         Ok((access_token, refresh_token))
     }
 
-    fn request_challenge(&self) -> AuthResult<String> {
+    fn request_challenge(&self) -> Result<String> {
         info!("Requesting challenge ...");
         let variables = request_challenge::Variables {};
         let response_body = post_graphql_blocking::<RequestChallenge, _>(
@@ -291,7 +291,7 @@ impl AuthProvider {
     }
 }
 
-fn build_client(access_token: Option<&str>) -> AuthResult<Client> {
+fn build_client(access_token: Option<&str>) -> Result<Client> {
     let user_agent = "graphql-rust/0.12.0";
     let timeout = Some(Duration::from_secs(10));
 
@@ -308,7 +308,7 @@ fn build_client(access_token: Option<&str>) -> AuthResult<Client> {
     Ok(client)
 }
 
-fn get_response_data<Data>(response: Response<Data>) -> AuthResult<Data> {
+fn get_response_data<Data>(response: Response<Data>) -> Result<Data> {
     if let Some(errors) = response.errors {
         let error = errors
             .get(0)
@@ -330,7 +330,7 @@ fn get_response_data<Data>(response: Response<Data>) -> AuthResult<Data> {
     }
 }
 
-fn map_error_code(code: &str) -> AuthError {
+fn map_error_code(code: &str) -> Error {
     match code {
         AUTH_EXCEPTION_CODE => runtime_error(
             AuthRuntimeErrorCode::AuthServiceError,
