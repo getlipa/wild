@@ -293,7 +293,7 @@ impl AuthProvider {
 
 fn build_client(access_token: Option<&str>) -> Result<Client> {
     let user_agent = "graphql-rust/0.12.0";
-    let timeout = Some(Duration::from_secs(10));
+    let timeout = Some(Duration::from_secs(20));
 
     let mut builder = Client::builder().user_agent(user_agent).timeout(timeout);
     if let Some(access_token) = access_token {
