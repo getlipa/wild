@@ -47,19 +47,19 @@ impl Auth {
     }
 
     pub fn query_token(&self) -> Result<String> {
-        if let Some(token) = self.get_token_if_valid()? {
+        if let Some(token) = self.get_token_if_valid() {
             return Ok(token);
         }
 
         let mut provider = self.provider.lock().unwrap();
         // Anyone else refreshed the token by chance?...
-        if let Some(token) = self.get_token_if_valid()? {
+        if let Some(token) = self.get_token_if_valid() {
             return Ok(token);
         }
 
         let token = adjust_token(provider.query_token()?)?;
         *self.token.lock().unwrap() = token;
-        self.get_token_if_valid()?
+        self.get_token_if_valid()
             .ok_or_permanent_failure("Newly refreshed token is not valid long enough")
     }
 
@@ -72,17 +72,17 @@ impl Auth {
         let mut provider = self.provider.lock().unwrap();
         let token = adjust_token(provider.query_token()?)?;
         *self.token.lock().unwrap() = token;
-        self.get_token_if_valid()?
+        self.get_token_if_valid()
             .ok_or_permanent_failure("Newly refreshed token is not valid long enough")
     }
 
-    fn get_token_if_valid(&self) -> Result<Option<String>> {
+    fn get_token_if_valid(&self) -> Option<String> {
         let now = SystemTime::now();
         let token = self.token.lock().unwrap();
         if now < token.expires_at {
-            Ok(Some(token.raw.clone()))
+            Some(token.raw.clone())
         } else {
-            Ok(None)
+            None
         }
     }
 }
