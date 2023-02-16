@@ -1,7 +1,7 @@
 pub mod errors;
 mod graphql;
 mod jwt;
-pub mod provider;
+mod provider;
 pub mod secrets;
 mod signing;
 

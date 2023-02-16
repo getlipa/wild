@@ -350,7 +350,7 @@ fn map_error_code(code: &str) -> Error {
             permanent_failure("A remote schema call has failed on the backend")
         }
         _ => permanent_failure(format!(
-            "Unexpected backend response: unknown error code {code}"
+            "Unexpected backend response: unknown error code: {code}"
         )),
     }
 }
