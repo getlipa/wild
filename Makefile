@@ -29,6 +29,10 @@ testall: test integrationtests
 
 .PHONY: fmt
 fmt:
+	cargo fmt
+
+.PHONY: fmt-check
+fmt-check:
 	cargo fmt -- --check
 
 .PHONY: clippy
