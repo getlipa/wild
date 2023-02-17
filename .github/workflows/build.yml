@@ -28,7 +28,7 @@ jobs:
       - name: Rust Cache
         uses: Swatinem/rust-cache@v2.2.0
       - name: Build honey-badger
-        run: cargo build --manifest-path honey-badger/Cargo.toml --verbose
+        run: cargo build --verbose
       - name: Run unit tests
         run: make -C honey-badger test
       - name: Set environment variables
