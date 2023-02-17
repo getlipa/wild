@@ -1,5 +1,3 @@
-pub mod errors;
-mod graphql;
 mod jwt;
 mod provider;
 pub mod secrets;
@@ -7,12 +5,12 @@ mod signing;
 
 pub use provider::AuthLevel;
 
-use crate::errors::{AuthRuntimeErrorCode, Result};
 use crate::jwt::parse_token;
 use crate::provider::AuthProvider;
 use crate::secrets::KeyPair;
 
-use perro::{MapToError, OptionToError};
+use graphql::errors::{AuthRuntimeErrorCode, Result};
+use graphql::perro::{MapToError, OptionToError};
 use std::cmp::{max, min};
 use std::sync::Mutex;
 use std::time::{Duration, SystemTime};

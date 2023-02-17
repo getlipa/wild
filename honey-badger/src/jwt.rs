@@ -1,6 +1,6 @@
-use crate::errors::Result;
 use base64::{engine::general_purpose, Engine as _};
-use perro::{MapToError, OptionToError};
+use graphql::errors::Result;
+use graphql::perro::{MapToError, OptionToError};
 use serde_json::Value;
 use std::time::{Duration, SystemTime};
 

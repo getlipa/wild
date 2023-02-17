@@ -1,2 +1,6 @@
 [workspace]
-members = [ "honey-badger" ]
+members = [
+    "chameleon",
+    "graphql",
+    "honey-badger",
+]

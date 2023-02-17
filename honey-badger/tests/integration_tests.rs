@@ -1,5 +1,5 @@
 use bdk::bitcoin::Network;
-use honey_badger::errors::{AuthRuntimeErrorCode, Error};
+use graphql::errors::{AuthRuntimeErrorCode, Error};
 use honey_badger::secrets::{derive_keys, generate_keypair, generate_mnemonic, KeyPair};
 use honey_badger::{Auth, AuthLevel};
 use simplelog::TestLogger;
