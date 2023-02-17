@@ -29,9 +29,9 @@ jobs:
         uses: Swatinem/rust-cache@v2.2.0
       - name: Build
         run: cargo build --verbose
-      - name: Set environment variables
-        run: echo "GRAPHQL_API_URL=${{ secrets.GRAPHQL_API_URL }}" >> $GITHUB_ENV
       - name: Run unit tests
         run: make test
+      - name: Set environment variables
+        run: echo "GRAPHQL_API_URL=${{ secrets.GRAPHQL_API_URL }}" >> $GITHUB_ENV
       - name: Run integration tests
         run: make integrationtests
