@@ -36,7 +36,7 @@ jobs:
           components: rustfmt
       - uses: actions/checkout@v3
       - name: Check code formatting
-        run: make -C honey-badger fmt-check
+        run: make fmt-check
   clippy_check:
     name: Clippy check
     runs-on: ubuntu-latest
@@ -56,7 +56,7 @@ jobs:
           submodules: true
           fetch-depth: 0
       - name: Clippy
-        run: make -C honey-badger clippy check-version
+        run: make clippy check-version
   unused_dependencies:
     name: Look for unused dependencies
     runs-on: ubuntu-latest
@@ -75,4 +75,4 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
       - name: Run unused dependency checker
-        run: make -C honey-badger udeps
+        run: make udeps
