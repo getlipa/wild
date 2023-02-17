@@ -27,11 +27,11 @@ jobs:
         uses: actions/checkout@v3
       - name: Rust Cache
         uses: Swatinem/rust-cache@v2.2.0
-      - name: Build
-        run: cargo build --verbose
+      - name: Build honey-badger
+        run: cargo build --manifest-path honey-badger/Cargo.toml --verbose
+      - name: Run unit tests
+        run: make -C honey-badger test
       - name: Set environment variables
         run: echo "GRAPHQL_API_URL=${{ secrets.GRAPHQL_API_URL }}" >> $GITHUB_ENV
-      - name: Run unit tests
-        run: make test
       - name: Run integration tests
-        run: make integrationtests
+        run: make -C honey-badger integrationtests
