@@ -1,5 +1,5 @@
 use bitcoin::Network;
-use chameleon::ExchangeRatesProvider;
+use chameleon::ExchangeRateProvider;
 use graphql::perro::Error;
 use honey_badger::secrets::{derive_keys, generate_keypair, generate_mnemonic};
 use honey_badger::{Auth, AuthLevel};
@@ -35,7 +35,7 @@ fn test_get_exchange_rate() {
     assert!(matches!(result, Err(Error::InvalidInput { .. })));
 }
 
-fn build_provider() -> ExchangeRatesProvider {
+fn build_provider() -> ExchangeRateProvider {
     println!("Generating keys ...");
     let mnemonic = generate_mnemonic();
     println!("mnemonic: {mnemonic:?}");
@@ -50,7 +50,7 @@ fn build_provider() -> ExchangeRatesProvider {
     )
     .unwrap();
 
-    ExchangeRatesProvider::new(get_backend_url(), Arc::new(auth))
+    ExchangeRateProvider::new(get_backend_url(), Arc::new(auth))
 }
 
 fn get_backend_url() -> String {

@@ -66,12 +66,12 @@ jobs:
         with:
           toolchain: nightly
           override: true
+      - name: Install unused dependency checker
+        run: cargo install cargo-udeps --locked
       - name: Install Protoc
         uses: arduino/setup-protoc@v1
         with:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
-      - name: Install unused dependency checker
-        run: cargo install cargo-udeps --locked
       - name: Checkout
         uses: actions/checkout@v3
       - name: Run unused dependency checker

@@ -5,12 +5,12 @@ use graphql::{build_client, post_blocking};
 use honey_badger::Auth;
 use std::sync::Arc;
 
-pub struct ExchangeRatesProvider {
+pub struct ExchangeRateProvider {
     backend_url: String,
     auth: Arc<Auth>,
 }
 
-impl ExchangeRatesProvider {
+impl ExchangeRateProvider {
     pub fn new(backend_url: String, auth: Arc<Auth>) -> Self {
         Self { backend_url, auth }
     }
@@ -28,12 +28,12 @@ impl ExchangeRatesProvider {
     pub fn query_exchange_rate(&self, code: String) -> Result<u32> {
         let token = self.auth.query_token()?;
         let client = build_client(Some(&token))?;
-        let variables = get_exchange_rates::Variables { code };
-        let data = post_blocking::<GetExchangeRates>(&client, &self.backend_url, variables)?;
+        let variables = get_exchange_rate::Variables { code };
+        let data = post_blocking::<GetExchangeRate>(&client, &self.backend_url, variables)?;
         let rate = data
             .currency
             .first()
-            .ok_or_invalid_input("Unknown curency")?
+            .ok_or_invalid_input("Unknown currency")?
             .sats_per_unit;
 
         Ok(rate)

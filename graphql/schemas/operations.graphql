@@ -57,7 +57,7 @@ query GetBusinessOwner($ownerWalletPubKeyId: uuid!) {
 
 # Currency
 
-query GetExchangeRates($code: String!) {
+query GetExchangeRate($code: String!) {
   currency(where: {currencyCode: {_eq: $code }}) {
     currencyCode
     satsPerUnit

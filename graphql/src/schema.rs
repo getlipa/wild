@@ -62,7 +62,7 @@ type numeric = u32;
     query_path = "schemas/operations.graphql",
     response_derives = "Debug"
 )]
-pub struct GetExchangeRates;
+pub struct GetExchangeRate;
 
 #[derive(GraphQLQuery)]
 #[graphql(
