@@ -1,18 +1,18 @@
-pub mod errors;
-mod graphql;
 mod jwt;
 mod provider;
 pub mod secrets;
 mod signing;
 
-pub use provider::AuthLevel;
+pub extern crate graphql;
 
-use crate::errors::{AuthRuntimeErrorCode, Result};
+pub use crate::provider::AuthLevel;
+
 use crate::jwt::parse_token;
 use crate::provider::AuthProvider;
 use crate::secrets::KeyPair;
 
-use perro::{MapToError, OptionToError};
+pub use graphql::errors::{GraphQlRuntimeErrorCode, Result};
+use graphql::perro::{MapToError, OptionToError};
 use std::cmp::{max, min};
 use std::sync::Mutex;
 use std::time::{Duration, SystemTime};
@@ -89,7 +89,7 @@ impl Auth {
 
 fn adjust_token(raw_token: String) -> Result<AdjustedToken> {
     let token = parse_token(raw_token).map_to_runtime_error(
-        AuthRuntimeErrorCode::AuthServiceError,
+        GraphQlRuntimeErrorCode::AuthServiceError,
         "Auth service returned invalid JWT",
     )?;
 
@@ -97,7 +97,7 @@ fn adjust_token(raw_token: String) -> Result<AdjustedToken> {
         .expires_at
         .duration_since(token.received_at)
         .map_to_runtime_error(
-            AuthRuntimeErrorCode::AuthServiceError,
+            GraphQlRuntimeErrorCode::AuthServiceError,
             "Expiration date of JWT is in the past",
         )?;
 

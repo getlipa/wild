@@ -485,6 +485,61 @@ input country_stream_cursor_value_input {
   name: String
 }
 
+"""
+columns and relationships of "currency"
+"""
+type currency {
+  """ISO 4217"""
+  currencyCode: String!
+  satsPerUnit: numeric!
+}
+
+"""
+Boolean expression to filter rows from the table "currency". All fields are combined with a logical 'AND'.
+"""
+input currency_bool_exp {
+  _and: [currency_bool_exp!]
+  _not: currency_bool_exp
+  _or: [currency_bool_exp!]
+  currencyCode: String_comparison_exp
+  satsPerUnit: numeric_comparison_exp
+}
+
+"""Ordering options when selecting data from "currency"."""
+input currency_order_by {
+  currencyCode: order_by
+  satsPerUnit: order_by
+}
+
+"""
+select columns of table "currency"
+"""
+enum currency_select_column {
+  """column name"""
+  currencyCode
+
+  """column name"""
+  satsPerUnit
+}
+
+"""
+Streaming cursor of the table "currency"
+"""
+input currency_stream_cursor_input {
+  """Stream column input with initial value"""
+  initial_value: currency_stream_cursor_value_input!
+
+  """cursor ordering"""
+  ordering: cursor_ordering
+}
+
+"""Initial value of the column from where the streaming should start"""
+input currency_stream_cursor_value_input {
+  """ISO 4217"""
+  currencyCode: String
+  satsPerUnit: numeric
+}
+
 """ordering argument of a cursor"""
 enum cursor_ordering {
   """ascending ordering of the cursor"""
@@ -573,6 +628,23 @@ type mutation_root {
   start_prepared_session_v2(challenge: String!, challengeSignature: String!, challengeSignatureType: ChallengeSignatureType, preparedPermissionToken: String!): SessionPermit
   start_session(authPubKey: String!, challenge: String!, challengeSignature: String!, challengeSignatureType: ChallengeSignatureType, signedAuthPubKey: String!, walletPubKey: String!): TokenContainer
   start_session_v2(authPubKey: String!, challenge: String!, challengeSignature: String!, challengeSignatureType: ChallengeSignatureType, signedAuthPubKey: String!, walletPubKey: String!): SessionPermit
+}
+
+scalar numeric
+
+"""
+Boolean expression to compare columns of type "numeric". All fields are combined with logical 'AND'.
+"""
+input numeric_comparison_exp {
+  _eq: numeric
+  _gt: numeric
+  _gte: numeric
+  _in: [numeric!]
+  _is_null: Boolean
+  _lt: numeric
+  _lte: numeric
+  _neq: numeric
+  _nin: [numeric!]
 }
 
 """column ordering options"""
@@ -667,6 +739,32 @@ type query_root {
 
   """fetch data from the table: "country" using primary key columns"""
   country_by_pk(countryCode: String!): country
+
+  """
+  fetch data from the table: "currency"
+  """
+  currency(
+    """distinct select on columns"""
+    distinct_on: [currency_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [currency_order_by!]
+
+    """filter the rows returned"""
+    where: currency_bool_exp
+  ): [currency!]!
+
+  """fetch data from the table: "currency" using primary key columns"""
+  currency_by_pk(
+    """ISO 4217"""
+    currencyCode: String!
+  ): currency
   prepare_wallet_session(challenge: String!, ownerPubKeyId: String!, signature: String!): String
 
   """
@@ -804,6 +902,46 @@ type subscription_root {
     """filter the rows returned"""
     where: country_bool_exp
   ): [country!]!
+
+  """
+  fetch data from the table: "currency"
+  """
+  currency(
+    """distinct select on columns"""
+    distinct_on: [currency_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [currency_order_by!]
+
+    """filter the rows returned"""
+    where: currency_bool_exp
+  ): [currency!]!
+
+  """fetch data from the table: "currency" using primary key columns"""
+  currency_by_pk(
+    """ISO 4217"""
+    currencyCode: String!
+  ): currency
+
+  """
+  fetch data from the table in a streaming manner: "currency"
+  """
+  currency_stream(
+    """maximum number of rows returned in a single batch"""
+    batch_size: Int!
+
+    """cursor to stream the results returned by the query"""
+    cursor: [currency_stream_cursor_input]!
+
+    """filter the rows returned"""
+    where: currency_bool_exp
+  ): [currency!]!
 
   """
   fetch data from the table: "wallet_acl"
