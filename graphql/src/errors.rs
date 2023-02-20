@@ -1,18 +1,18 @@
 use std::fmt::{Display, Formatter};
 
 #[derive(Debug, PartialEq, Eq)]
-pub enum AuthRuntimeErrorCode {
+pub enum GraphQlRuntimeErrorCode {
     AuthServiceError,
     NetworkError,
     GenericError,
 }
 
-impl Display for AuthRuntimeErrorCode {
+impl Display for GraphQlRuntimeErrorCode {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         write!(f, "{self:?}")
     }
 }
 
-pub type Error = perro::Error<AuthRuntimeErrorCode>;
+pub type Error = perro::Error<GraphQlRuntimeErrorCode>;
 
-pub type Result<T> = std::result::Result<T, perro::Error<AuthRuntimeErrorCode>>;
+pub type Result<T> = std::result::Result<T, perro::Error<GraphQlRuntimeErrorCode>>;

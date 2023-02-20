@@ -37,7 +37,7 @@ pub fn post_blocking<Query: graphql_client::GraphQLQuery>(
 ) -> Result<Query::ResponseData> {
     let response = post_graphql_blocking::<Query, _>(client, backend_url, variables)
         .map_to_runtime_error(
-            AuthRuntimeErrorCode::NetworkError,
+            GraphQlRuntimeErrorCode::NetworkError,
             "Failed to excute the query",
         )?;
     get_response_data(response)
@@ -74,11 +74,11 @@ fn map_error_code(code: &str) -> Error {
 
     match code {
         AUTH_EXCEPTION_CODE => runtime_error(
-            AuthRuntimeErrorCode::AuthServiceError,
+            GraphQlRuntimeErrorCode::AuthServiceError,
             "The backend threw an Authentication Exception",
         ),
         INVALID_JWT_ERROR_CODE => runtime_error(
-            AuthRuntimeErrorCode::AuthServiceError,
+            GraphQlRuntimeErrorCode::AuthServiceError,
             "A request we made included an invalid JWT",
         ),
         MISSING_HTTP_HEADER_EXCEPTION_CODE => {

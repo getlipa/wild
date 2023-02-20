@@ -1,5 +1,5 @@
 use bdk::bitcoin::Network;
-use graphql::errors::{AuthRuntimeErrorCode, Error};
+use graphql::errors::{Error, GraphQlRuntimeErrorCode};
 use honey_badger::secrets::{derive_keys, generate_keypair, generate_mnemonic, KeyPair};
 use honey_badger::{Auth, AuthLevel};
 use simplelog::TestLogger;
@@ -37,7 +37,7 @@ fn test_invalid_url() {
     assert!(matches!(
         result,
         Err(Error::RuntimeError {
-            code: AuthRuntimeErrorCode::NetworkError,
+            code: GraphQlRuntimeErrorCode::NetworkError,
             ..
         })
     ));

@@ -49,7 +49,7 @@ impl AuthProvider {
                 match self.refresh_session(refresh_token) {
                     // Tolerate authentication errors and retry auth flow.
                     Err(Error::RuntimeError {
-                        code: AuthRuntimeErrorCode::AuthServiceError,
+                        code: GraphQlRuntimeErrorCode::AuthServiceError,
                         ..
                     }) => self.run_auth_flow(),
                     result => result,

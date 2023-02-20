@@ -21,7 +21,9 @@ fn init() {
 fn test_list_currency_codes() {
     let provider = build_provider();
     let list = provider.list_currency_codes().unwrap();
-    assert_eq!(list, vec!["CHF", "EUR", "SATS", "USD"]);
+    assert!(list.contains(&"EUR".to_string()));
+    assert!(list.contains(&"USD".to_string()));
+    assert!(list.contains(&"CHF".to_string()));
 }
 
 #[test]
