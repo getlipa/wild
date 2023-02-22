@@ -1,7 +1,7 @@
 pub mod errors;
 pub mod schema;
 
-use crate::errors::*;
+pub use crate::errors::*;
 
 pub extern crate perro;
 pub extern crate reqwest;
