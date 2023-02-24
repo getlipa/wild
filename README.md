@@ -12,10 +12,8 @@ The chameleon can change its color very quickly, it knows everything about excha
 So it will fetch fiat exchange rates for you.
 
 ## Mole
-*Coming soon*
-
 The mole lives within channels and knows everything about them.    
-Therefore it is the perfect agent to deal with a users channel states.  
+Therefore, it is the perfect agent to deal with a users channel states.  
 It stores a users *channel manager* and *channel monitors* in encrypted form in the GraphQL backend
 and always returns the latest state of them when requested.
 

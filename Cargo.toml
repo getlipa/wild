@@ -3,4 +3,5 @@ members = [
     "chameleon",
     "graphql",
     "honey-badger",
+    "mole",
 ]

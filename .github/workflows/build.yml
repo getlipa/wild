@@ -32,6 +32,8 @@ jobs:
       - name: Run unit tests
         run: make test
       - name: Set environment variables
-        run: echo "GRAPHQL_API_URL=${{ secrets.GRAPHQL_API_URL }}" >> $GITHUB_ENV
+        run: |
+          echo "GRAPHQL_API_URL=${{ secrets.GRAPHQL_API_URL }}" >> $GITHUB_ENV
+          echo "GRAPHQL_HEALTH_URL=${{ secrets.GRAPHQL_HEALTH_URL }}" >> $GITHUB_ENV
       - name: Run integration tests
         run: make integrationtests
