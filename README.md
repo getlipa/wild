@@ -8,7 +8,8 @@ It deals with the backends authentication flow and leaves you with a JWT token
 that you can use in your HTTP header as a bearer token.
 
 ## Chameleon
-It can change its color very quickly. Fetches exchange rates.
+The chameleon can change its color very quickly, it knows everything about exchange rates.
+So it will fetch fiat exchange rates for you.
 
 ## Mole
 *Coming soon*
