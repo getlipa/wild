@@ -1,5 +1,5 @@
 # Wild
-Umbrella project (cargo workspace) for a couple of wild animals.
+Umbrella project (a virtual cargo workspace) for a couple of wild animals.
 The common denominator for these projects is that they are all clients for the Lipa backend GraphQL API.
 
 ## Honey-badger
