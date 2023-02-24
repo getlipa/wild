@@ -84,11 +84,10 @@ query VerifyChannelManagerFieldExists {
   }
 }
 
-mutation InsertChannelMonitorOne($channelId: bytea!, $encryptedChannelMonitor: bytea!, $timestamp: timestamptz!, $installationId: String!, $encryptedDeviceInfo: bytea!) {
+mutation InsertChannelMonitorOne($channelId: bytea!, $encryptedChannelMonitor: bytea!, $installationId: String!, $encryptedDeviceInfo: bytea!) {
   insert_channel_monitor_one(object: {
         channelId: $channelId,
         encryptedChannelMonitor: $encryptedChannelMonitor,
-        timestamp: $timestamp,
         installationId: $installationId,
         encryptedDeviceInfo: $encryptedDeviceInfo,
     }) {
@@ -108,10 +107,9 @@ query GetLatestChannelMonitor($channelId: bytea!) {
   }
 }
 
-mutation InsertChannelManagerOne($encryptedChannelManager: bytea!, $timestamp: timestamptz!) {
+mutation InsertChannelManagerOne($encryptedChannelManager: bytea!) {
   insert_channel_manager_one(object: {
         encryptedChannelManager: $encryptedChannelManager,
-        timestamp: $timestamp,
     }) {
       walletId
   }
