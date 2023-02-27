@@ -30,7 +30,7 @@ fn test_health_positive_check() {
 #[serial]
 fn test_health_negative_check() {
     let original_url = env::var("GRAPHQL_HEALTH_URL").unwrap();
-    std::env::set_var("GRAPHQL_HEALTH_URL", "https://localhost"); // No GraphQL endpoint here ...
+    std::env::set_var("GRAPHQL_HEALTH_URL", "http://localhost:9");
 
     let storage_client = build_storage_client();
     assert!(!storage_client.check_health());
