@@ -85,12 +85,8 @@ fn test_channel_monitor_persistence() {
 
     let retrieved_channel_ids = client.get_channel_monitor_ids().unwrap();
     assert_eq!(retrieved_channel_ids.len(), 2);
-    assert_ne!(retrieved_channel_ids[0], retrieved_channel_ids[1]);
-    for channel_id in retrieved_channel_ids {
-        if channel_id != channel_id_0 && channel_id != channel_id_1 {
-            panic!("Unexpected channel id: {}", channel_id);
-        }
-    }
+    assert!(retrieved_channel_ids.contains(&String::from(channel_id_0)));
+    assert!(retrieved_channel_ids.contains(&String::from(channel_id_1)));
 
     // must return the latest channel state
     let retrieved_channel_0 = client.read_channel_monitor(channel_id_0).unwrap();
