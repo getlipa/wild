@@ -72,18 +72,6 @@ query ListCurrencyCodes {
 
 # [mole] Channel state persistence
 
-query VerifyChannelMonitorFieldExists {
-  channel_monitor(limit: 0) {
-    channelId
-  }
-}
-
-query VerifyChannelManagerFieldExists {
-  channel_manager(limit: 0) {
-    walletId
-  }
-}
-
 mutation InsertChannelMonitorOne($channelId: bytea!, $encryptedChannelMonitor: bytea!, $installationId: String!, $encryptedDeviceInfo: bytea!) {
   insert_channel_monitor_one(object: {
         channelId: $channelId,

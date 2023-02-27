@@ -45,44 +45,6 @@ impl ChannelStatePersistenceClient {
         false
     }
 
-    pub fn verify_channel_monitor_field_exists(&self) -> Result<bool> {
-        let token = self.auth.query_token()?;
-        let client = build_client(Some(&token))?;
-        let variables = verify_channel_monitor_field_exists::Variables {};
-        let response =
-            post_blocking::<VerifyChannelMonitorFieldExists>(&client, &self.backend_url, variables);
-
-        match response {
-            Ok(_) => Ok(true),
-            Err(err) => {
-                if error_is_data_structure_related(&err) {
-                    Ok(false)
-                } else {
-                    Err(err)
-                }
-            }
-        }
-    }
-
-    pub fn verify_channel_manager_field_exists(&self) -> Result<bool> {
-        let token = self.auth.query_token()?;
-        let client = build_client(Some(&token))?;
-        let variables = verify_channel_manager_field_exists::Variables {};
-        let response =
-            post_blocking::<VerifyChannelManagerFieldExists>(&client, &self.backend_url, variables);
-
-        match response {
-            Ok(_) => Ok(true),
-            Err(err) => {
-                if error_is_data_structure_related(&err) {
-                    Ok(false)
-                } else {
-                    Err(err)
-                }
-            }
-        }
-    }
-
     pub fn write_channel_monitor(
         &self,
         channel_id: &str,
@@ -173,34 +135,4 @@ impl ChannelStatePersistenceClient {
 
 fn graphql_hex_encode(data: &Vec<u8>) -> String {
     format!("\\x{}", hex::encode(data))
-}
-
-fn error_is_data_structure_related(
-    error: &graphql::perro::Error<graphql::GraphQlRuntimeErrorCode>,
-) -> bool {
-    matches!(
-        error,
-        Error::RuntimeError {
-            code: GraphQlRuntimeErrorCode::GenericError,
-            ..
-        }
-    )
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use graphql::perro::runtime_error;
-
-    #[test]
-    fn test_nature_of_error() {
-        let error = runtime_error(GraphQlRuntimeErrorCode::GenericError, "test");
-        assert!(error_is_data_structure_related(&error));
-
-        let error = runtime_error(GraphQlRuntimeErrorCode::NetworkError, "test");
-        assert!(!error_is_data_structure_related(&error));
-
-        let error = runtime_error(GraphQlRuntimeErrorCode::AuthServiceError, "test");
-        assert!(!error_is_data_structure_related(&error));
-    }
 }

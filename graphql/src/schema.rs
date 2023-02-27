@@ -79,22 +79,6 @@ pub struct ListCurrencyCodes;
     query_path = "schemas/operations.graphql",
     response_derives = "Debug"
 )]
-pub struct VerifyChannelMonitorFieldExists;
-
-#[derive(GraphQLQuery)]
-#[graphql(
-    schema_path = "schemas/schema_wallet_read.graphql",
-    query_path = "schemas/operations.graphql",
-    response_derives = "Debug"
-)]
-pub struct VerifyChannelManagerFieldExists;
-
-#[derive(GraphQLQuery)]
-#[graphql(
-    schema_path = "schemas/schema_wallet_read.graphql",
-    query_path = "schemas/operations.graphql",
-    response_derives = "Debug"
-)]
 pub struct InsertChannelMonitorOne;
 
 #[derive(GraphQLQuery)]

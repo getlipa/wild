@@ -39,20 +39,6 @@ fn test_health_negative_check() {
 }
 
 #[test]
-fn test_channel_monitor_field_exists() {
-    let client = build_storage_client();
-
-    assert!(client.verify_channel_monitor_field_exists().unwrap());
-}
-
-#[test]
-fn test_channel_manager_field_exists() {
-    let client = build_storage_client();
-
-    assert!(client.verify_channel_manager_field_exists().unwrap());
-}
-
-#[test]
 fn test_channel_monitor_persistence() {
     let client = build_storage_client();
 
