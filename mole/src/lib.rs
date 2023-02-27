@@ -159,7 +159,7 @@ impl ChannelStatePersistenceClient {
         let client = build_client(Some(&token))?;
         let variables = get_latest_channel_manager::Variables {};
         let data = post_blocking::<GetLatestChannelManager>(&client, &self.backend_url, variables)?;
-        let binary = hex::decode(
+        hex::decode(
             data.channel_manager[0]
                 .encrypted_channel_manager
                 .replace("\\x", ""),
@@ -167,9 +167,7 @@ impl ChannelStatePersistenceClient {
         .map_to_runtime_error(
             GraphQlRuntimeErrorCode::GenericError,
             "Could not decode hex encoded binary",
-        )?;
-
-        Ok(binary)
+        )
     }
 }
 
