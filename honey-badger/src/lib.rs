@@ -3,7 +3,7 @@ mod provider;
 pub mod secrets;
 mod signing;
 
-pub extern crate graphql;
+pub use graphql;
 
 pub use crate::provider::AuthLevel;
 

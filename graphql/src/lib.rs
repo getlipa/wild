@@ -3,8 +3,8 @@ pub mod schema;
 
 pub use crate::errors::*;
 
-pub extern crate perro;
-pub extern crate reqwest;
+pub use perro;
+pub use reqwest;
 
 use graphql_client::reqwest::post_graphql_blocking;
 use graphql_client::Response;
