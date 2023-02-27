@@ -99,9 +99,9 @@ impl ChannelStatePersistenceClient {
         let client = build_client(Some(&token))?;
         let variables = insert_channel_monitor_one::Variables {
             channel_id: format!("\\x{channel_id}"),
-            encrypted_channel_monitor: format!("\\x{}", hex::encode(encrypted_channel_monitor)),
+            encrypted_channel_monitor: graphql_hex_encode(encrypted_channel_monitor),
             installation_id: installation_id.to_string(),
-            encrypted_device_info: format!("\\x{}", hex::encode(encrypted_device_info)),
+            encrypted_device_info: graphql_hex_encode(encrypted_device_info),
         };
         post_blocking::<InsertChannelMonitorOne>(&client, &self.backend_url, variables)?;
 
@@ -147,7 +147,7 @@ impl ChannelStatePersistenceClient {
         let token = self.auth.query_token().unwrap();
         let client = build_client(Some(&token))?;
         let variables = insert_channel_manager_one::Variables {
-            encrypted_channel_manager: format!("\\x{}", hex::encode(encrypted_channel_manager)),
+            encrypted_channel_manager: graphql_hex_encode(encrypted_channel_manager),
         };
         post_blocking::<InsertChannelManagerOne>(&client, &self.backend_url, variables)?;
 
@@ -169,6 +169,10 @@ impl ChannelStatePersistenceClient {
             "Could not decode hex encoded binary",
         )
     }
+}
+
+fn graphql_hex_encode(data: &Vec<u8>) -> String {
+    format!("\\x{}", hex::encode(data))
 }
 
 fn error_is_data_structure_related(
