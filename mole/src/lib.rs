@@ -117,7 +117,7 @@ impl ChannelStatePersistenceClient {
         let list = data
             .channel_monitor
             .into_iter()
-            .map(|cm| cm.channel_id.replace("\\x", ""))
+            .map(|cm| cm.channel_id.replacen("\\x", "", 1))
             .collect();
 
         Ok(list)
@@ -133,7 +133,7 @@ impl ChannelStatePersistenceClient {
         let binary = hex::decode(
             data.channel_monitor[0]
                 .encrypted_channel_monitor
-                .replace("\\x", ""),
+                .replacen("\\x", "", 1),
         )
         .map_to_runtime_error(
             GraphQlRuntimeErrorCode::GenericError,
@@ -162,7 +162,7 @@ impl ChannelStatePersistenceClient {
         hex::decode(
             data.channel_manager[0]
                 .encrypted_channel_manager
-                .replace("\\x", ""),
+                .replacen("\\x", "", 1),
         )
         .map_to_runtime_error(
             GraphQlRuntimeErrorCode::GenericError,
