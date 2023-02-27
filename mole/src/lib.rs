@@ -187,9 +187,6 @@ fn error_is_data_structure_related(
 mod tests {
     use super::*;
     use graphql::perro::runtime_error;
-    use honey_badger::secrets::{derive_keys, generate_keypair, generate_mnemonic};
-    use honey_badger::{Auth, AuthLevel};
-    use std::env;
 
     #[test]
     fn test_nature_of_error() {
