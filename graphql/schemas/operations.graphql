@@ -96,7 +96,7 @@ mutation InsertChannelMonitorOne($channelId: bytea!, $encryptedChannelMonitor: b
 }
 
 query GetChannelMonitorChannelIds {
-  channel_monitor(distinct_on: channelId, order_by: [{channelId: desc}, {timestamp: desc}]) {
+  channel_monitor(distinct_on: channelId, order_by: {channelId: desc}) {
     channelId
   }
 }
