@@ -1,7 +1,7 @@
 use bitcoin::Network;
 use honey_badger::secrets::{derive_keys, generate_keypair, generate_mnemonic};
 use honey_badger::{Auth, AuthLevel};
-use mole::RemoteStorageClient;
+use mole::ChannelStatePersistenceClient;
 use rand::Rng;
 use serial_test::{parallel, serial};
 use simplelog::TestLogger;
@@ -121,7 +121,7 @@ fn test_channel_manager_persistence() {
     );
 }
 
-fn build_storage_client() -> RemoteStorageClient {
+fn build_storage_client() -> ChannelStatePersistenceClient {
     println!("Generating keys ...");
     let mnemonic = generate_mnemonic();
     println!("mnemonic: {mnemonic:?}");
@@ -136,7 +136,7 @@ fn build_storage_client() -> RemoteStorageClient {
     )
     .unwrap();
 
-    RemoteStorageClient::new(get_backend_url(), get_backend_health_url(), Arc::new(auth))
+    ChannelStatePersistenceClient::new(get_backend_url(), get_backend_health_url(), Arc::new(auth))
 }
 
 fn get_backend_url() -> String {

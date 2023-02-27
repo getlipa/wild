@@ -6,13 +6,13 @@ use graphql::{build_client, post_blocking};
 use honey_badger::Auth;
 use std::sync::Arc;
 
-pub struct RemoteStorageClient {
+pub struct ChannelStatePersistenceClient {
     backend_url: String,
     backend_health_url: String,
     auth: Arc<Auth>,
 }
 
-impl RemoteStorageClient {
+impl ChannelStatePersistenceClient {
     pub fn new(backend_url: String, backend_health_url: String, auth: Arc<Auth>) -> Self {
         Self {
             backend_url,
