@@ -1,5 +1,14 @@
 use graphql_client::GraphQLQuery;
 
+#[allow(non_camel_case_types)]
+type bytea = String;
+#[allow(non_camel_case_types)]
+type numeric = u32;
+#[allow(non_camel_case_types)]
+type timestamptz = String;
+#[allow(non_camel_case_types)]
+type uuid = String;
+
 #[derive(GraphQLQuery)]
 #[graphql(
     schema_path = "schemas/schema_wallet_read.graphql",
@@ -40,11 +49,6 @@ pub struct UnlockWallet;
 )]
 pub struct RefreshSession;
 
-#[allow(non_camel_case_types)]
-type timestamptz = u64;
-#[allow(non_camel_case_types)]
-type uuid = String;
-
 #[derive(GraphQLQuery)]
 #[graphql(
     schema_path = "schemas/schema_wallet_read.graphql",
@@ -52,9 +56,6 @@ type uuid = String;
     response_derives = "Debug"
 )]
 pub struct GetBusinessOwner;
-
-#[allow(non_camel_case_types)]
-type numeric = u32;
 
 #[derive(GraphQLQuery)]
 #[graphql(
@@ -71,3 +72,43 @@ pub struct GetExchangeRate;
     response_derives = "Debug"
 )]
 pub struct ListCurrencyCodes;
+
+#[derive(GraphQLQuery)]
+#[graphql(
+    schema_path = "schemas/schema_wallet_read.graphql",
+    query_path = "schemas/operations.graphql",
+    response_derives = "Debug"
+)]
+pub struct InsertChannelMonitorOne;
+
+#[derive(GraphQLQuery)]
+#[graphql(
+    schema_path = "schemas/schema_wallet_read.graphql",
+    query_path = "schemas/operations.graphql",
+    response_derives = "Debug"
+)]
+pub struct GetChannelMonitorChannelIds;
+
+#[derive(GraphQLQuery)]
+#[graphql(
+    schema_path = "schemas/schema_wallet_read.graphql",
+    query_path = "schemas/operations.graphql",
+    response_derives = "Debug"
+)]
+pub struct GetLatestChannelMonitor;
+
+#[derive(GraphQLQuery)]
+#[graphql(
+    schema_path = "schemas/schema_wallet_read.graphql",
+    query_path = "schemas/operations.graphql",
+    response_derives = "Debug"
+)]
+pub struct InsertChannelManagerOne;
+
+#[derive(GraphQLQuery)]
+#[graphql(
+    schema_path = "schemas/schema_wallet_read.graphql",
+    query_path = "schemas/operations.graphql",
+    response_derives = "Debug"
+)]
+pub struct GetLatestChannelManager;

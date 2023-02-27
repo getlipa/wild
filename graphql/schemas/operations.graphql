@@ -69,3 +69,42 @@ query ListCurrencyCodes {
     currencyCode
   }
 }
+
+# [mole] Channel state persistence
+
+mutation InsertChannelMonitorOne($channelId: bytea!, $encryptedChannelMonitor: bytea!, $installationId: String!, $encryptedDeviceInfo: bytea!) {
+  insert_channel_monitor_one(object: {
+        channelId: $channelId,
+        encryptedChannelMonitor: $encryptedChannelMonitor,
+        installationId: $installationId,
+        encryptedDeviceInfo: $encryptedDeviceInfo,
+    }) {
+      channelId
+  }
+}
+
+query GetChannelMonitorChannelIds {
+  channel_monitor(distinct_on: channelId, order_by: {channelId: desc}) {
+    channelId
+  }
+}
+
+query GetLatestChannelMonitor($channelId: bytea!) {
+  channel_monitor(order_by: {timestamp: desc}, where: {channelId: {_eq: $channelId}}, limit: 1) {
+    encryptedChannelMonitor
+  }
+}
+
+mutation InsertChannelManagerOne($encryptedChannelManager: bytea!) {
+  insert_channel_manager_one(object: {
+        encryptedChannelManager: $encryptedChannelManager,
+    }) {
+      walletId
+  }
+}
+
+query GetLatestChannelManager {
+  channel_manager(order_by: {timestamp: desc}, limit: 1) {
+      encryptedChannelManager,
+  }
+}
