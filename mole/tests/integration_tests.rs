@@ -62,7 +62,7 @@ fn test_channel_monitor_persistence() {
     // For channel 1, simulate 3 channel updates
     for monitor in &channel_monitors_0 {
         client
-            .write_channel_monitor(channel_id_0, &monitor, inst_id, &device)
+            .write_channel_monitor(channel_id_0, monitor, inst_id, &device)
             .unwrap();
     }
 
