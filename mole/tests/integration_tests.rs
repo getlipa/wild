@@ -1,6 +1,6 @@
 use bitcoin::Network;
 use graphql::perro::Error::RuntimeError;
-use graphql::{Error, GraphQlRuntimeErrorCode};
+use graphql::GraphQlRuntimeErrorCode;
 use honey_badger::secrets::{derive_keys, generate_keypair, generate_mnemonic};
 use honey_badger::{Auth, AuthLevel};
 use mole::ChannelStatePersistenceClient;
@@ -32,12 +32,12 @@ fn test_health_positive_check() {
 #[serial]
 fn test_health_negative_check() {
     let original_url = env::var("GRAPHQL_HEALTH_URL").unwrap();
-    std::env::set_var("GRAPHQL_HEALTH_URL", "http://localhost:9");
+    env::set_var("GRAPHQL_HEALTH_URL", "http://localhost:9");
 
     let storage_client = build_storage_client();
     assert!(!storage_client.check_health());
 
-    std::env::set_var("GRAPHQL_HEALTH_URL", original_url);
+    env::set_var("GRAPHQL_HEALTH_URL", original_url);
 }
 
 #[test]
