@@ -85,6 +85,14 @@ fn test_channel_monitor_persistence() {
 }
 
 #[test]
+fn test_getting_channel_monitor_ids_when_there_are_none() {
+    let client = build_storage_client();
+
+    let retrieved_channel_ids = client.get_channel_monitor_ids().unwrap();
+    assert_eq!(retrieved_channel_ids.len(), 0);
+}
+
+#[test]
 fn test_reading_channel_monitors_when_there_are_none() {
     let client = build_storage_client();
 
