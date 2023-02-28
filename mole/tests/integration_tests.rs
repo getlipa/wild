@@ -100,7 +100,7 @@ fn test_reading_channel_monitors_when_there_are_none() {
     assert!(matches!(
         result,
         Err(RuntimeError {
-            code: GraphQlRuntimeErrorCode::DataError,
+            code: GraphQlRuntimeErrorCode::ObjectNotFound,
             ..
         })
     ));
@@ -116,7 +116,7 @@ fn test_reading_channel_manager_when_there_is_none() {
     assert!(matches!(
         result,
         Err(RuntimeError {
-            code: GraphQlRuntimeErrorCode::DataError,
+            code: GraphQlRuntimeErrorCode::ObjectNotFound,
             ..
         })
     ));

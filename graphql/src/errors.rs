@@ -5,7 +5,8 @@ pub enum GraphQlRuntimeErrorCode {
     AuthServiceError,
     NetworkError,
     GenericError,
-    DataError,
+    CorruptData,
+    ObjectNotFound,
 }
 
 impl Display for GraphQlRuntimeErrorCode {

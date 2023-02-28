@@ -95,7 +95,7 @@ impl ChannelStatePersistenceClient {
 
         if data.channel_monitor.is_empty() {
             return Err(runtime_error(
-                GraphQlRuntimeErrorCode::DataError,
+                GraphQlRuntimeErrorCode::ObjectNotFound,
                 "No channel monitor found for channel id {channel_id}",
             ));
         }
@@ -106,7 +106,7 @@ impl ChannelStatePersistenceClient {
                 .replacen("\\x", "", 1),
         )
         .map_to_runtime_error(
-            GraphQlRuntimeErrorCode::DataError,
+            GraphQlRuntimeErrorCode::CorruptData,
             "Could not decode hex encoded binary",
         )?;
 
@@ -132,7 +132,7 @@ impl ChannelStatePersistenceClient {
 
         if data.channel_manager.is_empty() {
             return Err(runtime_error(
-                GraphQlRuntimeErrorCode::DataError,
+                GraphQlRuntimeErrorCode::ObjectNotFound,
                 "No channel manager found",
             ));
         }
@@ -143,7 +143,7 @@ impl ChannelStatePersistenceClient {
                 .replacen("\\x", "", 1),
         )
         .map_to_runtime_error(
-            GraphQlRuntimeErrorCode::DataError,
+            GraphQlRuntimeErrorCode::CorruptData,
             "Could not decode hex encoded binary",
         )
     }
