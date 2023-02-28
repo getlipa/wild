@@ -1,5 +1,5 @@
 use graphql::errors::*;
-use graphql::perro::{runtime_error, MapToError};
+use graphql::perro::{runtime_error, MapToError, OptionToError};
 use graphql::reqwest::blocking::Client;
 use graphql::schema::*;
 use graphql::{build_client, post_blocking};
@@ -93,15 +93,13 @@ impl ChannelStatePersistenceClient {
         };
         let data = post_blocking::<GetLatestChannelMonitor>(&client, &self.backend_url, variables)?;
 
-        if data.channel_monitor.is_empty() {
-            return Err(runtime_error(
-                GraphQlRuntimeErrorCode::ObjectNotFound,
-                "No channel monitor found for channel id {channel_id}",
-            ));
-        }
+        let channel_monitor = data.channel_monitor.first().ok_or_runtime_error(
+            GraphQlRuntimeErrorCode::ObjectNotFound,
+            "No channel monitor found for channel id {channel_id}",
+        )?;
 
         let binary = hex::decode(
-            data.channel_monitor[0]
+            channel_monitor
                 .encrypted_channel_monitor
                 .replacen("\\x", "", 1),
         )
@@ -130,15 +128,13 @@ impl ChannelStatePersistenceClient {
         let variables = get_latest_channel_manager::Variables {};
         let data = post_blocking::<GetLatestChannelManager>(&client, &self.backend_url, variables)?;
 
-        if data.channel_manager.is_empty() {
-            return Err(runtime_error(
-                GraphQlRuntimeErrorCode::ObjectNotFound,
-                "No channel manager found",
-            ));
-        }
+        let channel_manager = data.channel_manager.first().ok_or_runtime_error(
+            GraphQlRuntimeErrorCode::ObjectNotFound,
+            "No channel manager found",
+        )?;
 
         hex::decode(
-            data.channel_manager[0]
+            channel_manager
                 .encrypted_channel_manager
                 .replacen("\\x", "", 1),
         )
