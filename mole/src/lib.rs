@@ -1,5 +1,5 @@
 use graphql::errors::*;
-use graphql::perro::{runtime_error, MapToError, OptionToError};
+use graphql::perro::{MapToError, OptionToError};
 use graphql::reqwest::blocking::Client;
 use graphql::schema::*;
 use graphql::{build_client, post_blocking};
@@ -98,17 +98,7 @@ impl ChannelStatePersistenceClient {
             "No channel monitor found for channel id {channel_id}",
         )?;
 
-        let binary = hex::decode(
-            channel_monitor
-                .encrypted_channel_monitor
-                .replacen("\\x", "", 1),
-        )
-        .map_to_runtime_error(
-            GraphQlRuntimeErrorCode::CorruptData,
-            "Could not decode hex encoded binary",
-        )?;
-
-        Ok(binary)
+        graphql_hex_decode(&channel_monitor.encrypted_channel_monitor)
     }
 
     pub fn write_channel_manager(&self, encrypted_channel_manager: &Vec<u8>) -> Result<()> {
@@ -133,18 +123,17 @@ impl ChannelStatePersistenceClient {
             "No channel manager found",
         )?;
 
-        hex::decode(
-            channel_manager
-                .encrypted_channel_manager
-                .replacen("\\x", "", 1),
-        )
-        .map_to_runtime_error(
-            GraphQlRuntimeErrorCode::CorruptData,
-            "Could not decode hex encoded binary",
-        )
+        graphql_hex_decode(&channel_manager.encrypted_channel_manager)
     }
 }
 
 fn graphql_hex_encode(data: &Vec<u8>) -> String {
     format!("\\x{}", hex::encode(data))
+}
+
+fn graphql_hex_decode(data: &str) -> Result<Vec<u8>> {
+    hex::decode(data.replacen("\\x", "", 1)).map_to_runtime_error(
+        GraphQlRuntimeErrorCode::CorruptData,
+        "Could not decode hex encoded binary",
+    )
 }
