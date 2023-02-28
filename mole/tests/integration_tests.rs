@@ -1,4 +1,6 @@
 use bitcoin::Network;
+use graphql::perro::Error::RuntimeError;
+use graphql::{Error, GraphQlRuntimeErrorCode};
 use honey_badger::secrets::{derive_keys, generate_keypair, generate_mnemonic};
 use honey_badger::{Auth, AuthLevel};
 use mole::ChannelStatePersistenceClient;
@@ -80,6 +82,44 @@ fn test_channel_monitor_persistence() {
 
     let retrieved_channel_1 = client.read_channel_monitor(channel_id_1).unwrap();
     assert_eq!(retrieved_channel_1, channel_monitor_1);
+}
+
+#[test]
+fn test_reading_channel_monitors_when_there_are_none() {
+    let client = build_storage_client();
+
+    let non_existant_channel_id =
+        "33333333333333333333333333333333333333333333333333333333333333330001";
+
+    let retrieved_channel_ids = client.get_channel_monitor_ids().unwrap();
+    assert_eq!(retrieved_channel_ids.len(), 0);
+
+    let result = client.read_channel_monitor(non_existant_channel_id);
+
+    assert!(result.is_err());
+    assert!(matches!(
+        result,
+        Err(RuntimeError {
+            code: GraphQlRuntimeErrorCode::ObjectNotFound,
+            ..
+        })
+    ));
+}
+
+#[test]
+fn test_reading_channel_manager_when_there_is_none() {
+    let client = build_storage_client();
+
+    let result = client.read_channel_manager();
+
+    assert!(result.is_err());
+    assert!(matches!(
+        result,
+        Err(RuntimeError {
+            code: GraphQlRuntimeErrorCode::ObjectNotFound,
+            ..
+        })
+    ));
 }
 
 #[test]

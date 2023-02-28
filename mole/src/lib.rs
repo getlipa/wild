@@ -1,5 +1,5 @@
 use graphql::errors::*;
-use graphql::perro::MapToError;
+use graphql::perro::{MapToError, OptionToError};
 use graphql::reqwest::blocking::Client;
 use graphql::schema::*;
 use graphql::{build_client, post_blocking};
@@ -92,17 +92,13 @@ impl ChannelStatePersistenceClient {
             channel_id: format!("\\x{channel_id}"),
         };
         let data = post_blocking::<GetLatestChannelMonitor>(&client, &self.backend_url, variables)?;
-        let binary = hex::decode(
-            data.channel_monitor[0]
-                .encrypted_channel_monitor
-                .replacen("\\x", "", 1),
-        )
-        .map_to_runtime_error(
-            GraphQlRuntimeErrorCode::GenericError,
-            "Could not decode hex encoded binary",
+
+        let channel_monitor = data.channel_monitor.first().ok_or_runtime_error(
+            GraphQlRuntimeErrorCode::ObjectNotFound,
+            "No channel monitor found for channel id {channel_id}",
         )?;
 
-        Ok(binary)
+        graphql_hex_decode(&channel_monitor.encrypted_channel_monitor)
     }
 
     pub fn write_channel_manager(&self, encrypted_channel_manager: &Vec<u8>) -> Result<()> {
@@ -121,18 +117,23 @@ impl ChannelStatePersistenceClient {
         let client = build_client(Some(&token))?;
         let variables = get_latest_channel_manager::Variables {};
         let data = post_blocking::<GetLatestChannelManager>(&client, &self.backend_url, variables)?;
-        hex::decode(
-            data.channel_manager[0]
-                .encrypted_channel_manager
-                .replacen("\\x", "", 1),
-        )
-        .map_to_runtime_error(
-            GraphQlRuntimeErrorCode::GenericError,
-            "Could not decode hex encoded binary",
-        )
+
+        let channel_manager = data.channel_manager.first().ok_or_runtime_error(
+            GraphQlRuntimeErrorCode::ObjectNotFound,
+            "No channel manager found",
+        )?;
+
+        graphql_hex_decode(&channel_manager.encrypted_channel_manager)
     }
 }
 
 fn graphql_hex_encode(data: &Vec<u8>) -> String {
     format!("\\x{}", hex::encode(data))
+}
+
+fn graphql_hex_decode(data: &str) -> Result<Vec<u8>> {
+    hex::decode(data.replacen("\\x", "", 1)).map_to_runtime_error(
+        GraphQlRuntimeErrorCode::CorruptData,
+        "Could not decode hex encoded binary",
+    )
 }
