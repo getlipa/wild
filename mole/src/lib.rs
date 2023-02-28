@@ -1,5 +1,5 @@
 use graphql::errors::*;
-use graphql::perro::MapToError;
+use graphql::perro::{runtime_error, MapToError};
 use graphql::reqwest::blocking::Client;
 use graphql::schema::*;
 use graphql::{build_client, post_blocking};
@@ -92,13 +92,21 @@ impl ChannelStatePersistenceClient {
             channel_id: format!("\\x{channel_id}"),
         };
         let data = post_blocking::<GetLatestChannelMonitor>(&client, &self.backend_url, variables)?;
+
+        if data.channel_monitor.is_empty() {
+            return Err(runtime_error(
+                GraphQlRuntimeErrorCode::DataError,
+                "No channel monitor found for channel id {channel_id}",
+            ));
+        }
+
         let binary = hex::decode(
             data.channel_monitor[0]
                 .encrypted_channel_monitor
                 .replacen("\\x", "", 1),
         )
         .map_to_runtime_error(
-            GraphQlRuntimeErrorCode::GenericError,
+            GraphQlRuntimeErrorCode::DataError,
             "Could not decode hex encoded binary",
         )?;
 
@@ -121,13 +129,21 @@ impl ChannelStatePersistenceClient {
         let client = build_client(Some(&token))?;
         let variables = get_latest_channel_manager::Variables {};
         let data = post_blocking::<GetLatestChannelManager>(&client, &self.backend_url, variables)?;
+
+        if data.channel_manager.is_empty() {
+            return Err(runtime_error(
+                GraphQlRuntimeErrorCode::DataError,
+                "No channel manager found",
+            ));
+        }
+
         hex::decode(
             data.channel_manager[0]
                 .encrypted_channel_manager
                 .replacen("\\x", "", 1),
         )
         .map_to_runtime_error(
-            GraphQlRuntimeErrorCode::GenericError,
+            GraphQlRuntimeErrorCode::DataError,
             "Could not decode hex encoded binary",
         )
     }
