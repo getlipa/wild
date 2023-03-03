@@ -40,10 +40,10 @@ pub fn post_blocking<Query: graphql_client::GraphQLQuery>(
             GraphQlRuntimeErrorCode::NetworkError,
             "Failed to excute the query",
         )?;
-    get_response_data(response)
+    get_response_data(response, backend_url)
 }
 
-fn get_response_data<Data>(response: Response<Data>) -> Result<Data> {
+fn get_response_data<Data>(response: Response<Data>, backend_url: &str) -> Result<Data> {
     if let Some(errors) = response.errors {
         let error = errors
             .get(0)
@@ -59,9 +59,9 @@ fn get_response_data<Data>(response: Response<Data>) -> Result<Data> {
 
         Err(map_error_code(code))
     } else {
-        response
-            .data
-            .ok_or_permanent_failure("Response has no data")
+        response.data.ok_or_permanent_failure(format!(
+            "Response has no data. Verify URL is a GraphQL endpoint: {backend_url}"
+        ))
     }
 }
 
