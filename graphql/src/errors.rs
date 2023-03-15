@@ -3,6 +3,7 @@ use std::fmt::{Display, Formatter};
 #[derive(Debug, PartialEq, Eq)]
 pub enum GraphQlRuntimeErrorCode {
     AuthServiceError,
+    AccessExpired,
     NetworkError,
     GenericError,
     CorruptData,

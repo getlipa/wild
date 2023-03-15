@@ -40,18 +40,10 @@ mutation UnlockWallet($challenge: String!, $challengeSignature: String!, $prepar
 
 # Employee
 
-fragment Employee on wallet_acl {
-    id
-    memberWalletPubKeyId
-    ownerWalletPubKeyId
-    accessExpiresAt
-    displayName
-    role
-}
-
 query GetBusinessOwner($ownerWalletPubKeyId: uuid!) {
   wallet_acl(where: {memberWalletPubKeyId: {_eq: $ownerWalletPubKeyId}}) {
-    ...Employee
+    accessExpiresAt
+    ownerWalletPubKeyId
   }
 }
 
