@@ -1095,4 +1095,3 @@ input wallet_acl_stream_cursor_value_input {
   ownerWalletPubKeyId: uuid
   role: String
 }
-
