@@ -11,7 +11,7 @@ graphql = { path = "../graphql" }
 honey-badger = { path = "../honey-badger" }
 
 [dev-dependencies]
-bitcoin = { version = "0.29.2" }
+bitcoin = { version = "0.30.0" }
 ctor = "0.1.26"
 rand = "0.8.5"
 simplelog = { version ="0.12.0", features = ["test"] }
