@@ -148,7 +148,9 @@ impl AuthProvider {
         let wallet_pub_key_id = session_permit.wallet_pub_key_id.ok_or_permanent_failure(
             "Response to start_session request doesn't have the expected structure: missing wallet public key id",
         )?;
+        #[cfg(debug_assertions)]
         info!("access_token: {}", access_token);
+        #[cfg(debug_assertions)]
         info!("refresh_token: {}", refresh_token);
         info!("wallet_pub_key_id: {}", wallet_pub_key_id);
         Ok((access_token, refresh_token, wallet_pub_key_id))
@@ -199,7 +201,9 @@ impl AuthProvider {
             "Response to unlock_wallet request doesn't have the expected structure: missing refresh token",
         )?;
 
+        #[cfg(debug_assertions)]
         info!("access_token: {}", access_token);
+        #[cfg(debug_assertions)]
         info!("refresh_token: {}", refresh_token);
 
         Ok((access_token, refresh_token))
@@ -254,7 +258,9 @@ impl AuthProvider {
             "Response to unlock_wallet request doesn't have the expected structure: missing refresh token",
         )?;
 
+        #[cfg(debug_assertions)]
         info!("access_token: {}", access_token);
+        #[cfg(debug_assertions)]
         info!("refresh_token: {}", refresh_token);
 
         Ok((access_token, refresh_token))
