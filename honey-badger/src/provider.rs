@@ -3,13 +3,14 @@ use crate::signing::sign;
 
 use chrono::DateTime;
 use graphql::errors::*;
-use graphql::perro::{runtime_error, MapToError, OptionToError};
+use graphql::perro::{invalid_input, permanent_failure, runtime_error, MapToError, OptionToError};
 use graphql::reqwest::blocking::Client;
 use graphql::schema::*;
 use graphql::{build_client, post_blocking};
 use log::info;
 use std::time::SystemTime;
 
+#[derive(PartialEq, Eq)]
 pub enum AuthLevel {
     Pseudonymous,
     Owner,
@@ -65,6 +66,35 @@ impl AuthProvider {
 
     pub fn get_wallet_pubkey_id(&self) -> Option<String> {
         self.wallet_pubkey_id.clone()
+    }
+
+    pub fn accept_terms_and_conditions(&self, access_token: String) -> Result<()> {
+        info!("Accepting T&C ...");
+        if self.auth_level != AuthLevel::Pseudonymous {
+            return Err(invalid_input(
+                "Accepting T&C not supported for auth levels other than Pseudonymous",
+            ));
+        }
+
+        let variables = accept_terms_and_conditions::Variables {
+            pub_key_id: self.wallet_pubkey_id.clone(),
+        };
+        let client = build_client(Some(&access_token))?;
+        let data =
+            post_blocking::<AcceptTermsAndConditions>(&client, &self.backend_url, variables)?;
+        if !matches!(
+            data.accept_terms,
+            Some(
+                accept_terms_and_conditions::AcceptTermsAndConditionsAcceptTerms {
+                    accepted_terms: true
+                }
+            )
+        ) {
+            return Err(permanent_failure(
+                "Backend rejected accepting Terms and Conditions",
+            ));
+        }
+        Ok(())
     }
 
     fn run_auth_flow(&mut self) -> Result<(String, String)> {

@@ -38,6 +38,12 @@ mutation UnlockWallet($challenge: String!, $challengeSignature: String!, $prepar
   }
 }
 
+mutation AcceptTermsAndConditions($pubKeyId: uuid) {
+  accept_terms(args: {pubkey_id: $pubKeyId}) {
+    acceptedTerms
+  }
+}
+
 # Employee
 
 query GetBusinessOwner($ownerWalletPubKeyId: uuid!) {

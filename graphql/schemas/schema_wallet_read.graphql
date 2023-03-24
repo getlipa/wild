@@ -17,6 +17,21 @@ input AcceptWalletPkRequestInput {
   id: String!
 }
 
+"""
+Boolean expression to compare columns of type "Boolean". All fields are combined with logical 'AND'.
+"""
+input Boolean_comparison_exp {
+  _eq: Boolean
+  _gt: Boolean
+  _gte: Boolean
+  _in: [Boolean!]
+  _is_null: Boolean
+  _lt: Boolean
+  _lte: Boolean
+  _neq: Boolean
+  _nin: [Boolean!]
+}
+
 enum ChallengeSignatureType {
   SECP256K1
 }
@@ -101,6 +116,101 @@ type WalletConfiguration {
   name: String
   pubKey: String
   pubKeyId: String
+}
+
+input accept_terms_args {
+  pubkey_id: uuid
+}
+
+"""
+columns and relationships of "accepted_terms_conditions"
+"""
+type accepted_terms_conditions {
+  acceptedTerms: Boolean!
+}
+
+"""
+Boolean expression to filter rows from the table "accepted_terms_conditions". All fields are combined with a logical 'AND'.
+"""
+input accepted_terms_conditions_bool_exp {
+  _and: [accepted_terms_conditions_bool_exp!]
+  _not: accepted_terms_conditions_bool_exp
+  _or: [accepted_terms_conditions_bool_exp!]
+  acceptedTerms: Boolean_comparison_exp
+}
+
+"""
+unique or primary key constraints on table "accepted_terms_conditions"
+"""
+enum accepted_terms_conditions_constraint {
+  """
+  unique or primary key constraint on columns "id"
+  """
+  accepted_terms_conditions_pkey
+}
+
+"""
+input type for inserting data into table "accepted_terms_conditions"
+"""
+input accepted_terms_conditions_insert_input {
+  acceptedTerms: Boolean
+}
+
+"""
+response of any mutation on the table "accepted_terms_conditions"
+"""
+type accepted_terms_conditions_mutation_response {
+  """number of rows affected by the mutation"""
+  affected_rows: Int!
+
+  """data from the rows affected by the mutation"""
+  returning: [accepted_terms_conditions!]!
+}
+
+"""
+on_conflict condition type for table "accepted_terms_conditions"
+"""
+input accepted_terms_conditions_on_conflict {
+  constraint: accepted_terms_conditions_constraint!
+  update_columns: [accepted_terms_conditions_update_column!]! = []
+  where: accepted_terms_conditions_bool_exp
+}
+
+"""Ordering options when selecting data from "accepted_terms_conditions"."""
+input accepted_terms_conditions_order_by {
+  acceptedTerms: order_by
+}
+
+"""
+select columns of table "accepted_terms_conditions"
+"""
+enum accepted_terms_conditions_select_column {
+  """column name"""
+  acceptedTerms
+}
+
+"""
+Streaming cursor of the table "accepted_terms_conditions"
+"""
+input accepted_terms_conditions_stream_cursor_input {
+  """Stream column input with initial value"""
+  initial_value: accepted_terms_conditions_stream_cursor_value_input!
+
+  """cursor ordering"""
+  ordering: cursor_ordering
+}
+
+"""Initial value of the column from where the streaming should start"""
+input accepted_terms_conditions_stream_cursor_value_input {
+  acceptedTerms: Boolean
+}
+
+"""
+placeholder for update columns of table "accepted_terms_conditions" (current role has no relevant permissions)
+"""
+enum accepted_terms_conditions_update_column {
+  """placeholder (do not use)"""
+  _PLACEHOLDER
 }
 
 scalar bpchar
@@ -489,6 +599,8 @@ input country_stream_cursor_value_input {
 columns and relationships of "currency"
 """
 type currency {
+  conversionRateUpdatedAt: timestamptz!
+
   """ISO 4217"""
   currencyCode: String!
   satsPerUnit: numeric!
@@ -501,12 +613,14 @@ input currency_bool_exp {
   _and: [currency_bool_exp!]
   _not: currency_bool_exp
   _or: [currency_bool_exp!]
+  conversionRateUpdatedAt: timestamptz_comparison_exp
   currencyCode: String_comparison_exp
   satsPerUnit: numeric_comparison_exp
 }
 
 """Ordering options when selecting data from "currency"."""
 input currency_order_by {
+  conversionRateUpdatedAt: order_by
   currencyCode: order_by
   satsPerUnit: order_by
 }
@@ -515,6 +629,9 @@ input currency_order_by {
 select columns of table "currency"
 """
 enum currency_select_column {
+  """column name"""
+  conversionRateUpdatedAt
+
   """column name"""
   currencyCode
 
@@ -535,6 +652,8 @@ input currency_stream_cursor_input {
 
 """Initial value of the column from where the streaming should start"""
 input currency_stream_cursor_value_input {
+  conversionRateUpdatedAt: timestamptz
+
   """ISO 4217"""
   currencyCode: String
   satsPerUnit: numeric
@@ -551,6 +670,30 @@ enum cursor_ordering {
 
 """mutation root"""
 type mutation_root {
+  """
+  execute VOLATILE function "accept_terms" which returns "accepted_terms_conditions"
+  """
+  accept_terms(
+    """
+    input parameters for function "accept_terms"
+    """
+    args: accept_terms_args!
+
+    """distinct select on columns"""
+    distinct_on: [accepted_terms_conditions_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [accepted_terms_conditions_order_by!]
+
+    """filter the rows returned"""
+    where: accepted_terms_conditions_bool_exp
+  ): accepted_terms_conditions
   accept_wallet_acl_by_pk(pk_columns: AcceptWalletPkRequestInput!): WalletAcl
 
   """
@@ -578,6 +721,28 @@ type mutation_root {
   delete single row from the table: "channel_monitor"
   """
   delete_channel_monitor_by_pk(channelId: bytea!, timestamp: timestamptz!, walletId: uuid!): channel_monitor
+
+  """
+  insert data into the table: "accepted_terms_conditions"
+  """
+  insert_accepted_terms_conditions(
+    """the rows to be inserted"""
+    objects: [accepted_terms_conditions_insert_input!]!
+
+    """upsert condition"""
+    on_conflict: accepted_terms_conditions_on_conflict
+  ): accepted_terms_conditions_mutation_response
+
+  """
+  insert a single row into the table: "accepted_terms_conditions"
+  """
+  insert_accepted_terms_conditions_one(
+    """the row to be inserted"""
+    object: accepted_terms_conditions_insert_input!
+
+    """upsert condition"""
+    on_conflict: accepted_terms_conditions_on_conflict
+  ): accepted_terms_conditions
 
   """
   insert data into the table: "channel_manager"
@@ -669,6 +834,25 @@ enum order_by {
 }
 
 type query_root {
+  """
+  fetch data from the table: "accepted_terms_conditions"
+  """
+  accepted_terms_conditions(
+    """distinct select on columns"""
+    distinct_on: [accepted_terms_conditions_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [accepted_terms_conditions_order_by!]
+
+    """filter the rows returned"""
+    where: accepted_terms_conditions_bool_exp
+  ): [accepted_terms_conditions!]!
   auth_challenge: String
 
   """
@@ -792,6 +976,40 @@ type query_root {
 }
 
 type subscription_root {
+  """
+  fetch data from the table: "accepted_terms_conditions"
+  """
+  accepted_terms_conditions(
+    """distinct select on columns"""
+    distinct_on: [accepted_terms_conditions_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [accepted_terms_conditions_order_by!]
+
+    """filter the rows returned"""
+    where: accepted_terms_conditions_bool_exp
+  ): [accepted_terms_conditions!]!
+
+  """
+  fetch data from the table in a streaming manner: "accepted_terms_conditions"
+  """
+  accepted_terms_conditions_stream(
+    """maximum number of rows returned in a single batch"""
+    batch_size: Int!
+
+    """cursor to stream the results returned by the query"""
+    cursor: [accepted_terms_conditions_stream_cursor_input]!
+
+    """filter the rows returned"""
+    where: accepted_terms_conditions_bool_exp
+  ): [accepted_terms_conditions!]!
+
   """
   fetch data from the table: "channel_manager"
   """

@@ -76,6 +76,12 @@ impl Auth {
             .ok_or_permanent_failure("Newly refreshed token is not valid long enough")
     }
 
+    pub fn accept_terms_and_conditions(&self) -> Result<()> {
+        let token = self.query_token()?;
+        let provider = self.provider.lock().unwrap();
+        provider.accept_terms_and_conditions(token)
+    }
+
     fn get_token_if_valid(&self) -> Option<String> {
         let now = SystemTime::now();
         let token = self.token.lock().unwrap();
