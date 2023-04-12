@@ -5,7 +5,7 @@ edition = "2021"
 
 [dependencies]
 base64 = "0.21.0"
-bdk = { version = "0.27.0", features = ["keys-bip39"] }
+bdk = { version = "0.28.0", features = ["keys-bip39"] }
 chrono = { version = "0.4.24", default-features = false, features = ["std"] }
 log = "0.4.17"
 rand = "0.8.5"
