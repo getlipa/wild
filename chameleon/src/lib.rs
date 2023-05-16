@@ -1,9 +1,17 @@
+use chrono::{DateTime, Utc};
 use graphql::errors::*;
-use graphql::perro::OptionToError;
+use graphql::perro::{MapToError, OptionToError};
 use graphql::schema::*;
 use graphql::{build_client, post_blocking};
 use honey_badger::Auth;
 use std::sync::Arc;
+use std::time::SystemTime;
+
+pub struct ExchangeRate {
+    pub currency_code: String,
+    pub sats_per_unit: u32,
+    pub updated_at: SystemTime,
+}
 
 pub struct ExchangeRateProvider {
     backend_url: String,
@@ -38,4 +46,33 @@ impl ExchangeRateProvider {
 
         Ok(rate)
     }
+
+    pub fn query_all_exchange_rates(&self) -> Result<Vec<ExchangeRate>> {
+        let token = self.auth.query_token()?;
+        let client = build_client(Some(&token))?;
+        let variables = get_all_exchange_rates::Variables {};
+        let data = post_blocking::<GetAllExchangeRates>(&client, &self.backend_url, variables)?;
+        let list: Vec<Result<ExchangeRate>> = data
+            .currency
+            .into_iter()
+            .map(|c| {
+                Ok(ExchangeRate {
+                    currency_code: c.currency_code,
+                    sats_per_unit: c.sats_per_unit,
+                    updated_at: system_time_from_rfc3339(&c.conversion_rate_updated_at)?,
+                })
+            })
+            .collect();
+
+        list.into_iter().collect()
+    }
+}
+
+fn system_time_from_rfc3339(datetime_str: &str) -> Result<SystemTime> {
+    let datetime: DateTime<Utc> = DateTime::parse_from_rfc3339(datetime_str)
+        .map_to_permanent_failure(
+            "Invalid value for conversion_rate_updated_at was provided by the backend",
+        )?
+        .with_timezone(&Utc);
+    Ok(datetime.into())
 }
