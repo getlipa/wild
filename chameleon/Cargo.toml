@@ -5,6 +5,7 @@ edition = "2021"
 
 [dependencies]
 log = "0.4.17"
+chrono = { version = "0.4.24", default-features = false }
 
 graphql = { path = "../graphql" }
 honey-badger = { path = "../honey-badger" }
