@@ -108,7 +108,13 @@ fn adjust_token(raw_token: String) -> Result<AdjustedToken> {
         )?;
 
     let leeway = compute_leeway(token_validity_period)?;
-    let expires_at = token.expires_at - leeway;
+    let expires_at = token
+        .expires_at
+        .checked_sub(leeway)
+        .ok_or_permanent_failure(format!(
+            "Failed to substract leeway: {leeway:?} from tokent expire at: {:?}",
+            token.expires_at
+        ))?;
     debug_assert!(token.received_at < expires_at);
 
     Ok(AdjustedToken {
