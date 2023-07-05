@@ -5,6 +5,7 @@ pub enum GraphQlRuntimeErrorCode {
     AuthServiceError,
     AccessExpired,
     NetworkError,
+    RemoteServiceUnavailable,
     GenericError,
     CorruptData,
     ObjectNotFound,

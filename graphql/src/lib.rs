@@ -11,6 +11,7 @@ use graphql_client::Response;
 use perro::{permanent_failure, runtime_error, MapToError, OptionToError};
 use reqwest::blocking::Client;
 use reqwest::header::{HeaderValue, AUTHORIZATION};
+use reqwest::StatusCode;
 use std::time::Duration;
 
 pub fn build_client(access_token: Option<&str>) -> Result<Client> {
@@ -35,12 +36,29 @@ pub fn post_blocking<Query: graphql_client::GraphQLQuery>(
     backend_url: &String,
     variables: Query::Variables,
 ) -> Result<Query::ResponseData> {
-    let response = post_graphql_blocking::<Query, _>(client, backend_url, variables)
-        .map_to_runtime_error(
-            GraphQlRuntimeErrorCode::NetworkError,
-            "Failed to excute the query",
-        )?;
+    let response = match post_graphql_blocking::<Query, _>(client, backend_url, variables) {
+        Ok(r) => r,
+        Err(e) => {
+            if is_502_status(e.status()) {
+                return Err(runtime_error(
+                    GraphQlRuntimeErrorCode::RemoteServiceUnavailable,
+                    "The remote server returned status 502",
+                ));
+            }
+            return Err(runtime_error(
+                GraphQlRuntimeErrorCode::NetworkError,
+                "Failed to execute the query",
+            ));
+        }
+    };
     get_response_data(response, backend_url)
+}
+
+fn is_502_status(status: Option<StatusCode>) -> bool {
+    match status {
+        None => false,
+        Some(status) => status == StatusCode::BAD_GATEWAY,
+    }
 }
 
 fn get_response_data<Data>(response: Response<Data>, backend_url: &str) -> Result<Data> {
