@@ -74,7 +74,7 @@ jobs:
       - name: rust-toolchain
         uses: actions-rs/toolchain@v1.0.6
         with:
-          toolchain: nightly
+          toolchain: nightly-2023-06-15
           override: true
       - name: Install unused dependency checker
         run: cargo install cargo-udeps --locked
@@ -85,4 +85,4 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
       - name: Run unused dependency checker
-        run: make udeps
+        run: cargo +nightly-2023-06-15 udeps
