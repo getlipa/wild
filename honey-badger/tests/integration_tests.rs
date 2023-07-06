@@ -44,6 +44,31 @@ fn test_invalid_url() {
 }
 
 #[test]
+fn test_502_return() {
+    let (wallet_keypair, auth_keypair) = generate_keys();
+
+    let auth = Auth::new(
+        "https://httpstat.us/502".to_string(),
+        AuthLevel::Pseudonymous,
+        wallet_keypair,
+        auth_keypair,
+    )
+    .unwrap();
+
+    let id = auth.get_wallet_pubkey_id();
+    assert!(id.is_none());
+
+    let result = auth.query_token();
+    assert!(matches!(
+        result,
+        Err(Error::RuntimeError {
+            code: GraphQlRuntimeErrorCode::RemoteServiceUnavailable,
+            ..
+        })
+    ));
+}
+
+#[test]
 fn test_basic_auth() {
     let (wallet_keypair, auth_keypair) = generate_keys();
 

@@ -39,7 +39,8 @@ pub fn post_blocking<Query: graphql_client::GraphQLQuery>(
     let response = match post_graphql_blocking::<Query, _>(client, backend_url, variables) {
         Ok(r) => r,
         Err(e) => {
-            if is_502_status(e.status()) {
+            if is_502_status(e.status()) || e.to_string().contains("502") {
+                // checking for the error containing 502 because reqwest is unexpectedly returning a decode error instead of status error
                 return Err(runtime_error(
                     GraphQlRuntimeErrorCode::RemoteServiceUnavailable,
                     "The remote server returned status 502",
