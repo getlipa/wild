@@ -5,7 +5,7 @@ mod signing;
 
 pub use graphql;
 
-pub use crate::provider::AuthLevel;
+pub use crate::provider::{AuthLevel, CustomTermsAndConditions};
 
 use crate::jwt::parse_token;
 use crate::provider::AuthProvider;
@@ -80,6 +80,15 @@ impl Auth {
         let token = self.query_token()?;
         let provider = self.provider.lock().unwrap();
         provider.accept_terms_and_conditions(token)
+    }
+
+    pub fn accept_custom_terms_and_conditions(
+        &self,
+        custom_terms: CustomTermsAndConditions,
+    ) -> Result<()> {
+        let token = self.query_token()?;
+        let provider = self.provider.lock().unwrap();
+        provider.accept_custom_terms_and_conditions(custom_terms, token)
     }
 
     fn get_token_if_valid(&self) -> Option<String> {

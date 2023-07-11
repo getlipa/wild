@@ -118,6 +118,11 @@ type WalletConfiguration {
   pubKeyId: String
 }
 
+type WalletNode {
+  nodePubKey: String
+  walletPubKeyId: String
+}
+
 input accept_terms_args {
   pubkey_id: uuid
 }
@@ -126,7 +131,9 @@ input accept_terms_args {
 columns and relationships of "accepted_terms_conditions"
 """
 type accepted_terms_conditions {
+  acceptDate: timestamptz
   acceptedTerms: Boolean!
+  serviceProvider: service_provider_enum!
 }
 
 """
@@ -136,7 +143,9 @@ input accepted_terms_conditions_bool_exp {
   _and: [accepted_terms_conditions_bool_exp!]
   _not: accepted_terms_conditions_bool_exp
   _or: [accepted_terms_conditions_bool_exp!]
+  acceptDate: timestamptz_comparison_exp
   acceptedTerms: Boolean_comparison_exp
+  serviceProvider: service_provider_enum_comparison_exp
 }
 
 """
@@ -144,7 +153,7 @@ unique or primary key constraints on table "accepted_terms_conditions"
 """
 enum accepted_terms_conditions_constraint {
   """
-  unique or primary key constraint on columns "id"
+  unique or primary key constraint on columns "serviceProvider", "id"
   """
   accepted_terms_conditions_pkey
 }
@@ -153,7 +162,7 @@ enum accepted_terms_conditions_constraint {
 input type for inserting data into table "accepted_terms_conditions"
 """
 input accepted_terms_conditions_insert_input {
-  acceptedTerms: Boolean
+  serviceProvider: service_provider_enum
 }
 
 """
@@ -178,7 +187,9 @@ input accepted_terms_conditions_on_conflict {
 
 """Ordering options when selecting data from "accepted_terms_conditions"."""
 input accepted_terms_conditions_order_by {
+  acceptDate: order_by
   acceptedTerms: order_by
+  serviceProvider: order_by
 }
 
 """
@@ -186,7 +197,13 @@ select columns of table "accepted_terms_conditions"
 """
 enum accepted_terms_conditions_select_column {
   """column name"""
+  acceptDate
+
+  """column name"""
   acceptedTerms
+
+  """column name"""
+  serviceProvider
 }
 
 """
@@ -202,7 +219,9 @@ input accepted_terms_conditions_stream_cursor_input {
 
 """Initial value of the column from where the streaming should start"""
 input accepted_terms_conditions_stream_cursor_value_input {
+  acceptDate: timestamptz
   acceptedTerms: Boolean
+  serviceProvider: service_provider_enum
 }
 
 """
@@ -211,6 +230,23 @@ placeholder for update columns of table "accepted_terms_conditions" (current rol
 enum accepted_terms_conditions_update_column {
   """placeholder (do not use)"""
   _PLACEHOLDER
+}
+
+scalar bigint
+
+"""
+Boolean expression to compare columns of type "bigint". All fields are combined with logical 'AND'.
+"""
+input bigint_comparison_exp {
+  _eq: bigint
+  _gt: bigint
+  _gte: bigint
+  _in: [bigint!]
+  _is_null: Boolean
+  _lt: bigint
+  _lte: bigint
+  _neq: bigint
+  _nin: [bigint!]
 }
 
 scalar bpchar
@@ -668,6 +704,23 @@ enum cursor_ordering {
   DESC
 }
 
+scalar float8
+
+"""
+Boolean expression to compare columns of type "float8". All fields are combined with logical 'AND'.
+"""
+input float8_comparison_exp {
+  _eq: float8
+  _gt: float8
+  _gte: float8
+  _in: [float8!]
+  _is_null: Boolean
+  _lt: float8
+  _lte: float8
+  _neq: float8
+  _nin: [float8!]
+}
+
 """mutation root"""
 type mutation_root {
   """
@@ -789,6 +842,7 @@ type mutation_root {
   ): channel_monitor
   refresh_session(refreshToken: String!): TokenContainer
   refresh_session_v2(refreshToken: String!): SessionPermit
+  register_node(nodePubKey: String): WalletNode
   start_prepared_session(challenge: String!, challengeSignature: String!, challengeSignatureType: ChallengeSignatureType, preparedPermissionToken: String!): TokenContainer
   start_prepared_session_v2(challenge: String!, challengeSignature: String!, challengeSignatureType: ChallengeSignatureType, preparedPermissionToken: String!): SessionPermit
   start_session(authPubKey: String!, challenge: String!, challengeSignature: String!, challengeSignatureType: ChallengeSignatureType, signedAuthPubKey: String!, walletPubKey: String!): TokenContainer
@@ -952,6 +1006,30 @@ type query_root {
   prepare_wallet_session(challenge: String!, ownerPubKeyId: String!, signature: String!): String
 
   """
+  fetch data from the table: "topup"
+  """
+  topup(
+    """distinct select on columns"""
+    distinct_on: [topup_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [topup_order_by!]
+
+    """filter the rows returned"""
+    where: topup_bool_exp
+  ): [topup!]!
+
+  """fetch data from the table: "topup" using primary key columns"""
+  topup_by_pk(id: uuid!): topup
+  topup_service_version: String
+
+  """
   fetch data from the table: "wallet_acl"
   """
   wallet_acl(
@@ -973,6 +1051,22 @@ type query_root {
 
   """fetch data from the table: "wallet_acl" using primary key columns"""
   wallet_acl_by_pk(id: uuid!): wallet_acl
+}
+
+enum service_provider_enum {
+  LIPA_WALLET
+  POCKET_EXCHANGE
+}
+
+"""
+Boolean expression to compare columns of type "service_provider_enum". All fields are combined with logical 'AND'.
+"""
+input service_provider_enum_comparison_exp {
+  _eq: service_provider_enum
+  _in: [service_provider_enum!]
+  _is_null: Boolean
+  _neq: service_provider_enum
+  _nin: [service_provider_enum!]
 }
 
 type subscription_root {
@@ -1162,6 +1256,43 @@ type subscription_root {
   ): [currency!]!
 
   """
+  fetch data from the table: "topup"
+  """
+  topup(
+    """distinct select on columns"""
+    distinct_on: [topup_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [topup_order_by!]
+
+    """filter the rows returned"""
+    where: topup_bool_exp
+  ): [topup!]!
+
+  """fetch data from the table: "topup" using primary key columns"""
+  topup_by_pk(id: uuid!): topup
+
+  """
+  fetch data from the table in a streaming manner: "topup"
+  """
+  topup_stream(
+    """maximum number of rows returned in a single batch"""
+    batch_size: Int!
+
+    """cursor to stream the results returned by the query"""
+    cursor: [topup_stream_cursor_input]!
+
+    """filter the rows returned"""
+    where: topup_bool_exp
+  ): [topup!]!
+
+  """
   fetch data from the table: "wallet_acl"
   """
   wallet_acl(
@@ -1214,6 +1345,147 @@ input timestamptz_comparison_exp {
   _lte: timestamptz
   _neq: timestamptz
   _nin: [timestamptz!]
+}
+
+"""
+columns and relationships of "topup"
+"""
+type topup {
+  additionalInfo: String
+  amountSat: bigint!
+  amountUserCurrency: float8!
+  createdAt: timestamptz!
+  exchangeFeeUserCurrency: float8!
+  expiresAt: timestamptz
+  id: uuid!
+  lightningFeeUserCurrency: float8!
+  lnurl: String
+  nodePubKey: String!
+  status: topup_status_enum!
+  userCurrency: String!
+}
+
+"""
+Boolean expression to filter rows from the table "topup". All fields are combined with a logical 'AND'.
+"""
+input topup_bool_exp {
+  _and: [topup_bool_exp!]
+  _not: topup_bool_exp
+  _or: [topup_bool_exp!]
+  additionalInfo: String_comparison_exp
+  amountSat: bigint_comparison_exp
+  amountUserCurrency: float8_comparison_exp
+  createdAt: timestamptz_comparison_exp
+  exchangeFeeUserCurrency: float8_comparison_exp
+  expiresAt: timestamptz_comparison_exp
+  id: uuid_comparison_exp
+  lightningFeeUserCurrency: float8_comparison_exp
+  lnurl: String_comparison_exp
+  nodePubKey: String_comparison_exp
+  status: topup_status_enum_comparison_exp
+  userCurrency: String_comparison_exp
+}
+
+"""Ordering options when selecting data from "topup"."""
+input topup_order_by {
+  additionalInfo: order_by
+  amountSat: order_by
+  amountUserCurrency: order_by
+  createdAt: order_by
+  exchangeFeeUserCurrency: order_by
+  expiresAt: order_by
+  id: order_by
+  lightningFeeUserCurrency: order_by
+  lnurl: order_by
+  nodePubKey: order_by
+  status: order_by
+  userCurrency: order_by
+}
+
+"""
+select columns of table "topup"
+"""
+enum topup_select_column {
+  """column name"""
+  additionalInfo
+
+  """column name"""
+  amountSat
+
+  """column name"""
+  amountUserCurrency
+
+  """column name"""
+  createdAt
+
+  """column name"""
+  exchangeFeeUserCurrency
+
+  """column name"""
+  expiresAt
+
+  """column name"""
+  id
+
+  """column name"""
+  lightningFeeUserCurrency
+
+  """column name"""
+  lnurl
+
+  """column name"""
+  nodePubKey
+
+  """column name"""
+  status
+
+  """column name"""
+  userCurrency
+}
+
+enum topup_status_enum {
+  FAILED
+  PENDING
+  READY
+  SETTLED
+}
+
+"""
+Boolean expression to compare columns of type "topup_status_enum". All fields are combined with logical 'AND'.
+"""
+input topup_status_enum_comparison_exp {
+  _eq: topup_status_enum
+  _in: [topup_status_enum!]
+  _is_null: Boolean
+  _neq: topup_status_enum
+  _nin: [topup_status_enum!]
+}
+
+"""
+Streaming cursor of the table "topup"
+"""
+input topup_stream_cursor_input {
+  """Stream column input with initial value"""
+  initial_value: topup_stream_cursor_value_input!
+
+  """cursor ordering"""
+  ordering: cursor_ordering
+}
+
+"""Initial value of the column from where the streaming should start"""
+input topup_stream_cursor_value_input {
+  additionalInfo: String
+  amountSat: bigint
+  amountUserCurrency: float8
+  createdAt: timestamptz
+  exchangeFeeUserCurrency: float8
+  expiresAt: timestamptz
+  id: uuid
+  lightningFeeUserCurrency: float8
+  lnurl: String
+  nodePubKey: String
+  status: topup_status_enum
+  userCurrency: String
 }
 
 scalar uuid

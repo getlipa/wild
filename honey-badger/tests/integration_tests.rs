@@ -1,7 +1,7 @@
 use bdk::bitcoin::Network;
 use graphql::errors::{Error, GraphQlRuntimeErrorCode};
 use honey_badger::secrets::{derive_keys, generate_keypair, generate_mnemonic, KeyPair};
-use honey_badger::{Auth, AuthLevel};
+use honey_badger::{Auth, AuthLevel, CustomTermsAndConditions};
 use simplelog::TestLogger;
 use std::env;
 use std::sync::Once;
@@ -197,6 +197,53 @@ fn test_accept_terms_and_conditions() {
     )
     .unwrap();
     let result = auth.accept_terms_and_conditions();
+    assert!(matches!(result, Err(Error::InvalidInput { .. })));
+}
+
+#[test]
+fn test_accept_custom_terms_and_conditions() {
+    let (wallet_keypair, auth_keypair) = generate_keys();
+    let auth = Auth::new(
+        get_backend_url(),
+        AuthLevel::Pseudonymous,
+        wallet_keypair,
+        auth_keypair,
+    )
+    .unwrap();
+    auth.accept_custom_terms_and_conditions(CustomTermsAndConditions::Lipa)
+        .unwrap();
+
+    let (wallet_keypair, auth_keypair) = generate_keys();
+    let auth = Auth::new(
+        get_backend_url(),
+        AuthLevel::Owner,
+        wallet_keypair,
+        auth_keypair,
+    )
+    .unwrap();
+    let result = auth.accept_custom_terms_and_conditions(CustomTermsAndConditions::Lipa);
+    assert!(matches!(result, Err(Error::InvalidInput { .. })));
+
+    let (wallet_keypair, auth_keypair) = generate_keys();
+    let auth = Auth::new(
+        get_backend_url(),
+        AuthLevel::Pseudonymous,
+        wallet_keypair,
+        auth_keypair,
+    )
+    .unwrap();
+    auth.accept_custom_terms_and_conditions(CustomTermsAndConditions::Pocket)
+        .unwrap();
+
+    let (wallet_keypair, auth_keypair) = generate_keys();
+    let auth = Auth::new(
+        get_backend_url(),
+        AuthLevel::Owner,
+        wallet_keypair,
+        auth_keypair,
+    )
+    .unwrap();
+    let result = auth.accept_custom_terms_and_conditions(CustomTermsAndConditions::Pocket);
     assert!(matches!(result, Err(Error::InvalidInput { .. })));
 }
 

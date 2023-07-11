@@ -44,6 +44,12 @@ mutation AcceptTermsAndConditions($pubKeyId: uuid) {
   }
 }
 
+mutation AcceptCustomTermsAndConditions($serviceProvider: service_provider_enum) {
+  insert_accepted_terms_conditions_one(object: {serviceProvider: $serviceProvider}) {
+    acceptDate
+  }
+}
+
 # Employee
 
 query GetBusinessOwner($ownerWalletPubKeyId: uuid!) {
