@@ -50,6 +50,12 @@ mutation AcceptCustomTermsAndConditions($serviceProvider: service_provider_enum)
   }
 }
 
+mutation RegisterNode($nodePubKey: String!){
+  register_node(nodePubKey: $nodePubKey) {
+    nodePubKey
+  }
+}
+
 # Employee
 
 query GetBusinessOwner($ownerWalletPubKeyId: uuid!) {
