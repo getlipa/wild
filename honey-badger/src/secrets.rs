@@ -30,6 +30,7 @@ fn generate_random_bytes() -> [u8; 32] {
     bytes
 }
 
+#[derive(Clone)]
 pub struct KeyPair {
     pub secret_key: String,
     pub public_key: String,

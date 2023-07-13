@@ -247,6 +247,19 @@ fn test_accept_custom_terms_and_conditions() {
     assert!(matches!(result, Err(Error::InvalidInput { .. })));
 }
 
+#[test]
+fn test_register_node() {
+    let (wallet_keypair, auth_keypair) = generate_keys();
+    let auth = Auth::new(
+        get_backend_url(),
+        AuthLevel::Pseudonymous,
+        wallet_keypair.clone(),
+        auth_keypair,
+    )
+    .unwrap();
+    auth.register_node(wallet_keypair.public_key).unwrap();
+}
+
 fn generate_keys() -> (KeyPair, KeyPair) {
     println!("Generating keys ...");
     let mnemonic = generate_mnemonic();
