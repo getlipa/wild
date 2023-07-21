@@ -118,6 +118,11 @@ type WalletConfiguration {
   pubKeyId: String
 }
 
+type WalletEmail {
+  email: String
+  walletPubKeyId: String
+}
+
 type WalletNode {
   nodePubKey: String
   walletPubKeyId: String
@@ -842,6 +847,7 @@ type mutation_root {
   ): channel_monitor
   refresh_session(refreshToken: String!): TokenContainer
   refresh_session_v2(refreshToken: String!): SessionPermit
+  register_email(email: String): WalletEmail
   register_node(nodePubKey: String): WalletNode
   start_prepared_session(challenge: String!, challengeSignature: String!, challengeSignatureType: ChallengeSignatureType, preparedPermissionToken: String!): TokenContainer
   start_prepared_session_v2(challenge: String!, challengeSignature: String!, challengeSignatureType: ChallengeSignatureType, preparedPermissionToken: String!): SessionPermit
@@ -1355,7 +1361,9 @@ type topup {
   amountSat: bigint!
   amountUserCurrency: float8!
   createdAt: timestamptz!
+  exchangeFeeRate: float8!
   exchangeFeeUserCurrency: float8!
+  exchangeRate: float8!
   expiresAt: timestamptz
   id: uuid!
   lightningFeeUserCurrency: float8!
@@ -1376,7 +1384,9 @@ input topup_bool_exp {
   amountSat: bigint_comparison_exp
   amountUserCurrency: float8_comparison_exp
   createdAt: timestamptz_comparison_exp
+  exchangeFeeRate: float8_comparison_exp
   exchangeFeeUserCurrency: float8_comparison_exp
+  exchangeRate: float8_comparison_exp
   expiresAt: timestamptz_comparison_exp
   id: uuid_comparison_exp
   lightningFeeUserCurrency: float8_comparison_exp
@@ -1392,7 +1402,9 @@ input topup_order_by {
   amountSat: order_by
   amountUserCurrency: order_by
   createdAt: order_by
+  exchangeFeeRate: order_by
   exchangeFeeUserCurrency: order_by
+  exchangeRate: order_by
   expiresAt: order_by
   id: order_by
   lightningFeeUserCurrency: order_by
@@ -1419,7 +1431,13 @@ enum topup_select_column {
   createdAt
 
   """column name"""
+  exchangeFeeRate
+
+  """column name"""
   exchangeFeeUserCurrency
+
+  """column name"""
+  exchangeRate
 
   """column name"""
   expiresAt
@@ -1478,7 +1496,9 @@ input topup_stream_cursor_value_input {
   amountSat: bigint
   amountUserCurrency: float8
   createdAt: timestamptz
+  exchangeFeeRate: float8
   exchangeFeeUserCurrency: float8
+  exchangeRate: float8
   expiresAt: timestamptz
   id: uuid
   lightningFeeUserCurrency: float8
