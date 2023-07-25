@@ -79,7 +79,7 @@ impl Auth {
     pub fn accept_terms_and_conditions(&self) -> Result<()> {
         let token = self.query_token()?;
         let provider = self.provider.lock().unwrap();
-        provider.accept_terms_and_conditions(token)
+        provider.accept_custom_terms_and_conditions(CustomTermsAndConditions::Lipa, token)
     }
 
     pub fn accept_custom_terms_and_conditions(
