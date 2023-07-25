@@ -5,7 +5,6 @@ use chrono::DateTime;
 use graphql::errors::*;
 use graphql::perro::{invalid_input, permanent_failure, runtime_error, MapToError, OptionToError};
 use graphql::reqwest::blocking::Client;
-use graphql::schema::accept_custom_terms_and_conditions::service_provider_enum;
 use graphql::schema::*;
 use graphql::{build_client, post_blocking};
 use log::info;
@@ -75,35 +74,6 @@ impl AuthProvider {
         self.wallet_pubkey_id.clone()
     }
 
-    pub fn accept_terms_and_conditions(&self, access_token: String) -> Result<()> {
-        info!("Accepting T&C ...");
-        if self.auth_level != AuthLevel::Pseudonymous {
-            return Err(invalid_input(
-                "Accepting T&C not supported for auth levels other than Pseudonymous",
-            ));
-        }
-
-        let variables = accept_terms_and_conditions::Variables {
-            pub_key_id: self.wallet_pubkey_id.clone(),
-        };
-        let client = build_client(Some(&access_token))?;
-        let data =
-            post_blocking::<AcceptTermsAndConditions>(&client, &self.backend_url, variables)?;
-        if !matches!(
-            data.accept_terms,
-            Some(
-                accept_terms_and_conditions::AcceptTermsAndConditionsAcceptTerms {
-                    accepted_terms: true
-                }
-            )
-        ) {
-            return Err(permanent_failure(
-                "Backend rejected accepting Terms and Conditions",
-            ));
-        }
-        Ok(())
-    }
-
     pub fn accept_custom_terms_and_conditions(
         &self,
         custom_terms: CustomTermsAndConditions,
@@ -117,19 +87,17 @@ impl AuthProvider {
         }
 
         let service_provider = match custom_terms {
-            CustomTermsAndConditions::Lipa => service_provider_enum::LIPA_WALLET,
-            CustomTermsAndConditions::Pocket => service_provider_enum::POCKET_EXCHANGE,
+            CustomTermsAndConditions::Lipa => String::from("LIPA_WALLET"),
+            CustomTermsAndConditions::Pocket => String::from("POCKET_EXCHANGE"),
         };
-        let variables = accept_custom_terms_and_conditions::Variables {
-            service_provider: Some(service_provider),
-        };
+        let variables = accept_custom_terms_and_conditions::Variables { service_provider };
         let client = build_client(Some(&access_token))?;
         let data =
             post_blocking::<AcceptCustomTermsAndConditions>(&client, &self.backend_url, variables)?;
         if !matches!(
-            data.insert_accepted_terms_conditions_one,
+            data.accept_terms_conditions,
             Some(
-                accept_custom_terms_and_conditions::AcceptCustomTermsAndConditionsInsertAcceptedTermsConditionsOne {
+                accept_custom_terms_and_conditions::AcceptCustomTermsAndConditionsAcceptTermsConditions {
                     ..
                 }
             )
