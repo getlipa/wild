@@ -128,6 +128,10 @@ type WalletNode {
   walletPubKeyId: String
 }
 
+input accept_terms_args {
+  pubkey_id: uuid
+}
+
 input accept_terms_conditions_args {
   service_provider: String
 }
@@ -728,6 +732,31 @@ input float8_comparison_exp {
 
 """mutation root"""
 type mutation_root {
+  """
+  execute VOLATILE function "accept_terms" which returns "accepted_terms_conditions"
+  """
+  accept_terms(
+    """
+    input parameters for function "accept_terms"
+    """
+    args: accept_terms_args!
+
+    """distinct select on columns"""
+    distinct_on: [accepted_terms_conditions_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [accepted_terms_conditions_order_by!]
+
+    """filter the rows returned"""
+    where: accepted_terms_conditions_bool_exp
+  ): accepted_terms_conditions
+
   """
   execute VOLATILE function "accept_terms_conditions" which returns "accepted_terms_conditions"
   """

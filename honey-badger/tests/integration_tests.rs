@@ -177,6 +177,30 @@ fn test_employee_auth() {
 }
 
 #[test]
+fn test_accept_terms_and_conditions() {
+    let (wallet_keypair, auth_keypair) = generate_keys();
+    let auth = Auth::new(
+        get_backend_url(),
+        AuthLevel::Pseudonymous,
+        wallet_keypair,
+        auth_keypair,
+    )
+    .unwrap();
+    auth.accept_terms_and_conditions().unwrap();
+
+    let (wallet_keypair, auth_keypair) = generate_keys();
+    let auth = Auth::new(
+        get_backend_url(),
+        AuthLevel::Owner,
+        wallet_keypair,
+        auth_keypair,
+    )
+    .unwrap();
+    let result = auth.accept_terms_and_conditions();
+    assert!(matches!(result, Err(Error::InvalidInput { .. })));
+}
+
+#[test]
 fn test_accept_custom_terms_and_conditions() {
     let (wallet_keypair, auth_keypair) = generate_keys();
     let auth = Auth::new(
