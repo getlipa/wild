@@ -129,3 +129,24 @@ query GetLatestChannelManager {
       encryptedChannelManager,
   }
 }
+
+# topups
+
+query ListAvailableTopups {
+  topup {
+    additionalInfo
+    amountSat
+    amountUserCurrency
+    createdAt
+    exchangeFeeRate
+    exchangeFeeUserCurrency
+    exchangeRate
+    expiresAt
+    id
+    lightningFeeUserCurrency
+    lnurl
+    nodePubKey
+    status
+    userCurrency
+  }
+}
