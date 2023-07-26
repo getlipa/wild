@@ -139,7 +139,7 @@ query GetLatestChannelManager {
 # topups
 
 query ListAvailableTopups {
-  topup {
+  topup(where: {status: {_eq: READY}}) {
     additionalInfo
     amountSat
     amountUserCurrency
