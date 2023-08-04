@@ -1,12 +1,11 @@
 use crate::secrets::KeyPair;
 use crate::signing::sign;
 
-use chrono::DateTime;
-use graphql::errors::*;
-use graphql::perro::{invalid_input, permanent_failure, runtime_error, MapToError, OptionToError};
+use graphql::perro::{invalid_input, permanent_failure, runtime_error, OptionToError};
 use graphql::reqwest::blocking::Client;
 use graphql::schema::*;
 use graphql::{build_client, post_blocking};
+use graphql::{errors::*, parse_from_rfc3339};
 use log::info;
 use std::time::SystemTime;
 
@@ -268,11 +267,8 @@ impl AuthProvider {
             .ok_or_invalid_input("Employee does not belong to any owner")?;
 
         if let Some(access_expires_at) = result.access_expires_at.as_ref() {
-            let access_expires_at = DateTime::parse_from_rfc3339(access_expires_at)
-                .map_to_permanent_failure(
-                    "Invalid access_expires_at date format, expected RFC 3339",
-                )?;
-            if SystemTime::now() > SystemTime::from(access_expires_at) {
+            let access_expires_at = parse_from_rfc3339(access_expires_at)?;
+            if SystemTime::now() > access_expires_at {
                 return Err(runtime_error(
                     GraphQlRuntimeErrorCode::AccessExpired,
                     "Access expired",

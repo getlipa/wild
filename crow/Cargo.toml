@@ -1,0 +1,8 @@
+[package]
+name = "crow"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+graphql = { path = "../graphql" }
+honey-badger = { path = "../honey-badger" }
