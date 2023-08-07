@@ -1,7 +1,7 @@
 [workspace]
 members = [
     "chameleon",
-	"crow",
+    "crow",
     "graphql",
     "honey-badger",
     "mole",
