@@ -21,4 +21,4 @@ and always returns the latest state of them when requested.
 
 ## Crow
 Crows are known for their love to collect stuff.
-The library allows to register for and list collect offers.
+The library allows to register for and list withdraw collect offers (e.g. Lightning Address).
