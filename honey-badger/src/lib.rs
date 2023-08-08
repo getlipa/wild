@@ -91,12 +91,6 @@ impl Auth {
         provider.accept_custom_terms_and_conditions(custom_terms, token)
     }
 
-    pub fn register_node(&self, node_pubkey: String) -> Result<()> {
-        let token = self.query_token()?;
-        let provider = self.provider.lock().unwrap();
-        provider.register_node(node_pubkey, token)
-    }
-
     fn get_token_if_valid(&self) -> Option<String> {
         let now = SystemTime::now();
         let token = self.token.lock().unwrap();

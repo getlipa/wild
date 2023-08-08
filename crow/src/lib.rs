@@ -1,6 +1,6 @@
 use graphql::perro::{permanent_failure, OptionToError};
 use graphql::schema::list_available_topups::ListAvailableTopupsTopup;
-use graphql::schema::{list_available_topups, register_email, ListAvailableTopups, RegisterEmail};
+use graphql::schema::{list_available_topups, register_email, ListAvailableTopups, RegisterEmail, register_node, RegisterNode};
 use graphql::{build_client, parse_from_rfc3339, post_blocking, ExchangeRate};
 use honey_badger::Auth;
 use std::sync::Arc;
@@ -39,6 +39,22 @@ impl OfferManager {
             Some(register_email::RegisterEmailRegisterEmail { .. })
         ) {
             return Err(permanent_failure("Backend rejected email registration"));
+        }
+        Ok(())
+    }
+
+    pub fn register_node(&self, node_pubkey: String) -> graphql::Result<()> {
+        let variables = register_node::Variables {
+            node_pub_key: node_pubkey,
+        };
+        let access_token = self.auth.query_token()?;
+        let client = build_client(Some(&access_token))?;
+        let data = post_blocking::<RegisterNode>(&client, &self.backend_url, variables)?;
+        if !matches!(
+            data.register_node,
+            Some(register_node::RegisterNodeRegisterNode { .. })
+        ) {
+            return Err(permanent_failure("Backend rejected node registration"));
         }
         Ok(())
     }

@@ -316,21 +316,6 @@ impl AuthProvider {
 
         Ok(challenge)
     }
-
-    pub fn register_node(&self, node_pubkey: String, access_token: String) -> Result<()> {
-        let variables = register_node::Variables {
-            node_pub_key: node_pubkey,
-        };
-        let client = build_client(Some(&access_token))?;
-        let data = post_blocking::<RegisterNode>(&client, &self.backend_url, variables)?;
-        if !matches!(
-            data.register_node,
-            Some(register_node::RegisterNodeRegisterNode { .. })
-        ) {
-            return Err(permanent_failure("Backend rejected node registration"));
-        }
-        Ok(())
-    }
 }
 
 fn add_hex_prefix(string: &str) -> String {

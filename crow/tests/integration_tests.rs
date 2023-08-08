@@ -1,6 +1,6 @@
 use bitcoin::Network;
 use crow::OfferManager;
-use honey_badger::secrets::{derive_keys, generate_keypair, generate_mnemonic};
+use honey_badger::secrets::{derive_keys, generate_keypair, generate_mnemonic, KeyPair};
 use honey_badger::{Auth, AuthLevel};
 use std::env;
 use std::sync::Arc;
@@ -11,6 +11,12 @@ fn test_register_email() {
     manager
         .register_email("satoshi@lipa.swiss".to_string())
         .unwrap();
+}
+
+#[test]
+fn test_register_node() {
+    let offer_manager = build_offer_manager();
+    offer_manager.register_node(wallet_keypair.public_key).unwrap();
 }
 
 #[test]
