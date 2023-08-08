@@ -102,7 +102,7 @@ impl ChannelStatePersistenceClient {
     }
 
     pub fn write_channel_manager(&self, encrypted_channel_manager: &Vec<u8>) -> Result<()> {
-        let token = self.auth.query_token().unwrap();
+        let token = self.auth.query_token()?;
         let client = build_client(Some(&token))?;
         let variables = insert_channel_manager_one::Variables {
             encrypted_channel_manager: graphql_hex_encode(encrypted_channel_manager),
