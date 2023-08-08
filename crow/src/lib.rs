@@ -1,6 +1,9 @@
 use graphql::perro::{permanent_failure, OptionToError};
 use graphql::schema::list_available_topups::ListAvailableTopupsTopup;
-use graphql::schema::{list_available_topups, register_email, ListAvailableTopups, RegisterEmail, register_node, RegisterNode};
+use graphql::schema::{
+    list_available_topups, register_email, register_node, register_notification_token,
+    ListAvailableTopups, RegisterEmail, RegisterNode, RegisterNotificationToken,
+};
 use graphql::{build_client, parse_from_rfc3339, post_blocking, ExchangeRate};
 use honey_badger::Auth;
 use std::sync::Arc;
@@ -56,6 +59,33 @@ impl OfferManager {
         ) {
             return Err(permanent_failure("Backend rejected node registration"));
         }
+        Ok(())
+    }
+
+    pub fn register_notification_token(
+        &self,
+        notification_token: String,
+        language: String,
+    ) -> graphql::Result<()> {
+        let variables = register_notification_token::Variables {
+            notification_token,
+            language,
+        };
+        let access_token = self.auth.query_token()?;
+        let client = build_client(Some(&access_token))?;
+        let data =
+            post_blocking::<RegisterNotificationToken>(&client, &self.backend_url, variables)?;
+        if !matches!(
+            data.register_notification_token,
+            Some(
+                register_notification_token::RegisterNotificationTokenRegisterNotificationToken { .. }
+            )
+        ) {
+            return Err(permanent_failure(
+                "Backend rejected notification token registration",
+            ));
+        }
+
         Ok(())
     }
 
