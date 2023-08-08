@@ -52,18 +52,6 @@ mutation AcceptCustomTermsAndConditions($serviceProvider: String!) {
   }
 }
 
-mutation RegisterNode($nodePubKey: String!){
-  register_node(nodePubKey: $nodePubKey) {
-    nodePubKey
-  }
-}
-
-mutation RegisterEmail($email: String!){
-  register_email(email: $email) {
-    email
-  }
-}
-
 # Employee
 
 query GetBusinessOwner($ownerWalletPubKeyId: uuid!) {
@@ -137,6 +125,24 @@ query GetLatestChannelManager {
 }
 
 # topups
+
+mutation RegisterNode($nodePubKey: String!){
+  register_node(nodePubKey: $nodePubKey) {
+    nodePubKey
+  }
+}
+
+mutation RegisterEmail($email: String!){
+  register_email(email: $email) {
+    email
+  }
+}
+
+mutation RegisterNotificationToken($language: String!, $notificationToken: String!) {
+  register_notification_token(language: $language, notificationToken: $notificationToken) {
+    id
+  }
+}
 
 query ListAvailableTopups {
   topup(where: {status: {_eq: READY}}) {

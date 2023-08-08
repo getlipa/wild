@@ -1,10 +1,16 @@
 use graphql::perro::{permanent_failure, OptionToError};
 use graphql::schema::list_available_topups::ListAvailableTopupsTopup;
-use graphql::schema::{list_available_topups, register_email, ListAvailableTopups, RegisterEmail};
+use graphql::schema::{
+    list_available_topups, register_email, register_node, register_notification_token,
+    ListAvailableTopups, RegisterEmail, RegisterNode, RegisterNotificationToken,
+};
 use graphql::{build_client, parse_from_rfc3339, post_blocking, ExchangeRate};
 use honey_badger::Auth;
 use std::sync::Arc;
 use std::time::SystemTime;
+
+pub use isocountry::CountryCode;
+pub use isolanguage_1::LanguageCode;
 
 pub struct TopupInfo {
     pub id: String,
@@ -40,6 +46,50 @@ impl OfferManager {
         ) {
             return Err(permanent_failure("Backend rejected email registration"));
         }
+        Ok(())
+    }
+
+    pub fn register_node(&self, node_pubkey: String) -> graphql::Result<()> {
+        let variables = register_node::Variables {
+            node_pub_key: node_pubkey,
+        };
+        let access_token = self.auth.query_token()?;
+        let client = build_client(Some(&access_token))?;
+        let data = post_blocking::<RegisterNode>(&client, &self.backend_url, variables)?;
+        if !matches!(
+            data.register_node,
+            Some(register_node::RegisterNodeRegisterNode { .. })
+        ) {
+            return Err(permanent_failure("Backend rejected node registration"));
+        }
+        Ok(())
+    }
+
+    pub fn register_notification_token(
+        &self,
+        notification_token: String,
+        language: LanguageCode,
+        country: CountryCode,
+    ) -> graphql::Result<()> {
+        let variables = register_notification_token::Variables {
+            notification_token,
+            language: format!("{}-{}", language.code(), country.alpha2()),
+        };
+        let access_token = self.auth.query_token()?;
+        let client = build_client(Some(&access_token))?;
+        let data =
+            post_blocking::<RegisterNotificationToken>(&client, &self.backend_url, variables)?;
+        if !matches!(
+            data.register_notification_token,
+            Some(
+                register_notification_token::RegisterNotificationTokenRegisterNotificationToken { .. }
+            )
+        ) {
+            return Err(permanent_failure(
+                "Backend rejected notification token registration",
+            ));
+        }
+
         Ok(())
     }
 
