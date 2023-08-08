@@ -2,6 +2,8 @@ use bitcoin::Network;
 use crow::OfferManager;
 use honey_badger::secrets::{derive_keys, generate_keypair, generate_mnemonic};
 use honey_badger::{Auth, AuthLevel};
+use isocountry::CountryCode;
+use isolanguage_1::LanguageCode;
 use std::env;
 use std::sync::Arc;
 
@@ -31,7 +33,7 @@ fn test_register_notification_token() {
     let manager = build_offer_manager();
     let notification_token = generate_keypair().public_key;
     manager
-        .register_notification_token(notification_token, String::from("EN"))
+        .register_notification_token(notification_token, LanguageCode::En, CountryCode::GBR)
         .unwrap();
 }
 

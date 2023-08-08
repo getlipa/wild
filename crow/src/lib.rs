@@ -9,6 +9,9 @@ use honey_badger::Auth;
 use std::sync::Arc;
 use std::time::SystemTime;
 
+pub use isocountry::CountryCode;
+pub use isolanguage_1::LanguageCode;
+
 pub struct TopupInfo {
     pub id: String,
 
@@ -65,11 +68,12 @@ impl OfferManager {
     pub fn register_notification_token(
         &self,
         notification_token: String,
-        language: String,
+        language: LanguageCode,
+        country: CountryCode,
     ) -> graphql::Result<()> {
         let variables = register_notification_token::Variables {
             notification_token,
-            language,
+            language: format!("{}-{}", language.code(), country.alpha2()),
         };
         let access_token = self.auth.query_token()?;
         let client = build_client(Some(&access_token))?;
