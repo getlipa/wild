@@ -18,3 +18,7 @@ It stores a users *channel manager* and *channel monitors* in encrypted form in 
 and always returns the latest state of them when requested.
 
 *Caution: The library does not encrypt the data itself. It expects to retrieve the data in an already encrypted form.*
+
+## Crow
+Crows are known for their love to collect stuff.
+The library allows to register for and list withdraw collect offers (e.g. Lightning Address).

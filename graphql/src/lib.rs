@@ -12,7 +12,13 @@ use perro::{permanent_failure, runtime_error, MapToError, OptionToError};
 use reqwest::blocking::Client;
 use reqwest::header::{HeaderValue, AUTHORIZATION};
 use reqwest::StatusCode;
-use std::time::Duration;
+use std::time::{Duration, SystemTime};
+
+pub struct ExchangeRate {
+    pub currency_code: String,
+    pub sats_per_unit: u32,
+    pub updated_at: SystemTime,
+}
 
 pub fn build_client(access_token: Option<&str>) -> Result<Client> {
     let user_agent = "graphql-rust/0.12.0";
@@ -53,6 +59,14 @@ pub fn post_blocking<Query: graphql_client::GraphQLQuery>(
         }
     };
     get_response_data(response, backend_url)
+}
+
+pub fn parse_from_rfc3339(rfc3339: &str) -> Result<SystemTime> {
+    let datetime = chrono::DateTime::parse_from_rfc3339(rfc3339).map_to_runtime_error(
+        GraphQlRuntimeErrorCode::CorruptData,
+        "Failed to parse rfc3339 timestamp",
+    )?;
+    Ok(SystemTime::from(datetime))
 }
 
 fn is_502_status(status: Option<StatusCode>) -> bool {
@@ -112,5 +126,36 @@ fn map_error_code(code: &str) -> Error {
         _ => permanent_failure(format!(
             "Unexpected backend response: unknown error code: {code}"
         )),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use std::time::SystemTime;
+
+    use crate::parse_from_rfc3339;
+
+    #[test]
+    fn test_parse_from_rfc3339() {
+        let date = parse_from_rfc3339("2023-09-21T16:39:21.919+00:00").unwrap();
+        let timestamp = date
+            .duration_since(SystemTime::UNIX_EPOCH)
+            .unwrap()
+            .as_secs();
+        assert_eq!(timestamp, 1695314361);
+
+        let date = parse_from_rfc3339("2023-09-21T16:39:21.919+01:00").unwrap();
+        let timestamp = date
+            .duration_since(SystemTime::UNIX_EPOCH)
+            .unwrap()
+            .as_secs();
+        assert_eq!(timestamp, 1695314361 - 3600);
+
+        let date = parse_from_rfc3339("2023-09-21T16:39:21.919-02:00").unwrap();
+        let timestamp = date
+            .duration_since(SystemTime::UNIX_EPOCH)
+            .unwrap()
+            .as_secs();
+        assert_eq!(timestamp, 1695314361 + 2 * 3600);
     }
 }
