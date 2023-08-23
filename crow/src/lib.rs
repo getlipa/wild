@@ -9,6 +9,7 @@ use honey_badger::Auth;
 use std::sync::Arc;
 use std::time::SystemTime;
 
+use graphql::perro::Error::RuntimeError;
 pub use isocountry::CountryCode;
 pub use isolanguage_1::LanguageCode;
 
@@ -137,18 +138,19 @@ fn to_topup_info(topup: ListAvailableTopupsTopup) -> graphql::Result<TopupInfo> 
     )?;
 
     let status = match topup.status {
-        topup_status_enum::FAILED => Some(TopupStatus::FAILED),
-        topup_status_enum::READY => Some(TopupStatus::READY),
-        topup_status_enum::SETTLED => Some(TopupStatus::SETTLED),
-        _ => None,
-    }
-    .ok_or_runtime_error(
-        graphql::GraphQlRuntimeErrorCode::CorruptData,
-        format!(
-            "The backend returned an unkown topup status - unkown status {:?}",
-            topup.status
-        ),
-    )?;
+        topup_status_enum::FAILED => TopupStatus::FAILED,
+        topup_status_enum::READY => TopupStatus::READY,
+        topup_status_enum::SETTLED => TopupStatus::SETTLED,
+        topup_status_enum::Other(_) => {
+            return Err(RuntimeError {
+                code: graphql::GraphQlRuntimeErrorCode::CorruptData,
+                msg: format!(
+                    "The backend returned an unknown topup status: {:?}",
+                    topup.status
+                ),
+            })
+        }
+    };
 
     Ok(TopupInfo {
         id: topup.id,
