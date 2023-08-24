@@ -145,7 +145,7 @@ mutation RegisterNotificationToken($language: String!, $notificationToken: Strin
 }
 
 query ListAvailableTopups {
-  topup(where: {status: {_eq: READY}}) {
+  topup(where: {_or: [{status: {_eq: READY}}, {status: {_eq: FAILED}}]}) {
     additionalInfo
     amountSat
     amountUserCurrency

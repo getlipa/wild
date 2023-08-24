@@ -1,5 +1,5 @@
 use graphql::perro::{permanent_failure, OptionToError};
-use graphql::schema::list_available_topups::ListAvailableTopupsTopup;
+use graphql::schema::list_available_topups::{topup_status_enum, ListAvailableTopupsTopup};
 use graphql::schema::{
     list_available_topups, register_email, register_node, register_notification_token,
     ListAvailableTopups, RegisterEmail, RegisterNode, RegisterNotificationToken,
@@ -9,11 +9,20 @@ use honey_badger::Auth;
 use std::sync::Arc;
 use std::time::SystemTime;
 
+use graphql::perro::Error::RuntimeError;
 pub use isocountry::CountryCode;
 pub use isolanguage_1::LanguageCode;
 
+#[derive(Debug, PartialEq)]
+pub enum TopupStatus {
+    READY,
+    FAILED,
+    SETTLED,
+}
+
 pub struct TopupInfo {
     pub id: String,
+    pub status: TopupStatus,
 
     pub amount_sat: u64,
     pub topup_value_minor_units: u64,
@@ -128,8 +137,24 @@ fn to_topup_info(topup: ListAvailableTopupsTopup) -> graphql::Result<TopupInfo> 
         "The backend returned an incomplete topup - missing lnurlw",
     )?;
 
+    let status = match topup.status {
+        topup_status_enum::FAILED => TopupStatus::FAILED,
+        topup_status_enum::READY => TopupStatus::READY,
+        topup_status_enum::SETTLED => TopupStatus::SETTLED,
+        topup_status_enum::Other(_) => {
+            return Err(RuntimeError {
+                code: graphql::GraphQlRuntimeErrorCode::CorruptData,
+                msg: format!(
+                    "The backend returned an unknown topup status: {:?}",
+                    topup.status
+                ),
+            })
+        }
+    };
+
     Ok(TopupInfo {
         id: topup.id,
+        status,
 
         amount_sat: topup.amount_sat,
         topup_value_minor_units,
@@ -146,7 +171,7 @@ fn to_topup_info(topup: ListAvailableTopupsTopup) -> graphql::Result<TopupInfo> 
 mod tests {
     use std::time::SystemTime;
 
-    use crate::to_topup_info;
+    use crate::{to_topup_info, TopupStatus};
     use graphql::schema::list_available_topups::{topup_status_enum, ListAvailableTopupsTopup};
 
     const LNURL: &str = "LNURL1DP68GURN8GHJ7UR0VD4K2ARPWPCZ6EMFWSKHXARPVA5KUEEDWPHKX6M9W3SHQUPWWEJHYCM9DSHXZURS9ASHQ6F0D3H82UNV9AMKJARGV3EXZAE0XVUNQDNYVDJRGTF4XGEKXTF5X56NXTTZX3NRWTT9XDJRJEP4VE3XGD3KXVXTX4LS";
@@ -195,5 +220,7 @@ mod tests {
             .as_secs();
         assert_eq!(expires_at, 1695314361);
         assert_eq!(topup_info.lnurlw, LNURL);
+
+        assert_eq!(topup_info.status, TopupStatus::READY)
     }
 }
