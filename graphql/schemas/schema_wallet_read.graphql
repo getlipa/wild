@@ -1629,6 +1629,7 @@ enum topup_select_column {
 enum topup_status_enum {
   FAILED
   READY
+  REFUNDED
   SETTLED
 }
 
