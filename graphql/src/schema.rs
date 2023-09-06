@@ -172,4 +172,4 @@ type float8 = f64;
     query_path = "schemas/operations.graphql",
     response_derives = "Debug"
 )]
-pub struct ListAvailableTopups;
+pub struct ListUncompletedTopups;

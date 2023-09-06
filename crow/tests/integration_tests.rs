@@ -23,9 +23,9 @@ fn test_register_node() {
 }
 
 #[test]
-fn test_query_available_topups() {
+fn test_query_uncompleted_topups() {
     let manager = build_offer_manager();
-    manager.query_available_topups().unwrap();
+    manager.query_uncompleted_topups().unwrap();
 }
 
 #[test]
