@@ -1,8 +1,8 @@
 use graphql::perro::{permanent_failure, OptionToError};
-use graphql::schema::list_available_topups::{topup_status_enum, ListAvailableTopupsTopup};
+use graphql::schema::list_uncompleted_topups::{topup_status_enum, ListUncompletedTopupsTopup};
 use graphql::schema::{
-    list_available_topups, register_email, register_node, register_notification_token,
-    ListAvailableTopups, RegisterEmail, RegisterNode, RegisterNotificationToken,
+    list_uncompleted_topups, register_email, register_node, register_notification_token,
+    ListUncompletedTopups, RegisterEmail, RegisterNode, RegisterNotificationToken,
 };
 use graphql::{build_client, parse_from_rfc3339, post_blocking, ExchangeRate};
 use honey_badger::Auth;
@@ -103,19 +103,19 @@ impl OfferManager {
         Ok(())
     }
 
-    pub fn query_available_topups(&self) -> graphql::Result<Vec<TopupInfo>> {
+    pub fn query_uncompleted_topups(&self) -> graphql::Result<Vec<TopupInfo>> {
         let access_token = self.auth.query_token()?;
         let client = build_client(Some(&access_token))?;
-        let data = post_blocking::<ListAvailableTopups>(
+        let data = post_blocking::<ListUncompletedTopups>(
             &client,
             &self.backend_url,
-            list_available_topups::Variables {},
+            list_uncompleted_topups::Variables {},
         )?;
         data.topup.into_iter().map(to_topup_info).collect()
     }
 }
 
-fn to_topup_info(topup: ListAvailableTopupsTopup) -> graphql::Result<TopupInfo> {
+fn to_topup_info(topup: ListUncompletedTopupsTopup) -> graphql::Result<TopupInfo> {
     let currency_code = topup.user_currency.to_string().to_uppercase();
     let sats_per_unit = (100_000_000_f64 / topup.exchange_rate).round() as u32;
     let created_at = parse_from_rfc3339(&topup.created_at)?;
@@ -174,14 +174,14 @@ mod tests {
     use std::time::SystemTime;
 
     use crate::{to_topup_info, TopupStatus};
-    use graphql::schema::list_available_topups::{topup_status_enum, ListAvailableTopupsTopup};
+    use graphql::schema::list_uncompleted_topups::{topup_status_enum, ListUncompletedTopupsTopup};
 
     const LNURL: &str = "LNURL1DP68GURN8GHJ7UR0VD4K2ARPWPCZ6EMFWSKHXARPVA5KUEEDWPHKX6M9W3SHQUPWWEJHYCM9DSHXZURS9ASHQ6F0D3H82UNV9AMKJARGV3EXZAE0XVUNQDNYVDJRGTF4XGEKXTF5X56NXTTZX3NRWTT9XDJRJEP4VE3XGD3KXVXTX4LS";
 
     #[test]
     fn test_topup_to_offer_info() {
         let amount_user_currency = 8.0;
-        let topup = ListAvailableTopupsTopup {
+        let topup = ListUncompletedTopupsTopup {
             additional_info: None,
             amount_sat: 42578,
             amount_user_currency,
