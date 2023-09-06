@@ -17,6 +17,7 @@ pub use isolanguage_1::LanguageCode;
 pub enum TopupStatus {
     READY,
     FAILED,
+    REFUNDED,
     SETTLED,
 }
 
@@ -140,6 +141,7 @@ fn to_topup_info(topup: ListAvailableTopupsTopup) -> graphql::Result<TopupInfo> 
     let status = match topup.status {
         topup_status_enum::FAILED => TopupStatus::FAILED,
         topup_status_enum::READY => TopupStatus::READY,
+        topup_status_enum::REFUNDED => TopupStatus::REFUNDED,
         topup_status_enum::SETTLED => TopupStatus::SETTLED,
         topup_status_enum::Other(_) => {
             return Err(RuntimeError {
