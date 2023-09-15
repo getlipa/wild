@@ -162,3 +162,13 @@ query ListUncompletedTopups {
     userCurrency
   }
 }
+
+query MigrationBalance($nodePubKey: String) {
+  migration_balance(nodePubKey: $nodePubKey) {
+	balanceAmountSat
+  }
+}
+
+mutation MigrateFunds($invoice: String, $base16InvoiceSignature: String, $ldkNodePubKey: String) {
+  migrate_funds(invoice: $invoice, base16InvoiceSignature: $base16InvoiceSignature, ldkNodePubKey: $ldkNodePubKey)
+}

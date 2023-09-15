@@ -4,6 +4,10 @@ schema {
   subscription: subscription_root
 }
 
+type MigrationBalanceResponse {
+    balanceAmountSat: bigint!
+}
+
 """whether this query should be cached (Hasura Cloud only)"""
 directive @cached(
   """measured in seconds"""
@@ -890,6 +894,7 @@ type mutation_root {
   start_prepared_session_v2(challenge: String!, challengeSignature: String!, challengeSignatureType: ChallengeSignatureType, preparedPermissionToken: String!): SessionPermit
   start_session(authPubKey: String!, challenge: String!, challengeSignature: String!, challengeSignatureType: ChallengeSignatureType, signedAuthPubKey: String!, walletPubKey: String!): TokenContainer
   start_session_v2(authPubKey: String!, challenge: String!, challengeSignature: String!, challengeSignatureType: ChallengeSignatureType, signedAuthPubKey: String!, walletPubKey: String!): SessionPermit
+  migrate_funds(invoice: String, base16InvoiceSignature: String, ldkNodePubKey: String): Boolean!
 }
 
 scalar numeric
@@ -1118,6 +1123,8 @@ type query_root {
 
   """fetch data from the table: "wallet_acl" using primary key columns"""
   wallet_acl_by_pk(id: uuid!): wallet_acl
+
+  migration_balance(nodePubKey: String): MigrationBalanceResponse
 }
 
 enum service_provider_enum {
