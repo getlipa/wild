@@ -17,6 +17,8 @@ input AcceptWalletPkRequestInput {
   id: String!
 }
 
+scalar BigInteger
+
 """
 Boolean expression to compare columns of type "Boolean". All fields are combined with logical 'AND'.
 """
@@ -37,6 +39,10 @@ enum ChallengeSignatureType {
 }
 
 scalar DateTime
+
+type MigrationBalanceResponse {
+  balanceAmountSat: BigInteger!
+}
 
 type SessionPermit {
   accessToken: String
@@ -881,6 +887,7 @@ type mutation_root {
     """upsert condition"""
     on_conflict: channel_monitor_on_conflict
   ): channel_monitor
+  migrate_funds(base16InvoiceSignature: String, invoice: String, ldkNodePubKey: String): Boolean!
   refresh_session(refreshToken: String!): TokenContainer
   refresh_session_v2(refreshToken: String!): SessionPermit
   register_email(email: String): WalletEmail
@@ -1046,6 +1053,7 @@ type query_root {
     """ISO 4217"""
     currencyCode: String!
   ): currency
+  migration_balance(nodePubKey: String): MigrationBalanceResponse
   notification_service_version: String
   prepare_wallet_session(challenge: String!, ownerPubKeyId: String!, signature: String!): String
 
@@ -1529,10 +1537,10 @@ type topup {
   exchangeFeeRate: float8!
   exchangeFeeUserCurrency: float8!
   exchangeRate: float8!
-  expiresAt: timestamptz
+  expiresAt: timestamptz!
   id: uuid!
   lightningFeeUserCurrency: float8!
-  lnurl: String
+  lnurl: String!
   nodePubKey: String!
   status: topup_status_enum!
   userCurrency: String!
