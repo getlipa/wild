@@ -1,4 +1,4 @@
-use graphql::perro::{permanent_failure, OptionToError};
+use graphql::perro::permanent_failure;
 use graphql::schema::list_uncompleted_topups::{topup_status_enum, ListUncompletedTopupsTopup};
 use graphql::schema::{
     list_uncompleted_topups, register_email, register_node, register_notification_token,
@@ -128,15 +128,9 @@ fn to_topup_info(topup: ListUncompletedTopupsTopup) -> graphql::Result<TopupInfo
     let topup_value_minor_units = (topup.amount_user_currency * 100_f64).round() as u64;
     let exchange_fee_rate_permyriad = (topup.exchange_fee_rate * 10_000_f64).round() as u16;
     let exchange_fee_minor_units = (topup.exchange_fee_user_currency * 100_f64).round() as u64;
-    let expires_at = topup.expires_at.ok_or_runtime_error(
-        graphql::GraphQlRuntimeErrorCode::CorruptData,
-        "The backend returned an incomplete topup - missing expires_at",
-    )?;
+    let expires_at = topup.expires_at;
     let expires_at = parse_from_rfc3339(&expires_at)?;
-    let lnurlw = topup.lnurl.ok_or_runtime_error(
-        graphql::GraphQlRuntimeErrorCode::CorruptData,
-        "The backend returned an incomplete topup - missing lnurlw",
-    )?;
+    let lnurlw = topup.lnurl;
 
     let status = match topup.status {
         topup_status_enum::FAILED => TopupStatus::FAILED,
@@ -189,10 +183,10 @@ mod tests {
             exchange_fee_rate: 0.014999999664723873,
             exchange_fee_user_currency: 0.11999999731779099,
             exchange_rate: 18507.0,
-            expires_at: Some("2023-09-21T16:39:21.919+00:00".to_string()),
+            expires_at: "2023-09-21T16:39:21.919+00:00".to_string(),
             id: "1707e09e-ebe1-4004-abd7-7a64604501b3".to_string(),
             lightning_fee_user_currency: 0.0,
-            lnurl: Some(LNURL.to_string()),
+            lnurl: LNURL.to_string(),
             node_pub_key: "0233786a3f5c79d25508ed973e7a37506ddab49d41a07fcb3d341ab638000d69cf"
                 .to_string(),
             status: topup_status_enum::READY,
