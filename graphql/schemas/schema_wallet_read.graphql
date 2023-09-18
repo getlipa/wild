@@ -4,8 +4,10 @@ schema {
   subscription: subscription_root
 }
 
+scalar BigInteger
+
 type MigrationBalanceResponse {
-    balanceAmountSat: bigint!
+    balanceAmountSat: BigInteger!
 }
 
 """whether this query should be cached (Hasura Cloud only)"""
