@@ -144,6 +144,10 @@ mutation RegisterNotificationToken($language: String!, $notificationToken: Strin
   }
 }
 
+mutation HideTopup($id: String!) {
+  hide_topup(id: $id)
+}
+
 query ListUncompletedTopups {
   topup(where: {_or: [{status: {_eq: READY}}, {status: {_eq: FAILED}}, {status: {_eq: REFUNDED}}]}) {
     additionalInfo

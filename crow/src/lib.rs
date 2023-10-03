@@ -1,8 +1,9 @@
 use graphql::perro::permanent_failure;
 use graphql::schema::list_uncompleted_topups::{topup_status_enum, ListUncompletedTopupsTopup};
 use graphql::schema::{
-    list_uncompleted_topups, register_email, register_node, register_notification_token,
-    ListUncompletedTopups, RegisterEmail, RegisterNode, RegisterNotificationToken,
+    hide_topup, list_uncompleted_topups, register_email, register_node,
+    register_notification_token, HideTopup, ListUncompletedTopups, RegisterEmail, RegisterNode,
+    RegisterNotificationToken,
 };
 use graphql::{build_client, parse_from_rfc3339, post_blocking, ExchangeRate};
 use honey_badger::Auth;
@@ -14,10 +15,12 @@ pub use isocountry::CountryCode;
 pub use isolanguage_1::LanguageCode;
 
 #[derive(Debug, PartialEq)]
+#[allow(non_camel_case_types)]
 pub enum TopupStatus {
     READY,
     FAILED,
     REFUNDED,
+    REFUND_HIDDEN,
     SETTLED,
 }
 
@@ -103,6 +106,14 @@ impl OfferManager {
         Ok(())
     }
 
+    pub fn hide_topup(&self, id: String) -> graphql::Result<()> {
+        let access_token = self.auth.query_token()?;
+        let client = build_client(Some(&access_token))?;
+        post_blocking::<HideTopup>(&client, &self.backend_url, hide_topup::Variables { id })?;
+
+        Ok(())
+    }
+
     pub fn query_uncompleted_topups(&self) -> graphql::Result<Vec<TopupInfo>> {
         let access_token = self.auth.query_token()?;
         let client = build_client(Some(&access_token))?;
@@ -136,6 +147,7 @@ fn to_topup_info(topup: ListUncompletedTopupsTopup) -> graphql::Result<TopupInfo
         topup_status_enum::FAILED => TopupStatus::FAILED,
         topup_status_enum::READY => TopupStatus::READY,
         topup_status_enum::REFUNDED => TopupStatus::REFUNDED,
+        topup_status_enum::REFUND_HIDDEN => TopupStatus::REFUND_HIDDEN,
         topup_status_enum::SETTLED => TopupStatus::SETTLED,
         topup_status_enum::Other(_) => {
             return Err(RuntimeError {
