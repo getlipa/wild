@@ -15,12 +15,10 @@ pub use isocountry::CountryCode;
 pub use isolanguage_1::LanguageCode;
 
 #[derive(Debug, PartialEq)]
-#[allow(non_camel_case_types)]
 pub enum TopupStatus {
     READY,
     FAILED,
     REFUNDED,
-    REFUND_HIDDEN,
     SETTLED,
 }
 
@@ -147,8 +145,13 @@ fn to_topup_info(topup: ListUncompletedTopupsTopup) -> graphql::Result<TopupInfo
         topup_status_enum::FAILED => TopupStatus::FAILED,
         topup_status_enum::READY => TopupStatus::READY,
         topup_status_enum::REFUNDED => TopupStatus::REFUNDED,
-        topup_status_enum::REFUND_HIDDEN => TopupStatus::REFUND_HIDDEN,
         topup_status_enum::SETTLED => TopupStatus::SETTLED,
+        topup_status_enum::REFUND_HIDDEN => {
+            return Err(RuntimeError {
+                code: graphql::GraphQlRuntimeErrorCode::CorruptData,
+                msg: "The backend returned the unexpected status: REFUND_HIDDEN".to_string()
+            })
+        },
         topup_status_enum::Other(_) => {
             return Err(RuntimeError {
                 code: graphql::GraphQlRuntimeErrorCode::CorruptData,
