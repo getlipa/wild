@@ -10,7 +10,7 @@ use honey_badger::Auth;
 use std::sync::Arc;
 use std::time::SystemTime;
 
-use graphql::perro::Error::RuntimeError;
+use graphql::perro::runtime_error;
 pub use isocountry::CountryCode;
 pub use isolanguage_1::LanguageCode;
 
@@ -147,19 +147,19 @@ fn to_topup_info(topup: ListUncompletedTopupsTopup) -> graphql::Result<TopupInfo
         topup_status_enum::REFUNDED => TopupStatus::REFUNDED,
         topup_status_enum::SETTLED => TopupStatus::SETTLED,
         topup_status_enum::REFUND_HIDDEN => {
-            return Err(RuntimeError {
-                code: graphql::GraphQlRuntimeErrorCode::CorruptData,
-                msg: "The backend returned the unexpected status: REFUND_HIDDEN".to_string()
-            })
-        },
+            return Err(runtime_error(
+                graphql::GraphQlRuntimeErrorCode::CorruptData,
+                "The backend returned the unexpected status: REFUND_HIDDEN".to_string(),
+            ))
+        }
         topup_status_enum::Other(_) => {
-            return Err(RuntimeError {
-                code: graphql::GraphQlRuntimeErrorCode::CorruptData,
-                msg: format!(
+            return Err(runtime_error(
+                graphql::GraphQlRuntimeErrorCode::CorruptData,
+                format!(
                     "The backend returned an unknown topup status: {:?}",
                     topup.status
                 ),
-            })
+            ))
         }
     };
 
