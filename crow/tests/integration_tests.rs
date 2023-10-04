@@ -8,18 +8,21 @@ use std::env;
 use std::sync::Arc;
 
 #[test]
-fn test_register_email() {
-    let manager = build_offer_manager();
-    manager
-        .register_email("satoshi@lipa.swiss".to_string())
-        .unwrap();
-}
-
-#[test]
-fn test_register_node() {
+fn test_register_topup() {
     let manager = build_offer_manager();
     let node_pubkey = generate_keypair().public_key;
-    manager.register_node(node_pubkey).unwrap();
+    manager
+        .register_topup(
+            "order_id_1".to_string(),
+            node_pubkey,
+            Some("satoshi@lipa.swiss".to_string()),
+        )
+        .unwrap();
+
+    let node_pubkey = generate_keypair().public_key;
+    manager
+        .register_topup("order_id_2".to_string(), node_pubkey, None)
+        .unwrap();
 }
 
 #[test]

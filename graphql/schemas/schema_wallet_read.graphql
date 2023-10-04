@@ -131,14 +131,10 @@ type WalletConfiguration {
   pubKeyId: String
 }
 
-type WalletEmail {
+type RegisterTopupResponse {
+  walletPubKeyId: String!
+  nodePubKey: String!
   email: String
-  walletPubKeyId: String
-}
-
-type WalletNode {
-  nodePubKey: String
-  walletPubKeyId: String
 }
 
 input accept_terms_args {
@@ -891,8 +887,7 @@ type mutation_root {
   migrate_funds(base16InvoiceSignature: String, invoice: String, ldkNodePubKey: String): Boolean!
   refresh_session(refreshToken: String!): TokenContainer
   refresh_session_v2(refreshToken: String!): SessionPermit
-  register_email(email: String): WalletEmail
-  register_node(nodePubKey: String): WalletNode
+  register_topup(orderId: String!, nodePubKey: String!, email: String): RegisterTopupResponse
   register_notification_token(language: String!, notificationToken: String!): Token
   start_prepared_session(challenge: String!, challengeSignature: String!, challengeSignatureType: ChallengeSignatureType, preparedPermissionToken: String!): TokenContainer
   start_prepared_session_v2(challenge: String!, challengeSignature: String!, challengeSignatureType: ChallengeSignatureType, preparedPermissionToken: String!): SessionPermit
