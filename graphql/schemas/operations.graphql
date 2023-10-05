@@ -126,8 +126,8 @@ query GetLatestChannelManager {
 
 # topups
 
-mutation RegisterTopup($orderId: String!, $nodePubKey: String!, $email: String){
-  register_topup(orderId: $orderId, nodePubKey: $nodePubKey, email: $email) {
+mutation RegisterTopup($orderId: String!, $email: String){
+  register_topup(orderId: $orderId, email: $email) {
     walletPubKeyId,
     nodePubKey,
     email,

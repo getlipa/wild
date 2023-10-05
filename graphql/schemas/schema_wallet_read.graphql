@@ -44,6 +44,12 @@ type MigrationBalanceResponse {
   balanceAmountSat: BigInteger!
 }
 
+type RegisterTopupResponse {
+  email: String
+  nodePubKey: String!
+  walletPubKeyId: String!
+}
+
 type SessionPermit {
   accessToken: String
   refreshToken: String
@@ -131,10 +137,14 @@ type WalletConfiguration {
   pubKeyId: String
 }
 
-type RegisterTopupResponse {
-  walletPubKeyId: String!
-  nodePubKey: String!
+type WalletEmail {
   email: String
+  walletPubKeyId: String
+}
+
+type WalletNode {
+  nodePubKey: String
+  walletPubKeyId: String
 }
 
 input accept_terms_args {
@@ -817,7 +827,7 @@ type mutation_root {
   delete single row from the table: "channel_monitor"
   """
   delete_channel_monitor_by_pk(channelId: bytea!, timestamp: timestamptz!, walletId: uuid!): channel_monitor
-  hide_topup(id: String): String
+  hide_topup(id: String!): String
 
   """
   insert data into the table: "accepted_terms_conditions"
@@ -887,8 +897,10 @@ type mutation_root {
   migrate_funds(base16InvoiceSignature: String, invoice: String, ldkNodePubKey: String): Boolean!
   refresh_session(refreshToken: String!): TokenContainer
   refresh_session_v2(refreshToken: String!): SessionPermit
-  register_topup(orderId: String!, nodePubKey: String!, email: String): RegisterTopupResponse
+  register_email(email: String): WalletEmail
+  register_node(nodePubKey: String): WalletNode
   register_notification_token(language: String!, notificationToken: String!): Token
+  register_topup(email: String, orderId: String!): RegisterTopupResponse
   start_prepared_session(challenge: String!, challengeSignature: String!, challengeSignatureType: ChallengeSignatureType, preparedPermissionToken: String!): TokenContainer
   start_prepared_session_v2(challenge: String!, challengeSignature: String!, challengeSignatureType: ChallengeSignatureType, preparedPermissionToken: String!): SessionPermit
   start_session(authPubKey: String!, challenge: String!, challengeSignature: String!, challengeSignatureType: ChallengeSignatureType, signedAuthPubKey: String!, walletPubKey: String!): TokenContainer

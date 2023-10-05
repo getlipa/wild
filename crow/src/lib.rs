@@ -45,17 +45,8 @@ impl OfferManager {
         Self { backend_url, auth }
     }
 
-    pub fn register_topup(
-        &self,
-        order_id: String,
-        node_pubkey: String,
-        email: Option<String>,
-    ) -> graphql::Result<()> {
-        let variables = register_topup::Variables {
-            order_id,
-            node_pub_key: node_pubkey,
-            email,
-        };
+    pub fn register_topup(&self, order_id: String, email: Option<String>) -> graphql::Result<()> {
+        let variables = register_topup::Variables { order_id, email };
         let access_token = self.auth.query_token()?;
         let client = build_client(Some(&access_token))?;
         let data = post_blocking::<RegisterTopup>(&client, &self.backend_url, variables)?;
