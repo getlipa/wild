@@ -1,9 +1,8 @@
 use graphql::perro::permanent_failure;
 use graphql::schema::list_uncompleted_topups::{topup_status_enum, ListUncompletedTopupsTopup};
 use graphql::schema::{
-    hide_topup, list_uncompleted_topups, register_email, register_node,
-    register_notification_token, HideTopup, ListUncompletedTopups, RegisterEmail, RegisterNode,
-    RegisterNotificationToken,
+    hide_topup, list_uncompleted_topups, register_notification_token, register_topup, HideTopup,
+    ListUncompletedTopups, RegisterNotificationToken, RegisterTopup,
 };
 use graphql::{build_client, parse_from_rfc3339, post_blocking, ExchangeRate};
 use honey_badger::Auth;
@@ -46,32 +45,16 @@ impl OfferManager {
         Self { backend_url, auth }
     }
 
-    pub fn register_email(&self, email: String) -> graphql::Result<()> {
-        let variables = register_email::Variables { email };
+    pub fn register_topup(&self, order_id: String, email: Option<String>) -> graphql::Result<()> {
+        let variables = register_topup::Variables { order_id, email };
         let access_token = self.auth.query_token()?;
         let client = build_client(Some(&access_token))?;
-        let data = post_blocking::<RegisterEmail>(&client, &self.backend_url, variables)?;
+        let data = post_blocking::<RegisterTopup>(&client, &self.backend_url, variables)?;
         if !matches!(
-            data.register_email,
-            Some(register_email::RegisterEmailRegisterEmail { .. })
+            data.register_topup,
+            Some(register_topup::RegisterTopupRegisterTopup { .. })
         ) {
-            return Err(permanent_failure("Backend rejected email registration"));
-        }
-        Ok(())
-    }
-
-    pub fn register_node(&self, node_pubkey: String) -> graphql::Result<()> {
-        let variables = register_node::Variables {
-            node_pub_key: node_pubkey,
-        };
-        let access_token = self.auth.query_token()?;
-        let client = build_client(Some(&access_token))?;
-        let data = post_blocking::<RegisterNode>(&client, &self.backend_url, variables)?;
-        if !matches!(
-            data.register_node,
-            Some(register_node::RegisterNodeRegisterNode { .. })
-        ) {
-            return Err(permanent_failure("Backend rejected node registration"));
+            return Err(permanent_failure("Backend rejected topup registration"));
         }
         Ok(())
     }
