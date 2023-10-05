@@ -821,6 +821,7 @@ type mutation_root {
   delete single row from the table: "channel_monitor"
   """
   delete_channel_monitor_by_pk(channelId: bytea!, timestamp: timestamptz!, walletId: uuid!): channel_monitor
+  hide_topup(id: String): String
 
   """
   insert data into the table: "accepted_terms_conditions"
@@ -1638,6 +1639,7 @@ enum topup_status_enum {
   FAILED
   READY
   REFUNDED
+  REFUND_HIDDEN
   SETTLED
 }
 

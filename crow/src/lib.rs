@@ -1,15 +1,16 @@
 use graphql::perro::permanent_failure;
 use graphql::schema::list_uncompleted_topups::{topup_status_enum, ListUncompletedTopupsTopup};
 use graphql::schema::{
-    list_uncompleted_topups, register_email, register_node, register_notification_token,
-    ListUncompletedTopups, RegisterEmail, RegisterNode, RegisterNotificationToken,
+    hide_topup, list_uncompleted_topups, register_email, register_node,
+    register_notification_token, HideTopup, ListUncompletedTopups, RegisterEmail, RegisterNode,
+    RegisterNotificationToken,
 };
 use graphql::{build_client, parse_from_rfc3339, post_blocking, ExchangeRate};
 use honey_badger::Auth;
 use std::sync::Arc;
 use std::time::SystemTime;
 
-use graphql::perro::Error::RuntimeError;
+use graphql::perro::runtime_error;
 pub use isocountry::CountryCode;
 pub use isolanguage_1::LanguageCode;
 
@@ -103,6 +104,14 @@ impl OfferManager {
         Ok(())
     }
 
+    pub fn hide_topup(&self, id: String) -> graphql::Result<()> {
+        let access_token = self.auth.query_token()?;
+        let client = build_client(Some(&access_token))?;
+        post_blocking::<HideTopup>(&client, &self.backend_url, hide_topup::Variables { id })?;
+
+        Ok(())
+    }
+
     pub fn query_uncompleted_topups(&self) -> graphql::Result<Vec<TopupInfo>> {
         let access_token = self.auth.query_token()?;
         let client = build_client(Some(&access_token))?;
@@ -137,14 +146,20 @@ fn to_topup_info(topup: ListUncompletedTopupsTopup) -> graphql::Result<TopupInfo
         topup_status_enum::READY => TopupStatus::READY,
         topup_status_enum::REFUNDED => TopupStatus::REFUNDED,
         topup_status_enum::SETTLED => TopupStatus::SETTLED,
+        topup_status_enum::REFUND_HIDDEN => {
+            return Err(runtime_error(
+                graphql::GraphQlRuntimeErrorCode::CorruptData,
+                "The backend returned the unexpected status: REFUND_HIDDEN".to_string(),
+            ))
+        }
         topup_status_enum::Other(_) => {
-            return Err(RuntimeError {
-                code: graphql::GraphQlRuntimeErrorCode::CorruptData,
-                msg: format!(
+            return Err(runtime_error(
+                graphql::GraphQlRuntimeErrorCode::CorruptData,
+                format!(
                     "The backend returned an unknown topup status: {:?}",
                     topup.status
                 ),
-            })
+            ))
         }
     };
 
