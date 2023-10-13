@@ -26,6 +26,7 @@ pub enum TemporaryFailureCode {
     NoRoute,
     InvoiceExpired,
     Unexpected,
+    Unknown { msg: String },
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -229,8 +230,8 @@ pub fn to_topup_error(code: Option<String>) -> Option<TopupError> {
         "payout_expired" => TopupError::PermanentFailure {
             code: PermanentFailureCode::PayoutExpired,
         },
-        _ => TopupError::TemporaryFailure {
-            code: TemporaryFailureCode::Unexpected,
+        e => TopupError::TemporaryFailure {
+            code: TemporaryFailureCode::Unknown { msg: e.to_string() },
         },
     })
 }
