@@ -336,19 +336,12 @@ mod tests {
 
         let topup_info = to_topup_info(topup).unwrap();
 
-        match topup_info.error {
-            None => {
-                panic!("Expected topup to have error code, was None")
-            }
-            Some(e) => match e {
-                TopupError::TemporaryFailure { code } => {
-                    assert_eq!(code, TemporaryFailureCode::NoRoute)
-                }
-                TopupError::PermanentFailure { .. } => {
-                    panic!("Expected topup to have temporary failure, was permanent")
-                }
-            },
-        }
+        assert!(matches!(
+            topup_info.error,
+            Some(TopupError::TemporaryFailure {
+                code: TemporaryFailureCode::NoRoute
+            })
+        ));
 
         let topup = ListUncompletedTopupsTopup {
             additional_info: Some("customer_requested".to_string()),
@@ -370,18 +363,11 @@ mod tests {
 
         let topup_info = to_topup_info(topup).unwrap();
 
-        match topup_info.error {
-            None => {
-                panic!("Expected topup to have error code, was None")
-            }
-            Some(e) => match e {
-                TopupError::TemporaryFailure { .. } => {
-                    panic!("Expected topup to have permanent failure, was temporary")
-                }
-                TopupError::PermanentFailure { code } => {
-                    assert_eq!(code, PermanentFailureCode::CustomerRequested)
-                }
-            },
-        }
+        assert!(matches!(
+            topup_info.error,
+            Some(TopupError::PermanentFailure {
+                code: PermanentFailureCode::CustomerRequested
+            })
+        ));
     }
 }
