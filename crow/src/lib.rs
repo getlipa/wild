@@ -21,6 +21,31 @@ pub enum TopupStatus {
     SETTLED,
 }
 
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub enum TemporaryFailureCode {
+    NoRoute,
+    InvoiceExpired,
+    Unexpected,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub enum PermanentFailureCode {
+    ThresholdExceeded,
+    OrderInactive,
+    CompaniesUnsupported,
+    CountryUnsupported,
+    OtherRiskDetected,
+    CustomerRequested,
+    AccountNotMatching,
+    PayoutExpired,
+}
+
+#[derive(PartialEq, Eq, Debug, Clone)]
+pub enum TopupError {
+    TemporaryFailure { code: TemporaryFailureCode },
+    PermanentFailure { code: PermanentFailureCode },
+}
+
 pub struct TopupInfo {
     pub id: String,
     pub status: TopupStatus,
@@ -33,6 +58,7 @@ pub struct TopupInfo {
 
     pub expires_at: SystemTime,
     pub lnurlw: String,
+    pub error: Option<TopupError>,
 }
 
 pub struct OfferManager {
@@ -146,6 +172,12 @@ fn to_topup_info(topup: ListUncompletedTopupsTopup) -> graphql::Result<TopupInfo
         }
     };
 
+    let error = match topup.status {
+        topup_status_enum::FAILED => to_topup_error(topup.additional_info),
+        topup_status_enum::REFUNDED => to_topup_error(topup.additional_info),
+        _ => None,
+    };
+
     Ok(TopupInfo {
         id: topup.id,
         status,
@@ -158,6 +190,71 @@ fn to_topup_info(topup: ListUncompletedTopupsTopup) -> graphql::Result<TopupInfo
 
         expires_at,
         lnurlw,
+        error,
+    })
+}
+
+pub fn from_topup_error(error: Option<TopupError>) -> Option<String> {
+    error.map(|e| {
+        match e {
+            TopupError::TemporaryFailure { code } => match code {
+                TemporaryFailureCode::NoRoute => "no_route",
+                TemporaryFailureCode::InvoiceExpired => "invoice_expired",
+                TemporaryFailureCode::Unexpected => "error",
+            },
+            TopupError::PermanentFailure { code } => match code {
+                PermanentFailureCode::ThresholdExceeded => "threshold_exceeded",
+                PermanentFailureCode::OrderInactive => "order_inactive",
+                PermanentFailureCode::CompaniesUnsupported => "companies_unsupported",
+                PermanentFailureCode::CountryUnsupported => "country_unsupported",
+                PermanentFailureCode::OtherRiskDetected => "other_risk_detected",
+                PermanentFailureCode::CustomerRequested => "customer_requested",
+                PermanentFailureCode::AccountNotMatching => "account_not_matching",
+                PermanentFailureCode::PayoutExpired => "payout_expired",
+            },
+        }
+        .to_string()
+    })
+}
+
+pub fn to_topup_error(code: Option<String>) -> Option<TopupError> {
+    code.map(|c| match &*c {
+        "no_route" => TopupError::TemporaryFailure {
+            code: TemporaryFailureCode::NoRoute,
+        },
+        "invoice_expired" => TopupError::TemporaryFailure {
+            code: TemporaryFailureCode::InvoiceExpired,
+        },
+        "error" => TopupError::TemporaryFailure {
+            code: TemporaryFailureCode::Unexpected,
+        },
+        "threshold_exceeded" => TopupError::PermanentFailure {
+            code: PermanentFailureCode::ThresholdExceeded,
+        },
+        "order_inactive" => TopupError::PermanentFailure {
+            code: PermanentFailureCode::OrderInactive,
+        },
+        "companies_unsupported" => TopupError::PermanentFailure {
+            code: PermanentFailureCode::CompaniesUnsupported,
+        },
+        "country_unsupported" => TopupError::PermanentFailure {
+            code: PermanentFailureCode::CountryUnsupported,
+        },
+        "other_risk_detected" => TopupError::PermanentFailure {
+            code: PermanentFailureCode::OtherRiskDetected,
+        },
+        "customer_requested" => TopupError::PermanentFailure {
+            code: PermanentFailureCode::CustomerRequested,
+        },
+        "account_not_matching" => TopupError::PermanentFailure {
+            code: PermanentFailureCode::AccountNotMatching,
+        },
+        "payout_expired" => TopupError::PermanentFailure {
+            code: PermanentFailureCode::PayoutExpired,
+        },
+        _ => TopupError::TemporaryFailure {
+            code: TemporaryFailureCode::Unexpected,
+        },
     })
 }
 
@@ -165,7 +262,9 @@ fn to_topup_info(topup: ListUncompletedTopupsTopup) -> graphql::Result<TopupInfo
 mod tests {
     use std::time::SystemTime;
 
-    use crate::{to_topup_info, TopupStatus};
+    use crate::{
+        to_topup_info, PermanentFailureCode, TemporaryFailureCode, TopupError, TopupStatus,
+    };
     use graphql::schema::list_uncompleted_topups::{topup_status_enum, ListUncompletedTopupsTopup};
 
     const LNURL: &str = "LNURL1DP68GURN8GHJ7UR0VD4K2ARPWPCZ6EMFWSKHXARPVA5KUEEDWPHKX6M9W3SHQUPWWEJHYCM9DSHXZURS9ASHQ6F0D3H82UNV9AMKJARGV3EXZAE0XVUNQDNYVDJRGTF4XGEKXTF5X56NXTTZX3NRWTT9XDJRJEP4VE3XGD3KXVXTX4LS";
@@ -215,6 +314,74 @@ mod tests {
         assert_eq!(expires_at, 1695314361);
         assert_eq!(topup_info.lnurlw, LNURL);
 
-        assert_eq!(topup_info.status, TopupStatus::READY)
+        assert_eq!(topup_info.status, TopupStatus::READY);
+
+        let topup = ListUncompletedTopupsTopup {
+            additional_info: Some("no_route".to_string()),
+            amount_sat: 42578,
+            amount_user_currency,
+            created_at: "2023-07-21T16:39:21.271+00:00".to_string(),
+            exchange_fee_rate: 0.014999999664723873,
+            exchange_fee_user_currency: 0.11999999731779099,
+            exchange_rate: 18507.0,
+            expires_at: "2023-09-21T16:39:21.919+00:00".to_string(),
+            id: "1707e09e-ebe1-4004-abd7-7a64604501b3".to_string(),
+            lightning_fee_user_currency: 0.0,
+            lnurl: LNURL.to_string(),
+            node_pub_key: "0233786a3f5c79d25508ed973e7a37506ddab49d41a07fcb3d341ab638000d69cf"
+                .to_string(),
+            status: topup_status_enum::FAILED,
+            user_currency: "eur".to_string(),
+        };
+
+        let topup_info = to_topup_info(topup).unwrap();
+
+        match topup_info.error {
+            None => {
+                panic!("Expected topup to have error code, was None")
+            }
+            Some(e) => match e {
+                TopupError::TemporaryFailure { code } => {
+                    assert_eq!(code, TemporaryFailureCode::NoRoute)
+                }
+                TopupError::PermanentFailure { .. } => {
+                    panic!("Expected topup to have temporary failure, was permanent")
+                }
+            },
+        }
+
+        let topup = ListUncompletedTopupsTopup {
+            additional_info: Some("customer_requested".to_string()),
+            amount_sat: 42578,
+            amount_user_currency,
+            created_at: "2023-07-21T16:39:21.271+00:00".to_string(),
+            exchange_fee_rate: 0.014999999664723873,
+            exchange_fee_user_currency: 0.11999999731779099,
+            exchange_rate: 18507.0,
+            expires_at: "2023-09-21T16:39:21.919+00:00".to_string(),
+            id: "1707e09e-ebe1-4004-abd7-7a64604501b3".to_string(),
+            lightning_fee_user_currency: 0.0,
+            lnurl: LNURL.to_string(),
+            node_pub_key: "0233786a3f5c79d25508ed973e7a37506ddab49d41a07fcb3d341ab638000d69cf"
+                .to_string(),
+            status: topup_status_enum::REFUNDED,
+            user_currency: "eur".to_string(),
+        };
+
+        let topup_info = to_topup_info(topup).unwrap();
+
+        match topup_info.error {
+            None => {
+                panic!("Expected topup to have error code, was None")
+            }
+            Some(e) => match e {
+                TopupError::TemporaryFailure { .. } => {
+                    panic!("Expected topup to have permanent failure, was temporary")
+                }
+                TopupError::PermanentFailure { code } => {
+                    assert_eq!(code, PermanentFailureCode::CustomerRequested)
+                }
+            },
+        }
     }
 }
