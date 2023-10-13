@@ -194,29 +194,6 @@ fn to_topup_info(topup: ListUncompletedTopupsTopup) -> graphql::Result<TopupInfo
     })
 }
 
-pub fn from_topup_error(error: Option<TopupError>) -> Option<String> {
-    error.map(|e| {
-        match e {
-            TopupError::TemporaryFailure { code } => match code {
-                TemporaryFailureCode::NoRoute => "no_route",
-                TemporaryFailureCode::InvoiceExpired => "invoice_expired",
-                TemporaryFailureCode::Unexpected => "error",
-            },
-            TopupError::PermanentFailure { code } => match code {
-                PermanentFailureCode::ThresholdExceeded => "threshold_exceeded",
-                PermanentFailureCode::OrderInactive => "order_inactive",
-                PermanentFailureCode::CompaniesUnsupported => "companies_unsupported",
-                PermanentFailureCode::CountryUnsupported => "country_unsupported",
-                PermanentFailureCode::OtherRiskDetected => "other_risk_detected",
-                PermanentFailureCode::CustomerRequested => "customer_requested",
-                PermanentFailureCode::AccountNotMatching => "account_not_matching",
-                PermanentFailureCode::PayoutExpired => "payout_expired",
-            },
-        }
-        .to_string()
-    })
-}
-
 pub fn to_topup_error(code: Option<String>) -> Option<TopupError> {
     code.map(|c| match &*c {
         "no_route" => TopupError::TemporaryFailure {
