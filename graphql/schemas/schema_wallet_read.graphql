@@ -1545,10 +1545,10 @@ type topup {
   exchangeFeeRate: float8!
   exchangeFeeUserCurrency: float8!
   exchangeRate: float8!
-  expiresAt: timestamptz!
+  expiresAt: timestamptz
   id: uuid!
   lightningFeeUserCurrency: float8!
-  lnurl: String!
+  lnurl: String
   nodePubKey: String!
   status: topup_status_enum!
   userCurrency: String!

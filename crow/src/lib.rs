@@ -57,8 +57,8 @@ pub struct TopupInfo {
     pub exchange_fee_minor_units: u64,
     pub exchange_rate: ExchangeRate,
 
-    pub expires_at: SystemTime,
-    pub lnurlw: String,
+    pub expires_at: Option<SystemTime>,
+    pub lnurlw: Option<String>,
     pub error: Option<TopupError>,
 }
 
@@ -148,7 +148,10 @@ fn to_topup_info(topup: ListUncompletedTopupsTopup) -> graphql::Result<TopupInfo
     let exchange_fee_rate_permyriad = (topup.exchange_fee_rate * 10_000_f64).round() as u16;
     let exchange_fee_minor_units = (topup.exchange_fee_user_currency * 100_f64).round() as u64;
     let expires_at = topup.expires_at;
-    let expires_at = parse_from_rfc3339(&expires_at)?;
+    let expires_at = match expires_at {
+        Some(e) => Some(parse_from_rfc3339(&e)?),
+        None => None,
+    };
     let lnurlw = topup.lnurl;
 
     let status = match topup.status {
@@ -258,10 +261,10 @@ mod tests {
             exchange_fee_rate: 0.014999999664723873,
             exchange_fee_user_currency: 0.11999999731779099,
             exchange_rate: 18507.0,
-            expires_at: "2023-09-21T16:39:21.919+00:00".to_string(),
+            expires_at: Some("2023-09-21T16:39:21.919+00:00".to_string()),
             id: "1707e09e-ebe1-4004-abd7-7a64604501b3".to_string(),
             lightning_fee_user_currency: 0.0,
-            lnurl: LNURL.to_string(),
+            lnurl: Some(LNURL.to_string()),
             node_pub_key: "0233786a3f5c79d25508ed973e7a37506ddab49d41a07fcb3d341ab638000d69cf"
                 .to_string(),
             status: topup_status_enum::READY,
@@ -286,11 +289,12 @@ mod tests {
 
         let expires_at = topup_info
             .expires_at
+            .unwrap()
             .duration_since(SystemTime::UNIX_EPOCH)
             .unwrap()
             .as_secs();
         assert_eq!(expires_at, 1695314361);
-        assert_eq!(topup_info.lnurlw, LNURL);
+        assert_eq!(topup_info.lnurlw.unwrap(), LNURL);
 
         assert_eq!(topup_info.status, TopupStatus::READY);
 
@@ -302,10 +306,10 @@ mod tests {
             exchange_fee_rate: 0.014999999664723873,
             exchange_fee_user_currency: 0.11999999731779099,
             exchange_rate: 18507.0,
-            expires_at: "2023-09-21T16:39:21.919+00:00".to_string(),
+            expires_at: None,
             id: "1707e09e-ebe1-4004-abd7-7a64604501b3".to_string(),
             lightning_fee_user_currency: 0.0,
-            lnurl: LNURL.to_string(),
+            lnurl: None,
             node_pub_key: "0233786a3f5c79d25508ed973e7a37506ddab49d41a07fcb3d341ab638000d69cf"
                 .to_string(),
             status: topup_status_enum::FAILED,
@@ -320,6 +324,8 @@ mod tests {
                 code: TemporaryFailureCode::NoRoute
             })
         ));
+        assert!(topup_info.expires_at.is_none());
+        assert!(topup_info.lnurlw.is_none());
 
         let topup = ListUncompletedTopupsTopup {
             additional_info: Some("customer_requested".to_string()),
@@ -329,10 +335,10 @@ mod tests {
             exchange_fee_rate: 0.014999999664723873,
             exchange_fee_user_currency: 0.11999999731779099,
             exchange_rate: 18507.0,
-            expires_at: "2023-09-21T16:39:21.919+00:00".to_string(),
+            expires_at: Some("2023-09-21T16:39:21.919+00:00".to_string()),
             id: "1707e09e-ebe1-4004-abd7-7a64604501b3".to_string(),
             lightning_fee_user_currency: 0.0,
-            lnurl: LNURL.to_string(),
+            lnurl: None,
             node_pub_key: "0233786a3f5c79d25508ed973e7a37506ddab49d41a07fcb3d341ab638000d69cf"
                 .to_string(),
             status: topup_status_enum::REFUNDED,
@@ -347,5 +353,7 @@ mod tests {
                 code: PermanentFailureCode::CustomerRequested
             })
         ));
+        assert!(topup_info.expires_at.is_some());
+        assert!(topup_info.lnurlw.is_none());
     }
 }
