@@ -165,8 +165,6 @@ pub struct GetLatestChannelManager;
 #[allow(non_camel_case_types)]
 type bigint = u64;
 type BigInteger = bigint;
-#[allow(non_camel_case_types)]
-type float8 = f64;
 
 #[derive(GraphQLQuery)]
 #[graphql(
@@ -207,3 +205,11 @@ pub struct CreateBackup;
     response_derives = "Debug"
 )]
 pub struct RecoverBackup;
+
+#[derive(GraphQLQuery)]
+#[graphql(
+schema_path = "schemas/schema_wallet_read.graphql",
+query_path = "schemas/operations.graphql",
+response_derives = "Debug"
+)]
+pub struct ReportPaymentTelemetry;

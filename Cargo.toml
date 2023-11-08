@@ -6,4 +6,5 @@ members = [
     "honey-badger",
     "mole",
     "squirrel",
+    "parrot",
 ]
