@@ -1,6 +1,5 @@
-use bdk::bitcoin::hashes::hex::ToHex;
+use bdk::bitcoin::bip32::{DerivationPath, ExtendedPrivKey};
 use bdk::bitcoin::secp256k1::PublicKey;
-use bdk::bitcoin::util::bip32::{DerivationPath, ExtendedPrivKey};
 use bdk::bitcoin::Network;
 use bdk::keys::bip39::Mnemonic;
 use bdk::keys::{DerivableKey, ExtendedKey};
@@ -66,8 +65,8 @@ fn derive_auth_keypair(master_xpriv: ExtendedPrivKey) -> KeyPair {
         .to_bytes();
 
     KeyPair {
-        secret_key: auth_priv_key.to_hex(),
-        public_key: auth_pub_key.to_hex(),
+        secret_key: hex::encode(auth_priv_key),
+        public_key: hex::encode(auth_pub_key),
     }
 }
 
@@ -82,7 +81,7 @@ pub fn generate_keypair() -> KeyPair {
     let (secret_key, public_key) = SECP256K1.generate_keypair(&mut rng);
 
     KeyPair {
-        secret_key: secret_key.secret_bytes().to_hex(),
-        public_key: public_key.serialize().to_hex(),
+        secret_key: hex::encode(secret_key.secret_bytes()),
+        public_key: hex::encode(public_key.serialize()),
     }
 }
