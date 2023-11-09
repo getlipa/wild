@@ -165,6 +165,8 @@ pub struct GetLatestChannelManager;
 #[allow(non_camel_case_types)]
 type bigint = u64;
 type BigInteger = bigint;
+#[allow(non_camel_case_types)]
+type float8 = f64;
 
 #[derive(GraphQLQuery)]
 #[graphql(
