@@ -6,7 +6,7 @@ pub use crate::errors::*;
 pub use perro;
 pub use reqwest;
 
-use graphql_client::reqwest::post_graphql_blocking;
+use graphql_client::reqwest::{post_graphql, post_graphql_blocking};
 use graphql_client::Response;
 use perro::{permanent_failure, runtime_error, MapToError, OptionToError};
 use reqwest::blocking::Client;
@@ -37,12 +37,55 @@ pub fn build_client(access_token: Option<&str>) -> Result<Client> {
     Ok(client)
 }
 
+pub fn build_async_client(access_token: Option<&str>) -> Result<reqwest::Client> {
+    let user_agent = "graphql-rust/0.12.0";
+    let timeout = Duration::from_secs(20);
+
+    let mut builder = reqwest::Client::builder()
+        .user_agent(user_agent)
+        .timeout(timeout);
+    if let Some(access_token) = access_token {
+        let value = HeaderValue::from_str(&format!("Bearer {access_token}"))
+            .map_to_permanent_failure("Failed to build header value from str")?;
+        builder = builder.default_headers(std::iter::once((AUTHORIZATION, value)).collect());
+    }
+
+    let client = builder
+        .build()
+        .map_to_permanent_failure("Failed to build a async reqwest client")?;
+    Ok(client)
+}
+
 pub fn post_blocking<Query: graphql_client::GraphQLQuery>(
     client: &Client,
     backend_url: &String,
     variables: Query::Variables,
 ) -> Result<Query::ResponseData> {
     let response = match post_graphql_blocking::<Query, _>(client, backend_url, variables) {
+        Ok(r) => r,
+        Err(e) => {
+            if is_502_status(e.status()) || e.to_string().contains("502") {
+                // checking for the error containing 502 because reqwest is unexpectedly returning a decode error instead of status error
+                return Err(runtime_error(
+                    GraphQlRuntimeErrorCode::RemoteServiceUnavailable,
+                    "The remote server returned status 502",
+                ));
+            }
+            return Err(runtime_error(
+                GraphQlRuntimeErrorCode::NetworkError,
+                "Failed to execute the query",
+            ));
+        }
+    };
+    get_response_data(response, backend_url)
+}
+
+pub async fn post<Query: graphql_client::GraphQLQuery>(
+    client: &reqwest::Client,
+    backend_url: &String,
+    variables: Query::Variables,
+) -> Result<Query::ResponseData> {
+    let response = match post_graphql::<Query, _>(client, backend_url, variables).await {
         Ok(r) => r,
         Err(e) => {
             if is_502_status(e.status()) || e.to_string().contains("502") {

@@ -1,26 +1,15 @@
 use crate::secrets::KeyPair;
 use crate::signing::sign;
 
+use crate::provider::{add_bitcoin_message_prefix, add_hex_prefix};
+use crate::{AuthLevel, CustomTermsAndConditions};
 use graphql::perro::{invalid_input, permanent_failure, runtime_error, OptionToError};
-use graphql::reqwest::blocking::Client;
+use graphql::reqwest::Client;
 use graphql::schema::*;
-use graphql::{build_client, post_blocking};
+use graphql::{build_async_client, post};
 use graphql::{errors::*, parse_from_rfc3339};
 use log::info;
 use std::time::SystemTime;
-
-#[derive(PartialEq, Eq)]
-pub enum AuthLevel {
-    Pseudonymous,
-    Owner,
-    Employee,
-}
-
-#[derive(Debug)]
-pub enum CustomTermsAndConditions {
-    Lipa,
-    Pocket,
-}
 
 pub(crate) struct AuthProvider {
     backend_url: String,
@@ -39,7 +28,7 @@ impl AuthProvider {
         wallet_keypair: KeyPair,
         auth_keypair: KeyPair,
     ) -> Result<Self> {
-        let client = build_client(None)?;
+        let client = build_async_client(None)?;
         Ok(AuthProvider {
             backend_url,
             auth_level,
@@ -51,19 +40,19 @@ impl AuthProvider {
         })
     }
 
-    pub fn query_token(&mut self) -> Result<String> {
+    pub async fn query_token(&mut self) -> Result<String> {
         let (access_token, refresh_token) = match self.refresh_token.clone() {
             Some(refresh_token) => {
-                match self.refresh_session(refresh_token) {
+                match self.refresh_session(refresh_token).await {
                     // Tolerate authentication errors and retry auth flow.
                     Err(Error::RuntimeError {
                         code: GraphQlRuntimeErrorCode::AuthServiceError,
                         ..
-                    }) => self.run_auth_flow(),
+                    }) => self.run_auth_flow().await,
                     result => result,
                 }
             }
-            None => self.run_auth_flow(),
+            None => self.run_auth_flow().await,
         }?;
         self.refresh_token = Some(refresh_token);
         Ok(access_token)
@@ -73,7 +62,7 @@ impl AuthProvider {
         self.wallet_pubkey_id.clone()
     }
 
-    pub fn accept_terms_and_conditions(&self, access_token: String) -> Result<()> {
+    pub async fn accept_terms_and_conditions(&self, access_token: String) -> Result<()> {
         info!("Accepting T&C ...");
         if self.auth_level != AuthLevel::Pseudonymous {
             return Err(invalid_input(
@@ -84,9 +73,8 @@ impl AuthProvider {
         let variables = accept_terms_and_conditions::Variables {
             pub_key_id: self.wallet_pubkey_id.clone(),
         };
-        let client = build_client(Some(&access_token))?;
-        let data =
-            post_blocking::<AcceptTermsAndConditions>(&client, &self.backend_url, variables)?;
+        let client = build_async_client(Some(&access_token))?;
+        let data = post::<AcceptTermsAndConditions>(&client, &self.backend_url, variables).await?;
         if !matches!(
             data.accept_terms,
             Some(
@@ -102,7 +90,7 @@ impl AuthProvider {
         Ok(())
     }
 
-    pub fn accept_custom_terms_and_conditions(
+    pub async fn accept_custom_terms_and_conditions(
         &self,
         custom_terms: CustomTermsAndConditions,
         access_token: String,
@@ -119,9 +107,9 @@ impl AuthProvider {
             CustomTermsAndConditions::Pocket => String::from("POCKET_EXCHANGE"),
         };
         let variables = accept_custom_terms_and_conditions::Variables { service_provider };
-        let client = build_client(Some(&access_token))?;
+        let client = build_async_client(Some(&access_token))?;
         let data =
-            post_blocking::<AcceptCustomTermsAndConditions>(&client, &self.backend_url, variables)?;
+            post::<AcceptCustomTermsAndConditions>(&client, &self.backend_url, variables).await?;
         if !matches!(
             data.accept_terms_conditions,
             Some(
@@ -137,24 +125,29 @@ impl AuthProvider {
         Ok(())
     }
 
-    fn run_auth_flow(&mut self) -> Result<(String, String)> {
-        let (access_token, refresh_token, wallet_pub_key_id) = self.start_basic_session()?;
+    async fn run_auth_flow(&mut self) -> Result<(String, String)> {
+        let (access_token, refresh_token, wallet_pub_key_id) = self.start_basic_session().await?;
 
         self.wallet_pubkey_id = Some(wallet_pub_key_id.clone());
 
         match self.auth_level {
             AuthLevel::Pseudonymous => Ok((access_token, refresh_token)),
-            AuthLevel::Owner => self.start_priviledged_session(access_token, wallet_pub_key_id),
+            AuthLevel::Owner => {
+                self.start_priviledged_session(access_token, wallet_pub_key_id)
+                    .await
+            }
             AuthLevel::Employee => {
-                let owner_pub_key_id =
-                    self.get_business_owner(access_token.clone(), wallet_pub_key_id)?;
+                let owner_pub_key_id = self
+                    .get_business_owner(access_token.clone(), wallet_pub_key_id)
+                    .await?;
                 self.start_priviledged_session(access_token, owner_pub_key_id)
+                    .await
             }
         }
     }
 
-    fn start_basic_session(&self) -> Result<(String, String, String)> {
-        let challenge = self.request_challenge()?;
+    async fn start_basic_session(&self) -> Result<(String, String, String)> {
+        let challenge = self.request_challenge().await?;
 
         let challenge_with_prefix = add_bitcoin_message_prefix(&challenge);
         let challenge_signature = sign(challenge_with_prefix, self.auth_keypair.secret_key.clone());
@@ -174,7 +167,7 @@ impl AuthProvider {
             signed_auth_pub_key: add_hex_prefix(&signed_auth_pub_key),
         };
 
-        let data = post_blocking::<StartSession>(&self.client, &self.backend_url, variables)?;
+        let data = post::<StartSession>(&self.client, &self.backend_url, variables).await?;
 
         let session_permit = data.start_session_v2.ok_or_permanent_failure(
             "Response to start_session request doesn't have the expected structure",
@@ -196,12 +189,12 @@ impl AuthProvider {
         Ok((access_token, refresh_token, wallet_pub_key_id))
     }
 
-    fn start_priviledged_session(
+    async fn start_priviledged_session(
         &self,
         access_token: String,
         owner_pub_key_id: String,
     ) -> Result<(String, String)> {
-        let challenge = self.request_challenge()?;
+        let challenge = self.request_challenge().await?;
 
         let challenge_with_prefix = add_bitcoin_message_prefix(&challenge);
         let challenge_signature = sign(
@@ -216,8 +209,8 @@ impl AuthProvider {
             signed_challenge: add_hex_prefix(&challenge_signature),
         };
 
-        let client = build_client(Some(&access_token))?;
-        let data = post_blocking::<PrepareWalletSession>(&client, &self.backend_url, variables)?;
+        let client = build_async_client(Some(&access_token))?;
+        let data = post::<PrepareWalletSession>(&client, &self.backend_url, variables).await?;
 
         let prepared_permission_token = data.prepare_wallet_session.ok_or_permanent_failure(
             "Response to prepare_wallet_session request doesn't have the expected structure",
@@ -229,7 +222,7 @@ impl AuthProvider {
             challenge_signature: add_hex_prefix(&challenge_signature),
             prepared_permission_token,
         };
-        let data = post_blocking::<UnlockWallet>(&client, &self.backend_url, variables)?;
+        let data = post::<UnlockWallet>(&client, &self.backend_url, variables).await?;
 
         let session_permit = data.start_prepared_session.ok_or_permanent_failure(
             "Response to unlock_wallet request doesn't have the expected structure",
@@ -249,7 +242,7 @@ impl AuthProvider {
         Ok((access_token, refresh_token))
     }
 
-    fn get_business_owner(
+    async fn get_business_owner(
         &self,
         access_token: String,
         wallet_pub_key_id: String,
@@ -258,8 +251,8 @@ impl AuthProvider {
         let variables = get_business_owner::Variables {
             owner_wallet_pub_key_id: wallet_pub_key_id,
         };
-        let client = build_client(Some(&access_token))?;
-        let data = post_blocking::<GetBusinessOwner>(&client, &self.backend_url, variables)?;
+        let client = build_async_client(Some(&access_token))?;
+        let data = post::<GetBusinessOwner>(&client, &self.backend_url, variables).await?;
 
         let result = data
             .wallet_acl
@@ -279,11 +272,11 @@ impl AuthProvider {
         Ok(result.owner_wallet_pub_key_id.clone())
     }
 
-    fn refresh_session(&self, refresh_token: String) -> Result<(String, String)> {
+    async fn refresh_session(&self, refresh_token: String) -> Result<(String, String)> {
         // Refresh session.
         info!("Refreshing session ...");
         let variables = refresh_session::Variables { refresh_token };
-        let data = post_blocking::<RefreshSession>(&self.client, &self.backend_url, variables)?;
+        let data = post::<RefreshSession>(&self.client, &self.backend_url, variables).await?;
 
         let session_permit = data.refresh_session.ok_or_permanent_failure(
             "Response to refresh_session request doesn't have the expected structure",
@@ -303,10 +296,10 @@ impl AuthProvider {
         Ok((access_token, refresh_token))
     }
 
-    fn request_challenge(&self) -> Result<String> {
+    async fn request_challenge(&self) -> Result<String> {
         info!("Requesting challenge ...");
         let variables = request_challenge::Variables {};
-        let data = post_blocking::<RequestChallenge>(&self.client, &self.backend_url, variables)?;
+        let data = post::<RequestChallenge>(&self.client, &self.backend_url, variables).await?;
 
         let challenge = data
             .auth_challenge
@@ -316,12 +309,4 @@ impl AuthProvider {
 
         Ok(challenge)
     }
-}
-
-pub(crate) fn add_hex_prefix(string: &str) -> String {
-    ["\\x", string].concat()
-}
-
-pub(crate) fn add_bitcoin_message_prefix(string: &str) -> String {
-    ["\\x18Bitcoin Signed Message:", string].concat()
 }

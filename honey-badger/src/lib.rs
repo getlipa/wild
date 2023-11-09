@@ -1,3 +1,4 @@
+pub mod asynchronous;
 mod jwt;
 mod provider;
 pub mod secrets;
@@ -102,7 +103,7 @@ impl Auth {
     }
 }
 
-fn adjust_token(raw_token: String) -> Result<AdjustedToken> {
+pub(crate) fn adjust_token(raw_token: String) -> Result<AdjustedToken> {
     let token = parse_token(raw_token).map_to_runtime_error(
         GraphQlRuntimeErrorCode::AuthServiceError,
         "Auth service returned invalid JWT",

@@ -22,3 +22,7 @@ and always returns the latest state of them when requested.
 ## Crow
 Crows are known for their love to collect stuff.
 The library allows to register for and list withdraw collect offers (e.g. Lightning Address).
+
+## Squirrel
+Squirrels love to store nuts for the winter.
+The library allows backups of local data to be created.
