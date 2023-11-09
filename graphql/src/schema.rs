@@ -210,8 +210,8 @@ pub struct RecoverBackup;
 
 #[derive(GraphQLQuery)]
 #[graphql(
-schema_path = "schemas/schema_wallet_read.graphql",
-query_path = "schemas/operations.graphql",
-response_derives = "Debug"
+    schema_path = "schemas/schema_wallet_read.graphql",
+    query_path = "schemas/operations.graphql",
+    response_derives = "Debug"
 )]
 pub struct ReportPaymentTelemetry;

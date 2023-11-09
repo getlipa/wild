@@ -16,7 +16,7 @@ pub enum PaymentSource {
 }
 pub enum PayFailureReason {
     NoRoute,
-    Unkown,
+    Unknown,
 }
 
 pub enum AnalyticsEvent {
@@ -215,6 +215,6 @@ fn map_pay_failure_reason(
 ) -> report_payment_telemetry::PayFailureReason {
     match pay_failure_reason {
         PayFailureReason::NoRoute => report_payment_telemetry::PayFailureReason::NO_ROUTE,
-        PayFailureReason::Unkown => report_payment_telemetry::PayFailureReason::UNKNOWN,
+        PayFailureReason::Unknown => report_payment_telemetry::PayFailureReason::UNKNOWN,
     }
 }

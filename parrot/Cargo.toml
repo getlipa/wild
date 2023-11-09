@@ -4,10 +4,5 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-log = "0.4.17"
-
 graphql = { path = "../graphql" }
 honey-badger = { path = "../honey-badger" }
-
-[dev-dependencies]
-simplelog = { version ="0.12.0", features = ["test"] }

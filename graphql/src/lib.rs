@@ -6,8 +6,8 @@ pub use crate::errors::*;
 pub use perro;
 pub use reqwest;
 
-use graphql_client::reqwest::{post_graphql, post_graphql_blocking};
 use chrono::{DateTime, Utc};
+use graphql_client::reqwest::{post_graphql, post_graphql_blocking};
 use graphql_client::Response;
 use perro::{permanent_failure, runtime_error, MapToError, OptionToError};
 use reqwest::blocking::Client;

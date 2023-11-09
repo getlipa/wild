@@ -188,5 +188,7 @@ mutation RecoverBackup($schemaName: String!) {
 }
 
 mutation ReportPaymentTelemetry($telemetryId: String!, $events: PaymentTelemetryEventsInput) {
-  report_payment_telemetry(telemetryId: $telemetryId, events: $events)
+  report_payment_telemetry(telemetryId: $telemetryId, events: $events) {
+    payFailed
+  }
 }
