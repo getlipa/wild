@@ -2,8 +2,9 @@ use graphql_client::GraphQLQuery;
 
 #[allow(non_camel_case_types)]
 type bytea = String;
+type DateTime = String;
 #[allow(non_camel_case_types)]
-type numeric = u32;
+type numeric = float8;
 #[allow(non_camel_case_types)]
 type timestamptz = String;
 #[allow(non_camel_case_types)]
@@ -190,3 +191,19 @@ pub struct MigrationBalance;
     response_derives = "Debug"
 )]
 pub struct MigrateFunds;
+
+#[derive(GraphQLQuery)]
+#[graphql(
+    schema_path = "schemas/schema_wallet_read.graphql",
+    query_path = "schemas/operations.graphql",
+    response_derives = "Debug"
+)]
+pub struct CreateBackup;
+
+#[derive(GraphQLQuery)]
+#[graphql(
+    schema_path = "schemas/schema_wallet_read.graphql",
+    query_path = "schemas/operations.graphql",
+    response_derives = "Debug"
+)]
+pub struct RecoverBackup;

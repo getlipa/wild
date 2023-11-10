@@ -43,7 +43,7 @@ impl ExchangeRateProvider {
             .ok_or_invalid_input("Unknown currency")?
             .sats_per_unit;
 
-        Ok(rate)
+        Ok(rate as u32)
     }
 
     pub fn query_all_exchange_rates(&self) -> Result<Vec<ExchangeRate>> {
@@ -57,7 +57,7 @@ impl ExchangeRateProvider {
             .map(|c| {
                 Ok(ExchangeRate {
                     currency_code: c.currency_code,
-                    sats_per_unit: c.sats_per_unit,
+                    sats_per_unit: c.sats_per_unit as u32,
                     updated_at: parse_from_rfc3339(&c.conversion_rate_updated_at)?,
                 })
             })

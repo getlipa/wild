@@ -172,3 +172,17 @@ query MigrationBalance($nodePubKey: String) {
 mutation MigrateFunds($invoice: String, $base16InvoiceSignature: String, $ldkNodePubKey: String) {
   migrate_funds(invoice: $invoice, base16InvoiceSignature: $base16InvoiceSignature, ldkNodePubKey: $ldkNodePubKey)
 }
+
+mutation CreateBackup($encryptedBackup: String!, $schemaName: String!, $schemaVersion: String!) {
+  create_backup(encryptedBackup: $encryptedBackup, schemaName: $schemaName, schemaVersion: $schemaVersion) {
+    updatedAt
+  }
+}
+
+mutation RecoverBackup($schemaName: String!) {
+  recover_backup(schemaName: $schemaName) {
+    encryptedBackup
+    schemaVersion
+    updatedAt
+  }
+}

@@ -38,16 +38,97 @@ enum ChallengeSignatureType {
   SECP256K1
 }
 
+type CreateBackupResponse {
+  schemaName: String
+  schemaVersion: String
+  updatedAt: DateTime
+  walletId: String
+}
+
 scalar DateTime
 
 type MigrationBalanceResponse {
   balanceAmountSat: BigInteger!
 }
 
+input PayFailedInput {
+  failedAt: DateTime!
+  paymentHash: String!
+  reason: PayFailureReason!
+}
+
+enum PayFailureReason {
+  NO_ROUTE
+  UNKNOWN
+}
+
+input PayInitiatedInput {
+  executedAt: DateTime!
+  paidAmountMSat: BigInteger!
+  paymentHash: String!
+  processStartedAt: DateTime!
+  requestedAmountMSat: BigInteger!
+  satsPerUserCurrency: Int!
+  source: PaySource!
+  userCurrency: String!
+}
+
+enum PaySource {
+  CAMERA
+  CLIPBOARD
+  MANUAL
+  NFC
+}
+
+input PaySucceededInput {
+  confirmedAt: DateTime!
+  lnFeesPaidMSat: BigInteger!
+  paymentHash: String!
+}
+
+input PaymentTelemetryEventsInput {
+  payFailed: PayFailedInput
+  payInitiated: PayInitiatedInput
+  paySucceeded: PaySucceededInput
+  requestInitiated: RequestInitiatedInput
+  requestSucceeded: RequestSucceededInput
+}
+
+type RecoverBackupResponse {
+  encryptedBackup: String
+  schemaVersion: String
+  updatedAt: DateTime
+  walletId: String
+}
+
 type RegisterTopupResponse {
   email: String
   nodePubKey: String!
   walletPubKeyId: String!
+}
+
+type ReportPaymentTelemetryResponse {
+  payFailed: String
+  payInitiated: String
+  paySucceeded: String
+  requestInitiated: String
+  requestSucceeded: String
+}
+
+input RequestInitiatedInput {
+  createdAt: DateTime!
+  enteredAmountMSat: BigInteger!
+  paymentHash: String!
+  requestCurrency: String!
+  satsPerUserCurrency: Int!
+  userCurrency: String!
+}
+
+input RequestSucceededInput {
+  channelOpeningFeeMSat: BigInteger!
+  paidAmountMSat: BigInteger!
+  paymentHash: String!
+  paymentReceivedAt: DateTime!
 }
 
 type SessionPermit {
@@ -732,23 +813,6 @@ enum cursor_ordering {
   DESC
 }
 
-scalar float8
-
-"""
-Boolean expression to compare columns of type "float8". All fields are combined with logical 'AND'.
-"""
-input float8_comparison_exp {
-  _eq: float8
-  _gt: float8
-  _gte: float8
-  _in: [float8!]
-  _is_null: Boolean
-  _lt: float8
-  _lte: float8
-  _neq: float8
-  _nin: [float8!]
-}
-
 """mutation root"""
 type mutation_root {
   """
@@ -801,6 +865,7 @@ type mutation_root {
     where: accepted_terms_conditions_bool_exp
   ): accepted_terms_conditions
   accept_wallet_acl_by_pk(pk_columns: AcceptWalletPkRequestInput!): WalletAcl
+  create_backup(encryptedBackup: String!, schemaName: String!, schemaVersion: String!): CreateBackupResponse
 
   """
   delete data from the table: "channel_manager"
@@ -895,12 +960,14 @@ type mutation_root {
     on_conflict: channel_monitor_on_conflict
   ): channel_monitor
   migrate_funds(base16InvoiceSignature: String, invoice: String, ldkNodePubKey: String): Boolean!
+  recover_backup(schemaName: String!): RecoverBackupResponse
   refresh_session(refreshToken: String!): TokenContainer
   refresh_session_v2(refreshToken: String!): SessionPermit
   register_email(email: String): WalletEmail
   register_node(nodePubKey: String): WalletNode
   register_notification_token(language: String!, notificationToken: String!): Token
   register_topup(email: String, orderId: String!): RegisterTopupResponse
+  report_payment_telemetry(events: PaymentTelemetryEventsInput, telemetryId: String!): ReportPaymentTelemetryResponse
   start_prepared_session(challenge: String!, challengeSignature: String!, challengeSignatureType: ChallengeSignatureType, preparedPermissionToken: String!): TokenContainer
   start_prepared_session_v2(challenge: String!, challengeSignature: String!, challengeSignatureType: ChallengeSignatureType, preparedPermissionToken: String!): SessionPermit
   start_session(authPubKey: String!, challenge: String!, challengeSignature: String!, challengeSignatureType: ChallengeSignatureType, signedAuthPubKey: String!, walletPubKey: String!): TokenContainer
@@ -966,6 +1033,7 @@ type query_root {
     where: accepted_terms_conditions_bool_exp
   ): [accepted_terms_conditions!]!
   auth_challenge: String
+  backup_service_version: String
 
   """
   fetch data from the table: "channel_manager"
@@ -1063,6 +1131,7 @@ type query_root {
   ): currency
   migration_balance(nodePubKey: String): MigrationBalanceResponse
   notification_service_version: String
+  payment_service_version: String
   prepare_wallet_session(challenge: String!, ownerPubKeyId: String!, signature: String!): String
 
   """
@@ -1540,14 +1609,14 @@ columns and relationships of "topup"
 type topup {
   additionalInfo: String
   amountSat: bigint!
-  amountUserCurrency: float8!
+  amountUserCurrency: numeric!
   createdAt: timestamptz!
-  exchangeFeeRate: float8!
-  exchangeFeeUserCurrency: float8!
-  exchangeRate: float8!
+  exchangeFeeRate: numeric!
+  exchangeFeeUserCurrency: numeric!
+  exchangeRate: numeric!
   expiresAt: timestamptz
   id: uuid!
-  lightningFeeUserCurrency: float8!
+  lightningFeeUserCurrency: numeric!
   lnurl: String
   nodePubKey: String!
   status: topup_status_enum!
@@ -1563,14 +1632,14 @@ input topup_bool_exp {
   _or: [topup_bool_exp!]
   additionalInfo: String_comparison_exp
   amountSat: bigint_comparison_exp
-  amountUserCurrency: float8_comparison_exp
+  amountUserCurrency: numeric_comparison_exp
   createdAt: timestamptz_comparison_exp
-  exchangeFeeRate: float8_comparison_exp
-  exchangeFeeUserCurrency: float8_comparison_exp
-  exchangeRate: float8_comparison_exp
+  exchangeFeeRate: numeric_comparison_exp
+  exchangeFeeUserCurrency: numeric_comparison_exp
+  exchangeRate: numeric_comparison_exp
   expiresAt: timestamptz_comparison_exp
   id: uuid_comparison_exp
-  lightningFeeUserCurrency: float8_comparison_exp
+  lightningFeeUserCurrency: numeric_comparison_exp
   lnurl: String_comparison_exp
   nodePubKey: String_comparison_exp
   status: topup_status_enum_comparison_exp
@@ -1676,14 +1745,14 @@ input topup_stream_cursor_input {
 input topup_stream_cursor_value_input {
   additionalInfo: String
   amountSat: bigint
-  amountUserCurrency: float8
+  amountUserCurrency: numeric
   createdAt: timestamptz
-  exchangeFeeRate: float8
-  exchangeFeeUserCurrency: float8
-  exchangeRate: float8
+  exchangeFeeRate: numeric
+  exchangeFeeUserCurrency: numeric
+  exchangeRate: numeric
   expiresAt: timestamptz
   id: uuid
-  lightningFeeUserCurrency: float8
+  lightningFeeUserCurrency: numeric
   lnurl: String
   nodePubKey: String
   status: topup_status_enum
