@@ -6,6 +6,7 @@ pub use crate::errors::*;
 pub use perro;
 pub use reqwest;
 
+use chrono::{DateTime, Utc};
 use graphql_client::reqwest::{post_graphql, post_graphql_blocking};
 use graphql_client::Response;
 use perro::{permanent_failure, runtime_error, MapToError, OptionToError};
@@ -200,5 +201,16 @@ mod tests {
             .unwrap()
             .as_secs();
         assert_eq!(timestamp, 1695314361 + 2 * 3600);
+    }
+}
+
+pub trait ToRfc3339 {
+    fn to_rfc3339(&self) -> String;
+}
+
+impl ToRfc3339 for SystemTime {
+    fn to_rfc3339(&self) -> String {
+        let datetime: DateTime<Utc> = DateTime::from(*self);
+        datetime.to_rfc3339()
     }
 }

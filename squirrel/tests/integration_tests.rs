@@ -1,4 +1,4 @@
-use bitcoin::Network;
+use bdk::bitcoin::Network;
 use graphql::perro::Error::RuntimeError;
 use graphql::GraphQlRuntimeErrorCode;
 use honey_badger::asynchronous::Auth;

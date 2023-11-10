@@ -26,3 +26,7 @@ The library allows to register for and list withdraw collect offers (e.g. Lightn
 ## Squirrel
 Squirrels love to store nuts for the winter.
 The library allows backups of local data to be created.
+
+## Parrot
+This feathered companion, similar to its namesakes, repeats what he hears and as such delivers, 
+important analytics data about payments to the backend. This data is pseudonymized and used to improve our services.
