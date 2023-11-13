@@ -3,7 +3,7 @@ use graphql::schema::report_payment_telemetry::{
     RequestInitiatedInput, RequestSucceededInput,
 };
 use graphql::schema::{report_payment_telemetry, ReportPaymentTelemetry};
-use graphql::{build_client, post_blocking, ToRfc3339};
+use graphql::{build_async_client, post, ToRfc3339};
 use honey_badger::Auth;
 use std::sync::Arc;
 use std::time::SystemTime;
@@ -81,7 +81,7 @@ impl AnalyticsClient {
         }
     }
 
-    pub fn report_event(&self, analytics_event: AnalyticsEvent) -> graphql::Result<()> {
+    pub async fn report_event(&self, analytics_event: AnalyticsEvent) -> graphql::Result<()> {
         let variables = match analytics_event {
             AnalyticsEvent::PayInitiated {
                 payment_hash,
@@ -194,8 +194,8 @@ impl AnalyticsClient {
         };
 
         let token = self.auth.query_token()?;
-        let client = build_client(Some(&token))?;
-        post_blocking::<ReportPaymentTelemetry>(&client, &self.backend_url, variables)?;
+        let client = build_async_client(Some(&token))?;
+        post::<ReportPaymentTelemetry>(&client, &self.backend_url, variables).await?;
 
         Ok(())
     }
