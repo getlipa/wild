@@ -59,7 +59,7 @@ pub enum AnalyticsEvent {
     RequestSucceeded {
         payment_hash: String,
 
-        paid_amount_sat: u64,
+        paid_amount_msat: u64,
         channel_opening_fee_msat: u64,
 
         received_at: SystemTime,
@@ -173,7 +173,7 @@ impl AnalyticsClient {
             },
             AnalyticsEvent::RequestSucceeded {
                 payment_hash,
-                paid_amount_sat,
+                paid_amount_msat,
                 channel_opening_fee_msat,
                 received_at,
             } => report_payment_telemetry::Variables {
@@ -185,7 +185,7 @@ impl AnalyticsClient {
                     request_initiated: None,
                     request_succeeded: Some(RequestSucceededInput {
                         channel_opening_fee_m_sat: channel_opening_fee_msat,
-                        paid_amount_m_sat: paid_amount_sat,
+                        paid_amount_m_sat: paid_amount_msat,
                         payment_hash,
                         payment_received_at: received_at.to_rfc3339(),
                     }),
