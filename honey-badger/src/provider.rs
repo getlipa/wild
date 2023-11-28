@@ -17,9 +17,19 @@ pub enum AuthLevel {
 }
 
 #[derive(Debug)]
-pub enum CustomTermsAndConditions {
+pub enum TermsAndConditions {
     Lipa,
     Pocket,
+}
+
+impl From<TermsAndConditions> for String {
+    fn from(value: TermsAndConditions) -> Self {
+        match value {
+            TermsAndConditions::Lipa => "LIPA_WALLET",
+            TermsAndConditions::Pocket => "POCKET_EXCHANGE",
+        }
+        .to_string()
+    }
 }
 
 pub(crate) struct AuthProvider {
@@ -73,8 +83,12 @@ impl AuthProvider {
         self.wallet_pubkey_id.clone()
     }
 
-    pub fn accept_terms_and_conditions(&self, access_token: String) -> Result<()> {
-        info!("Accepting T&C ...");
+    pub fn accept_terms_and_conditions(
+        &self,
+        access_token: String,
+        terms: TermsAndConditions,
+    ) -> Result<()> {
+        info!("Accepting T&C ({:?})...", terms);
         if self.auth_level != AuthLevel::Pseudonymous {
             return Err(invalid_input(
                 "Accepting T&C not supported for auth levels other than Pseudonymous",
@@ -82,53 +96,14 @@ impl AuthProvider {
         }
 
         let variables = accept_terms_and_conditions::Variables {
-            pub_key_id: self.wallet_pubkey_id.clone(),
+            service_provider: terms.into(),
         };
         let client = build_client(Some(&access_token))?;
         let data =
             post_blocking::<AcceptTermsAndConditions>(&client, &self.backend_url, variables)?;
         if !matches!(
-            data.accept_terms,
-            Some(
-                accept_terms_and_conditions::AcceptTermsAndConditionsAcceptTerms {
-                    accepted_terms: true
-                }
-            )
-        ) {
-            return Err(permanent_failure(
-                "Backend rejected accepting Terms and Conditions",
-            ));
-        }
-        Ok(())
-    }
-
-    pub fn accept_custom_terms_and_conditions(
-        &self,
-        custom_terms: CustomTermsAndConditions,
-        access_token: String,
-    ) -> Result<()> {
-        info!("Accepting custom T&C ({:?})...", custom_terms);
-        if self.auth_level != AuthLevel::Pseudonymous {
-            return Err(invalid_input(
-                "Accepting T&C not supported for auth levels other than Pseudonymous",
-            ));
-        }
-
-        let service_provider = match custom_terms {
-            CustomTermsAndConditions::Lipa => String::from("LIPA_WALLET"),
-            CustomTermsAndConditions::Pocket => String::from("POCKET_EXCHANGE"),
-        };
-        let variables = accept_custom_terms_and_conditions::Variables { service_provider };
-        let client = build_client(Some(&access_token))?;
-        let data =
-            post_blocking::<AcceptCustomTermsAndConditions>(&client, &self.backend_url, variables)?;
-        if !matches!(
             data.accept_terms_conditions,
-            Some(
-                accept_custom_terms_and_conditions::AcceptCustomTermsAndConditionsAcceptTermsConditions {
-                    ..
-                }
-            )
+            Some(accept_terms_and_conditions::AcceptTermsAndConditionsAcceptTermsConditions { .. })
         ) {
             return Err(permanent_failure(
                 "Backend rejected accepting Terms and Conditions",
