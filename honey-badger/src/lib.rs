@@ -6,7 +6,7 @@ mod signing;
 
 pub use graphql;
 
-pub use crate::provider::{AuthLevel, CustomTermsAndConditions};
+pub use crate::provider::{AuthLevel, TermsAndConditions};
 
 use crate::jwt::parse_token;
 use crate::provider::AuthProvider;
@@ -77,19 +77,10 @@ impl Auth {
             .ok_or_permanent_failure("Newly refreshed token is not valid long enough")
     }
 
-    pub fn accept_terms_and_conditions(&self) -> Result<()> {
+    pub fn accept_terms_and_conditions(&self, terms: TermsAndConditions) -> Result<()> {
         let token = self.query_token()?;
         let provider = self.provider.lock().unwrap();
-        provider.accept_terms_and_conditions(token)
-    }
-
-    pub fn accept_custom_terms_and_conditions(
-        &self,
-        custom_terms: CustomTermsAndConditions,
-    ) -> Result<()> {
-        let token = self.query_token()?;
-        let provider = self.provider.lock().unwrap();
-        provider.accept_custom_terms_and_conditions(custom_terms, token)
+        provider.accept_terms_and_conditions(token, terms)
     }
 
     fn get_token_if_valid(&self) -> Option<String> {

@@ -1,7 +1,7 @@
 use bdk::bitcoin::Network;
 use graphql::errors::{Error, GraphQlRuntimeErrorCode};
 use honey_badger::secrets::{derive_keys, generate_keypair, generate_mnemonic, KeyPair};
-use honey_badger::{Auth, AuthLevel, CustomTermsAndConditions};
+use honey_badger::{Auth, AuthLevel, TermsAndConditions};
 use simplelog::TestLogger;
 use std::env;
 use std::sync::Once;
@@ -186,31 +186,7 @@ fn test_accept_terms_and_conditions() {
         auth_keypair,
     )
     .unwrap();
-    auth.accept_terms_and_conditions().unwrap();
-
-    let (wallet_keypair, auth_keypair) = generate_keys();
-    let auth = Auth::new(
-        get_backend_url(),
-        AuthLevel::Owner,
-        wallet_keypair,
-        auth_keypair,
-    )
-    .unwrap();
-    let result = auth.accept_terms_and_conditions();
-    assert!(matches!(result, Err(Error::InvalidInput { .. })));
-}
-
-#[test]
-fn test_accept_custom_terms_and_conditions() {
-    let (wallet_keypair, auth_keypair) = generate_keys();
-    let auth = Auth::new(
-        get_backend_url(),
-        AuthLevel::Pseudonymous,
-        wallet_keypair,
-        auth_keypair,
-    )
-    .unwrap();
-    auth.accept_custom_terms_and_conditions(CustomTermsAndConditions::Lipa)
+    auth.accept_terms_and_conditions(TermsAndConditions::Lipa)
         .unwrap();
 
     let (wallet_keypair, auth_keypair) = generate_keys();
@@ -221,7 +197,7 @@ fn test_accept_custom_terms_and_conditions() {
         auth_keypair,
     )
     .unwrap();
-    let result = auth.accept_custom_terms_and_conditions(CustomTermsAndConditions::Lipa);
+    let result = auth.accept_terms_and_conditions(TermsAndConditions::Lipa);
     assert!(matches!(result, Err(Error::InvalidInput { .. })));
 
     let (wallet_keypair, auth_keypair) = generate_keys();
@@ -232,7 +208,7 @@ fn test_accept_custom_terms_and_conditions() {
         auth_keypair,
     )
     .unwrap();
-    auth.accept_custom_terms_and_conditions(CustomTermsAndConditions::Pocket)
+    auth.accept_terms_and_conditions(TermsAndConditions::Pocket)
         .unwrap();
 
     let (wallet_keypair, auth_keypair) = generate_keys();
@@ -243,7 +219,7 @@ fn test_accept_custom_terms_and_conditions() {
         auth_keypair,
     )
     .unwrap();
-    let result = auth.accept_custom_terms_and_conditions(CustomTermsAndConditions::Pocket);
+    let result = auth.accept_terms_and_conditions(TermsAndConditions::Pocket);
     assert!(matches!(result, Err(Error::InvalidInput { .. })));
 }
 

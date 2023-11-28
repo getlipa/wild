@@ -4,7 +4,7 @@ pub use graphql;
 
 use crate::asynchronous::provider::AuthProvider;
 use crate::secrets::KeyPair;
-use crate::{adjust_token, AdjustedToken, AuthLevel, CustomTermsAndConditions};
+use crate::{adjust_token, AdjustedToken, AuthLevel, TermsAndConditions};
 pub use graphql::errors::{GraphQlRuntimeErrorCode, Result};
 use graphql::perro::OptionToError;
 use std::time::SystemTime;
@@ -65,21 +65,10 @@ impl Auth {
             .ok_or_permanent_failure("Newly refreshed token is not valid long enough")
     }
 
-    pub async fn accept_terms_and_conditions(&self) -> Result<()> {
+    pub async fn accept_terms_and_conditions(&self, terms: TermsAndConditions) -> Result<()> {
         let token = self.query_token().await?;
         let provider = self.provider.lock().await;
-        provider.accept_terms_and_conditions(token).await
-    }
-
-    pub async fn accept_custom_terms_and_conditions(
-        &self,
-        custom_terms: CustomTermsAndConditions,
-    ) -> Result<()> {
-        let token = self.query_token().await?;
-        let provider = self.provider.lock().await;
-        provider
-            .accept_custom_terms_and_conditions(custom_terms, token)
-            .await
+        provider.accept_terms_and_conditions(token, terms).await
     }
 
     async fn get_token_if_valid(&self) -> Option<String> {
