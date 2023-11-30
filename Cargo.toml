@@ -8,3 +8,5 @@ members = [
     "squirrel",
     "parrot",
 ]
+
+resolver = "2"
