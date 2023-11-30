@@ -29,6 +29,13 @@ pub struct Auth {
     token: Mutex<AdjustedToken>,
 }
 
+#[derive(Debug, PartialEq)]
+pub struct TermsAndConditionsStatus {
+    pub accept_date: Option<SystemTime>,
+    pub accepted_terms: bool,
+    pub terms_and_conditions: TermsAndConditions,
+}
+
 impl Auth {
     pub fn new(
         backend_url: String,
@@ -81,6 +88,15 @@ impl Auth {
         let token = self.query_token()?;
         let provider = self.provider.lock().unwrap();
         provider.accept_terms_and_conditions(token, terms)
+    }
+
+    pub fn get_terms_and_conditions_status(
+        &self,
+        terms: TermsAndConditions,
+    ) -> Result<TermsAndConditionsStatus> {
+        let token = self.query_token()?;
+        let provider = self.provider.lock().unwrap();
+        provider.get_terms_and_conditions_status(token, terms)
     }
 
     fn get_token_if_valid(&self) -> Option<String> {

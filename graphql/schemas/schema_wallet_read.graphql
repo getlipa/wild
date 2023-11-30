@@ -13,6 +13,12 @@ directive @cached(
   refresh: Boolean! = false
 ) on QUERY
 
+type AcceptTermsResponse {
+  acceptDate: DateTime
+  acceptedTerms: Boolean!
+  serviceProvider: ServiceProviderEnum!
+}
+
 input AcceptWalletPkRequestInput {
   id: String!
 }
@@ -46,6 +52,16 @@ type CreateBackupResponse {
 }
 
 scalar DateTime
+
+input GetTermsConditionsStatusInputInput {
+  service_provider: ServiceProviderEnum
+}
+
+type GetTermsConditionsStatusResponse {
+  acceptDate: DateTime
+  acceptedTerms: Boolean!
+  serviceProvider: ServiceProviderEnum!
+}
 
 type MigrationBalanceResponse {
   balanceAmountSat: BigInteger!
@@ -129,6 +145,15 @@ input RequestSucceededInput {
   paidAmountMSat: BigInteger!
   paymentHash: String!
   paymentReceivedAt: DateTime!
+}
+
+enum ServiceProviderEnum {
+  LIPA_WALLET
+  POCKET_EXCHANGE
+}
+
+input ServiceProviderInputInput {
+  service_provider: String
 }
 
 type SessionPermit {
@@ -226,14 +251,6 @@ type WalletEmail {
 type WalletNode {
   nodePubKey: String
   walletPubKeyId: String
-}
-
-input accept_terms_args {
-  pubkey_id: uuid
-}
-
-input accept_terms_conditions_args {
-  service_provider: String
 }
 
 """
@@ -815,55 +832,7 @@ enum cursor_ordering {
 
 """mutation root"""
 type mutation_root {
-  """
-  execute VOLATILE function "accept_terms" which returns "accepted_terms_conditions"
-  """
-  accept_terms(
-    """
-    input parameters for function "accept_terms"
-    """
-    args: accept_terms_args!
-
-    """distinct select on columns"""
-    distinct_on: [accepted_terms_conditions_select_column!]
-
-    """limit the number of rows returned"""
-    limit: Int
-
-    """skip the first n rows. Use only with order_by"""
-    offset: Int
-
-    """sort the rows by one or more columns"""
-    order_by: [accepted_terms_conditions_order_by!]
-
-    """filter the rows returned"""
-    where: accepted_terms_conditions_bool_exp
-  ): accepted_terms_conditions
-
-  """
-  execute VOLATILE function "accept_terms_conditions" which returns "accepted_terms_conditions"
-  """
-  accept_terms_conditions(
-    """
-    input parameters for function "accept_terms_conditions"
-    """
-    args: accept_terms_conditions_args!
-
-    """distinct select on columns"""
-    distinct_on: [accepted_terms_conditions_select_column!]
-
-    """limit the number of rows returned"""
-    limit: Int
-
-    """skip the first n rows. Use only with order_by"""
-    offset: Int
-
-    """sort the rows by one or more columns"""
-    order_by: [accepted_terms_conditions_order_by!]
-
-    """filter the rows returned"""
-    where: accepted_terms_conditions_bool_exp
-  ): accepted_terms_conditions
+  accept_terms_conditions(args: ServiceProviderInputInput): AcceptTermsResponse
   accept_wallet_acl_by_pk(pk_columns: AcceptWalletPkRequestInput!): WalletAcl
   create_backup(encryptedBackup: String!, schemaName: String!, schemaVersion: String!): CreateBackupResponse
 
@@ -1080,6 +1049,7 @@ type query_root {
 
   """fetch data from the table: "channel_monitor" using primary key columns"""
   channel_monitor_by_pk(channelId: bytea!, timestamp: timestamptz!, walletId: uuid!): channel_monitor
+  consumer_service_version: String
 
   """
   fetch data from the table: "country"
@@ -1129,6 +1099,7 @@ type query_root {
     """ISO 4217"""
     currencyCode: String!
   ): currency
+  get_terms_conditions_status(args: GetTermsConditionsStatusInputInput): GetTermsConditionsStatusResponse
   migration_balance(nodePubKey: String): MigrationBalanceResponse
   notification_service_version: String
   payment_service_version: String

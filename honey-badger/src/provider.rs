@@ -1,10 +1,12 @@
 use crate::secrets::KeyPair;
 use crate::signing::sign;
 
+use crate::TermsAndConditionsStatus;
 use graphql::perro::{ensure, invalid_input, permanent_failure, runtime_error, OptionToError};
 use graphql::reqwest::blocking::Client;
+use graphql::schema::get_terms_and_conditions_status::ServiceProviderEnum;
 use graphql::schema::*;
-use graphql::{build_client, post_blocking};
+use graphql::{build_client, perro, post_blocking};
 use graphql::{errors::*, parse_from_rfc3339};
 use log::info;
 use std::time::SystemTime;
@@ -16,7 +18,7 @@ pub enum AuthLevel {
     Employee,
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum TermsAndConditions {
     Lipa,
     Pocket,
@@ -29,6 +31,30 @@ impl From<TermsAndConditions> for String {
             TermsAndConditions::Pocket => "POCKET_EXCHANGE",
         }
         .to_string()
+    }
+}
+
+impl From<TermsAndConditions> for ServiceProviderEnum {
+    fn from(value: TermsAndConditions) -> Self {
+        match value {
+            TermsAndConditions::Lipa => ServiceProviderEnum::LIPA_WALLET,
+            TermsAndConditions::Pocket => ServiceProviderEnum::POCKET_EXCHANGE,
+        }
+    }
+}
+
+impl TryInto<TermsAndConditions> for ServiceProviderEnum {
+    type Error = perro::Error<GraphQlRuntimeErrorCode>;
+
+    fn try_into(self) -> std::result::Result<TermsAndConditions, Self::Error> {
+        match self {
+            ServiceProviderEnum::LIPA_WALLET => Ok(TermsAndConditions::Lipa),
+            ServiceProviderEnum::POCKET_EXCHANGE => Ok(TermsAndConditions::Pocket),
+            ServiceProviderEnum::Other(v) => Err(runtime_error(
+                GraphQlRuntimeErrorCode::CorruptData,
+                format!("Unknown service provider: {:?}", v),
+            )),
+        }
     }
 }
 
@@ -111,6 +137,44 @@ impl AuthProvider {
         );
 
         Ok(())
+    }
+
+    pub fn get_terms_and_conditions_status(
+        &self,
+        access_token: String,
+        terms: TermsAndConditions,
+    ) -> Result<TermsAndConditionsStatus> {
+        info!("Requesting T&C status ({:?})...", terms);
+        if self.auth_level != AuthLevel::Pseudonymous {
+            return Err(invalid_input(
+                "Requesting T&C status not supported for auth levels other than Pseudonymous",
+            ));
+        }
+
+        let variables = get_terms_and_conditions_status::Variables {
+            service_provider: terms.into(),
+        };
+        let client = build_client(Some(&access_token))?;
+        let data =
+            post_blocking::<GetTermsAndConditionsStatus>(&client, &self.backend_url, variables)?;
+        match data.get_terms_conditions_status {
+            None => Err(runtime_error(
+                GraphQlRuntimeErrorCode::RemoteServiceUnavailable,
+                "Couldn't fetch T&C status.",
+            )),
+            Some(d) => {
+                let accept_date = match d.accept_date {
+                    None => None,
+                    Some(d) => Some(parse_from_rfc3339(&d)?),
+                };
+
+                Ok(TermsAndConditionsStatus {
+                    accept_date,
+                    accepted_terms: d.accepted_terms,
+                    terms_and_conditions: d.service_provider.try_into()?,
+                })
+            }
+        }
     }
 
     fn run_auth_flow(&mut self) -> Result<(String, String)> {
