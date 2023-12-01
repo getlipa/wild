@@ -47,10 +47,6 @@ jobs:
         with:
           toolchain: stable
           components: clippy
-      - name: Install Protoc
-        uses: arduino/setup-protoc@v1
-        with:
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
       - name: Checkout
         uses: actions/checkout@v3
         with:
@@ -78,10 +74,6 @@ jobs:
           override: true
       - name: Install unused dependency checker
         run: cargo install cargo-udeps --locked
-      - name: Install Protoc
-        uses: arduino/setup-protoc@v1
-        with:
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
       - name: Checkout
         uses: actions/checkout@v3
       - name: Run unused dependency checker
