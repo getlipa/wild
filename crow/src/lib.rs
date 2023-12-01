@@ -1,4 +1,4 @@
-use graphql::perro::permanent_failure;
+use graphql::perro::{ensure, permanent_failure};
 use graphql::schema::list_uncompleted_topups::{topup_status_enum, ListUncompletedTopupsTopup};
 use graphql::schema::{
     hide_topup, list_uncompleted_topups, register_notification_token, register_topup, HideTopup,
@@ -77,12 +77,13 @@ impl OfferManager {
         let access_token = self.auth.query_token()?;
         let client = build_client(Some(&access_token))?;
         let data = post_blocking::<RegisterTopup>(&client, &self.backend_url, variables)?;
-        if !matches!(
-            data.register_topup,
-            Some(register_topup::RegisterTopupRegisterTopup { .. })
-        ) {
-            return Err(permanent_failure("Backend rejected topup registration"));
-        }
+        ensure!(
+            matches!(
+                data.register_topup,
+                Some(register_topup::RegisterTopupRegisterTopup { .. })
+            ),
+            permanent_failure("Backend rejected topup registration")
+        );
         Ok(())
     }
 
@@ -100,17 +101,12 @@ impl OfferManager {
         let client = build_client(Some(&access_token))?;
         let data =
             post_blocking::<RegisterNotificationToken>(&client, &self.backend_url, variables)?;
-        if !matches!(
+        ensure!(matches!(
             data.register_notification_token,
             Some(
                 register_notification_token::RegisterNotificationTokenRegisterNotificationToken { .. }
             )
-        ) {
-            return Err(permanent_failure(
-                "Backend rejected notification token registration",
-            ));
-        }
-
+        ), permanent_failure("Backend rejected notification token registration"));
         Ok(())
     }
 
@@ -147,8 +143,7 @@ fn to_topup_info(topup: ListUncompletedTopupsTopup) -> graphql::Result<TopupInfo
     let topup_value_minor_units = (topup.amount_user_currency * 100_f64).round() as u64;
     let exchange_fee_rate_permyriad = (topup.exchange_fee_rate * 10_000_f64).round() as u16;
     let exchange_fee_minor_units = (topup.exchange_fee_user_currency * 100_f64).round() as u64;
-    let expires_at = topup.expires_at;
-    let expires_at = match expires_at {
+    let expires_at = match topup.expires_at {
         Some(e) => Some(parse_from_rfc3339(&e)?),
         None => None,
     };
@@ -160,19 +155,17 @@ fn to_topup_info(topup: ListUncompletedTopupsTopup) -> graphql::Result<TopupInfo
         topup_status_enum::REFUNDED => TopupStatus::REFUNDED,
         topup_status_enum::SETTLED => TopupStatus::SETTLED,
         topup_status_enum::REFUND_HIDDEN => {
-            return Err(runtime_error(
+            runtime_error!(
                 graphql::GraphQlRuntimeErrorCode::CorruptData,
-                "The backend returned the unexpected status: REFUND_HIDDEN".to_string(),
-            ))
+                "The backend returned the unexpected status: REFUND_HIDDEN",
+            );
         }
         topup_status_enum::Other(_) => {
-            return Err(runtime_error(
+            runtime_error!(
                 graphql::GraphQlRuntimeErrorCode::CorruptData,
-                format!(
-                    "The backend returned an unknown topup status: {:?}",
-                    topup.status
-                ),
-            ))
+                "The backend returned an unknown topup status: {:?}",
+                topup.status
+            );
         }
     };
 

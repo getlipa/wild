@@ -3,7 +3,7 @@ use crate::signing::sign;
 
 use crate::provider::{add_bitcoin_message_prefix, add_hex_prefix};
 use crate::{AuthLevel, TermsAndConditions};
-use graphql::perro::{invalid_input, permanent_failure, runtime_error, OptionToError};
+use graphql::perro::{ensure, invalid_input, permanent_failure, runtime_error, OptionToError};
 use graphql::reqwest::Client;
 use graphql::schema::*;
 use graphql::{build_async_client, post};
@@ -68,25 +68,25 @@ impl AuthProvider {
         terms: TermsAndConditions,
     ) -> Result<()> {
         info!("Accepting T&C ({:?})...", terms);
-        if self.auth_level != AuthLevel::Pseudonymous {
-            return Err(invalid_input(
-                "Accepting T&C not supported for auth levels other than Pseudonymous",
-            ));
-        }
+        ensure!(
+            self.auth_level == AuthLevel::Pseudonymous,
+            invalid_input("Accepting T&C not supported for auth levels other than Pseudonymous")
+        );
 
         let variables = accept_terms_and_conditions::Variables {
             service_provider: terms.into(),
         };
         let client = build_async_client(Some(&access_token))?;
         let data = post::<AcceptTermsAndConditions>(&client, &self.backend_url, variables).await?;
-        if !matches!(
-            data.accept_terms_conditions,
-            Some(accept_terms_and_conditions::AcceptTermsAndConditionsAcceptTermsConditions { .. })
-        ) {
-            return Err(permanent_failure(
-                "Backend rejected accepting Terms and Conditions",
-            ));
-        }
+        ensure!(
+            matches!(
+                data.accept_terms_conditions,
+                Some(
+                    accept_terms_and_conditions::AcceptTermsAndConditionsAcceptTermsConditions { .. }
+                )
+            ),
+            permanent_failure("Backend rejected accepting Terms and Conditions")
+        );
         Ok(())
     }
 
@@ -226,12 +226,10 @@ impl AuthProvider {
 
         if let Some(access_expires_at) = result.access_expires_at.as_ref() {
             let access_expires_at = parse_from_rfc3339(access_expires_at)?;
-            if SystemTime::now() > access_expires_at {
-                return Err(runtime_error(
-                    GraphQlRuntimeErrorCode::AccessExpired,
-                    "Access expired",
-                ));
-            }
+            ensure!(
+                SystemTime::now() <= access_expires_at,
+                runtime_error(GraphQlRuntimeErrorCode::AccessExpired, "Access expired")
+            );
         }
         info!("Owner: {:?}", result.owner_wallet_pub_key_id);
         Ok(result.owner_wallet_pub_key_id.clone())

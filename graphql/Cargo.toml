@@ -10,4 +10,4 @@ log = "0.4.17"
 reqwest = { version = "0.11", default-features = false, features = ["json", "blocking", "rustls-tls"]}
 serde = { version = "1.0", features = ["derive"]}
 
-perro = {git = "https://github.com/getlipa/perro", tag = "v1.1.0" }
+perro = {git = "https://github.com/getlipa/perro", tag = "v1.2.0" }

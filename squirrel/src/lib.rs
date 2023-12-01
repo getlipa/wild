@@ -1,5 +1,5 @@
 use graphql::errors::*;
-use graphql::perro::{runtime_error, MapToError, OptionToError};
+use graphql::perro::{MapToError, OptionToError};
 use graphql::schema::*;
 use graphql::{build_async_client, post};
 use honey_badger::asynchronous::Auth;
@@ -43,31 +43,26 @@ impl RemoteBackupClient {
         };
         let data = post::<RecoverBackup>(&client, &self.backend_url, variables).await?;
 
-        match data.recover_backup {
-            None => Err(runtime_error(
-                GraphQlRuntimeErrorCode::ObjectNotFound,
-                "No backup found with the provided schema name",
-            )),
-            Some(d) => {
-                let encrypted_backup =
-                    graphql_hex_decode(&d.encrypted_backup.ok_or_runtime_error(
-                        GraphQlRuntimeErrorCode::ObjectNotFound,
-                        "No backup found with the provided schema name",
-                    )?)
-                    .map_to_runtime_error(
-                        GraphQlRuntimeErrorCode::CorruptData,
-                        "Encrypted backup invalid hex",
-                    )?;
-                let schema_version = d.schema_version.ok_or_permanent_failure(
-                    "Backend returned encrypted backup but no schema version",
-                )?;
-                Ok(Backup {
-                    encrypted_backup,
-                    schema_name: schema_name.to_string(),
-                    schema_version,
-                })
-            }
-        }
+        let d = data.recover_backup.ok_or_runtime_error(
+            GraphQlRuntimeErrorCode::ObjectNotFound,
+            "No backup found with the provided schema name",
+        )?;
+        let encrypted_backup = graphql_hex_decode(&d.encrypted_backup.ok_or_runtime_error(
+            GraphQlRuntimeErrorCode::ObjectNotFound,
+            "No backup found with the provided schema name",
+        )?)
+        .map_to_runtime_error(
+            GraphQlRuntimeErrorCode::CorruptData,
+            "Encrypted backup invalid hex",
+        )?;
+        let schema_version = d
+            .schema_version
+            .ok_or_permanent_failure("Backend returned encrypted backup but no schema version")?;
+        Ok(Backup {
+            encrypted_backup,
+            schema_name: schema_name.to_string(),
+            schema_version,
+        })
     }
 }
 

@@ -67,15 +67,15 @@ pub fn post_blocking<Query: graphql_client::GraphQLQuery>(
         Err(e) => {
             if is_502_status(e.status()) || e.to_string().contains("502") {
                 // checking for the error containing 502 because reqwest is unexpectedly returning a decode error instead of status error
-                return Err(runtime_error(
+                runtime_error!(
                     GraphQlRuntimeErrorCode::RemoteServiceUnavailable,
                     "The remote server returned status 502",
-                ));
+                );
             }
-            return Err(runtime_error(
+            runtime_error!(
                 GraphQlRuntimeErrorCode::NetworkError,
                 "Failed to execute the query",
-            ));
+            );
         }
     };
     get_response_data(response, backend_url)
@@ -91,15 +91,15 @@ pub async fn post<Query: graphql_client::GraphQLQuery>(
         Err(e) => {
             if is_502_status(e.status()) || e.to_string().contains("502") {
                 // checking for the error containing 502 because reqwest is unexpectedly returning a decode error instead of status error
-                return Err(runtime_error(
+                runtime_error!(
                     GraphQlRuntimeErrorCode::RemoteServiceUnavailable,
                     "The remote server returned status 502",
-                ));
+                );
             }
-            return Err(runtime_error(
+            runtime_error!(
                 GraphQlRuntimeErrorCode::NetworkError,
                 "Failed to execute the query",
-            ));
+            );
         }
     };
     get_response_data(response, backend_url)
