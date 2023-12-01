@@ -31,8 +31,7 @@ pub struct Auth {
 
 #[derive(Debug, PartialEq)]
 pub struct TermsAndConditionsStatus {
-    pub accept_date: Option<SystemTime>,
-    pub accepted_terms: bool,
+    pub accepted_at: Option<SystemTime>,
     pub terms_and_conditions: TermsAndConditions,
 }
 
