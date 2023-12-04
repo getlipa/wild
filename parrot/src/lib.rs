@@ -4,7 +4,7 @@ use graphql::schema::report_payment_telemetry::{
 };
 use graphql::schema::{report_payment_telemetry, ReportPaymentTelemetry};
 use graphql::{build_async_client, post, ToRfc3339};
-use honey_badger::Auth;
+use honey_badger::asynchronous::Auth;
 use std::sync::Arc;
 use std::time::SystemTime;
 
@@ -193,7 +193,7 @@ impl AnalyticsClient {
             },
         };
 
-        let token = self.auth.query_token()?;
+        let token = self.auth.query_token().await?;
         let client = build_async_client(Some(&token))?;
         post::<ReportPaymentTelemetry>(&client, &self.backend_url, variables).await?;
 
