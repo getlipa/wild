@@ -50,10 +50,10 @@ impl TryInto<TermsAndConditions> for ServiceProviderEnum {
         match self {
             ServiceProviderEnum::LIPA_WALLET => Ok(TermsAndConditions::Lipa),
             ServiceProviderEnum::POCKET_EXCHANGE => Ok(TermsAndConditions::Pocket),
-            ServiceProviderEnum::Other(v) => Err(runtime_error(
+            ServiceProviderEnum::Other(v) => runtime_error!(
                 GraphQlRuntimeErrorCode::CorruptData,
-                format!("Unknown service provider: {v:?}"),
-            )),
+                "Unknown service provider: {v:?}",
+            ),
         }
     }
 }
@@ -145,11 +145,12 @@ impl AuthProvider {
         terms: TermsAndConditions,
     ) -> Result<TermsAndConditionsStatus> {
         info!("Requesting T&C status ({terms:?})...");
-        if self.auth_level != AuthLevel::Pseudonymous {
-            return Err(invalid_input(
-                "Requesting T&C status not supported for auth levels other than Pseudonymous",
-            ));
-        }
+        ensure!(
+            self.auth_level == AuthLevel::Pseudonymous,
+            invalid_input(
+                "Requesting T&C status not supported for auth levels other than Pseudonymous"
+            )
+        );
 
         let variables = get_terms_and_conditions_status::Variables {
             service_provider: terms.into(),
