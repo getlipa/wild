@@ -18,7 +18,7 @@ pub enum AuthLevel {
     Employee,
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum TermsAndConditions {
     Lipa,
     Pocket,
@@ -153,7 +153,7 @@ impl AuthProvider {
         );
 
         let variables = get_terms_and_conditions_status::Variables {
-            service_provider: terms.into(),
+            service_provider: terms.clone().into(),
         };
         let client = build_client(Some(&access_token))?;
         let data =
@@ -173,9 +173,19 @@ impl AuthProvider {
             None
         };
 
+        let terms_and_conditions: TermsAndConditions = terms_status.service_provider.try_into()?;
+
+        ensure!(
+            terms_and_conditions.clone() == terms,
+            runtime_error(
+                GraphQlRuntimeErrorCode::CorruptData,
+                format!("Requested status of T&C {terms:?} received {terms_and_conditions:?}")
+            )
+        );
+
         Ok(TermsAndConditionsStatus {
             accepted_at,
-            terms_and_conditions: terms_status.service_provider.try_into()?,
+            terms_and_conditions,
         })
     }
 
