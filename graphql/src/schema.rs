@@ -64,6 +64,14 @@ pub struct AcceptTermsAndConditions;
     query_path = "schemas/operations.graphql",
     response_derives = "Debug"
 )]
+pub struct GetTermsAndConditionsStatus;
+
+#[derive(GraphQLQuery)]
+#[graphql(
+    schema_path = "schemas/schema_wallet_read.graphql",
+    query_path = "schemas/operations.graphql",
+    response_derives = "Debug"
+)]
 pub struct RegisterTopup;
 
 #[derive(GraphQLQuery)]

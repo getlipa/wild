@@ -46,6 +46,14 @@ mutation AcceptTermsAndConditions($serviceProvider: String!) {
   }
 }
 
+query GetTermsAndConditionsStatus($serviceProvider: ServiceProviderEnum!) {
+ get_terms_conditions_status(args: {service_provider: $serviceProvider}) {
+   serviceProvider
+   acceptedTerms
+   acceptDate
+ }
+}
+
 # Employee
 
 query GetBusinessOwner($ownerWalletPubKeyId: uuid!) {
