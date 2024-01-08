@@ -15,4 +15,4 @@ bitcoin = { version = "0.30.1" }
 ctor = "0.2.0"
 rand = "0.8.5"
 simplelog = { version ="0.12.0", features = ["test"] }
-serial_test = "2.0.0"
+serial_test = "3.0.0"
