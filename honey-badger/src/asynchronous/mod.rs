@@ -65,10 +65,16 @@ impl Auth {
             .ok_or_permanent_failure("Newly refreshed token is not valid long enough")
     }
 
-    pub async fn accept_terms_and_conditions(&self, terms: TermsAndConditions) -> Result<()> {
+    pub async fn accept_terms_and_conditions(
+        &self,
+        terms: TermsAndConditions,
+        version: i64,
+    ) -> Result<()> {
         let token = self.query_token().await?;
         let provider = self.provider.lock().await;
-        provider.accept_terms_and_conditions(token, terms).await
+        provider
+            .accept_terms_and_conditions(token, terms, version)
+            .await
     }
 
     async fn get_token_if_valid(&self) -> Option<String> {

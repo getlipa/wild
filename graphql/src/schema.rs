@@ -1,7 +1,5 @@
 use graphql_client::GraphQLQuery;
 
-#[allow(non_camel_case_types)]
-type bytea = String;
 type DateTime = String;
 #[allow(non_camel_case_types)]
 type numeric = float8;
@@ -121,46 +119,6 @@ pub struct GetAllExchangeRates;
     response_derives = "Debug"
 )]
 pub struct ListCurrencyCodes;
-
-#[derive(GraphQLQuery)]
-#[graphql(
-    schema_path = "schemas/schema_wallet_read.graphql",
-    query_path = "schemas/operations.graphql",
-    response_derives = "Debug"
-)]
-pub struct InsertChannelMonitorOne;
-
-#[derive(GraphQLQuery)]
-#[graphql(
-    schema_path = "schemas/schema_wallet_read.graphql",
-    query_path = "schemas/operations.graphql",
-    response_derives = "Debug"
-)]
-pub struct GetChannelMonitorChannelIds;
-
-#[derive(GraphQLQuery)]
-#[graphql(
-    schema_path = "schemas/schema_wallet_read.graphql",
-    query_path = "schemas/operations.graphql",
-    response_derives = "Debug"
-)]
-pub struct GetLatestChannelMonitor;
-
-#[derive(GraphQLQuery)]
-#[graphql(
-    schema_path = "schemas/schema_wallet_read.graphql",
-    query_path = "schemas/operations.graphql",
-    response_derives = "Debug"
-)]
-pub struct InsertChannelManagerOne;
-
-#[derive(GraphQLQuery)]
-#[graphql(
-    schema_path = "schemas/schema_wallet_read.graphql",
-    query_path = "schemas/operations.graphql",
-    response_derives = "Debug"
-)]
-pub struct GetLatestChannelManager;
 
 #[allow(non_camel_case_types)]
 type bigint = u64;

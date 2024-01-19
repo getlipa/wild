@@ -113,6 +113,7 @@ impl AuthProvider {
         &self,
         access_token: String,
         terms: TermsAndConditions,
+        version: i64,
     ) -> Result<()> {
         info!("Accepting T&C ({:?})...", terms);
         ensure!(
@@ -122,6 +123,7 @@ impl AuthProvider {
 
         let variables = accept_terms_and_conditions::Variables {
             service_provider: terms.into(),
+            version,
         };
         let client = build_client(Some(&access_token))?;
         let data =
@@ -186,6 +188,7 @@ impl AuthProvider {
         Ok(TermsAndConditionsStatus {
             accepted_at,
             terms_and_conditions,
+            version: terms_status.version,
         })
     }
 

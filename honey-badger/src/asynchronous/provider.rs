@@ -66,6 +66,7 @@ impl AuthProvider {
         &self,
         access_token: String,
         terms: TermsAndConditions,
+        version: i64,
     ) -> Result<()> {
         info!("Accepting T&C ({:?})...", terms);
         ensure!(
@@ -75,6 +76,7 @@ impl AuthProvider {
 
         let variables = accept_terms_and_conditions::Variables {
             service_provider: terms.into(),
+            version,
         };
         let client = build_async_client(Some(&access_token))?;
         let data = post::<AcceptTermsAndConditions>(&client, &self.backend_url, variables).await?;

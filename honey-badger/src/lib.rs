@@ -33,6 +33,7 @@ pub struct Auth {
 pub struct TermsAndConditionsStatus {
     pub accepted_at: Option<SystemTime>,
     pub terms_and_conditions: TermsAndConditions,
+    pub version: i64,
 }
 
 impl Auth {
@@ -83,10 +84,14 @@ impl Auth {
             .ok_or_permanent_failure("Newly refreshed token is not valid long enough")
     }
 
-    pub fn accept_terms_and_conditions(&self, terms: TermsAndConditions) -> Result<()> {
+    pub fn accept_terms_and_conditions(
+        &self,
+        terms: TermsAndConditions,
+        version: i64,
+    ) -> Result<()> {
         let token = self.query_token()?;
         let provider = self.provider.lock().unwrap();
-        provider.accept_terms_and_conditions(token, terms)
+        provider.accept_terms_and_conditions(token, terms, version)
     }
 
     pub fn get_terms_and_conditions_status(
