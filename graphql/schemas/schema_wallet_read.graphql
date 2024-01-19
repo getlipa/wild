@@ -17,6 +17,7 @@ type AcceptTermsResponse {
   acceptDate: DateTime
   acceptedTerms: Boolean!
   serviceProvider: ServiceProviderEnum!
+  version: Int!
 }
 
 input AcceptWalletPkRequestInput {
@@ -61,6 +62,7 @@ type GetTermsConditionsStatusResponse {
   acceptDate: DateTime
   acceptedTerms: Boolean!
   serviceProvider: ServiceProviderEnum!
+  version: Int!
 }
 
 type MigrationBalanceResponse {
@@ -154,6 +156,7 @@ enum ServiceProviderEnum {
 
 input ServiceProviderInputInput {
   service_provider: String
+  version: Int
 }
 
 type SessionPermit {
@@ -251,6 +254,10 @@ type WalletEmail {
 type WalletNode {
   nodePubKey: String
   walletPubKeyId: String
+}
+
+input accept_terms_args {
+  pubkey_id: uuid
 }
 
 """
@@ -430,259 +437,6 @@ input bpchar_comparison_exp {
   _similar: bpchar
 }
 
-scalar bytea
-
-"""
-Boolean expression to compare columns of type "bytea". All fields are combined with logical 'AND'.
-"""
-input bytea_comparison_exp {
-  _eq: bytea
-  _gt: bytea
-  _gte: bytea
-  _in: [bytea!]
-  _is_null: Boolean
-  _lt: bytea
-  _lte: bytea
-  _neq: bytea
-  _nin: [bytea!]
-}
-
-"""
-columns and relationships of "channel_manager"
-"""
-type channel_manager {
-  encryptedChannelManager: bytea!
-  timestamp: timestamptz!
-  walletId: uuid!
-}
-
-"""
-Boolean expression to filter rows from the table "channel_manager". All fields are combined with a logical 'AND'.
-"""
-input channel_manager_bool_exp {
-  _and: [channel_manager_bool_exp!]
-  _not: channel_manager_bool_exp
-  _or: [channel_manager_bool_exp!]
-  encryptedChannelManager: bytea_comparison_exp
-  timestamp: timestamptz_comparison_exp
-  walletId: uuid_comparison_exp
-}
-
-"""
-unique or primary key constraints on table "channel_manager"
-"""
-enum channel_manager_constraint {
-  """
-  unique or primary key constraint on columns "timestamp", "walletId"
-  """
-  channel_manager_pkey
-}
-
-"""
-input type for inserting data into table "channel_manager"
-"""
-input channel_manager_insert_input {
-  encryptedChannelManager: bytea
-  timestamp: timestamptz
-}
-
-"""
-response of any mutation on the table "channel_manager"
-"""
-type channel_manager_mutation_response {
-  """number of rows affected by the mutation"""
-  affected_rows: Int!
-
-  """data from the rows affected by the mutation"""
-  returning: [channel_manager!]!
-}
-
-"""
-on_conflict condition type for table "channel_manager"
-"""
-input channel_manager_on_conflict {
-  constraint: channel_manager_constraint!
-  update_columns: [channel_manager_update_column!]! = []
-  where: channel_manager_bool_exp
-}
-
-"""Ordering options when selecting data from "channel_manager"."""
-input channel_manager_order_by {
-  encryptedChannelManager: order_by
-  timestamp: order_by
-  walletId: order_by
-}
-
-"""
-select columns of table "channel_manager"
-"""
-enum channel_manager_select_column {
-  """column name"""
-  encryptedChannelManager
-
-  """column name"""
-  timestamp
-
-  """column name"""
-  walletId
-}
-
-"""
-Streaming cursor of the table "channel_manager"
-"""
-input channel_manager_stream_cursor_input {
-  """Stream column input with initial value"""
-  initial_value: channel_manager_stream_cursor_value_input!
-
-  """cursor ordering"""
-  ordering: cursor_ordering
-}
-
-"""Initial value of the column from where the streaming should start"""
-input channel_manager_stream_cursor_value_input {
-  encryptedChannelManager: bytea
-  timestamp: timestamptz
-  walletId: uuid
-}
-
-"""
-placeholder for update columns of table "channel_manager" (current role has no relevant permissions)
-"""
-enum channel_manager_update_column {
-  """placeholder (do not use)"""
-  _PLACEHOLDER
-}
-
-"""
-columns and relationships of "channel_monitor"
-"""
-type channel_monitor {
-  channelId: bytea!
-  encryptedChannelMonitor: bytea!
-  encryptedDeviceInfo: bytea!
-  installationId: String!
-  timestamp: timestamptz!
-  walletId: uuid!
-}
-
-"""
-Boolean expression to filter rows from the table "channel_monitor". All fields are combined with a logical 'AND'.
-"""
-input channel_monitor_bool_exp {
-  _and: [channel_monitor_bool_exp!]
-  _not: channel_monitor_bool_exp
-  _or: [channel_monitor_bool_exp!]
-  channelId: bytea_comparison_exp
-  encryptedChannelMonitor: bytea_comparison_exp
-  encryptedDeviceInfo: bytea_comparison_exp
-  installationId: String_comparison_exp
-  timestamp: timestamptz_comparison_exp
-  walletId: uuid_comparison_exp
-}
-
-"""
-unique or primary key constraints on table "channel_monitor"
-"""
-enum channel_monitor_constraint {
-  """
-  unique or primary key constraint on columns "timestamp", "channelId", "walletId"
-  """
-  channel_monitor_pkey
-}
-
-"""
-input type for inserting data into table "channel_monitor"
-"""
-input channel_monitor_insert_input {
-  channelId: bytea
-  encryptedChannelMonitor: bytea
-  encryptedDeviceInfo: bytea
-  installationId: String
-  timestamp: timestamptz
-}
-
-"""
-response of any mutation on the table "channel_monitor"
-"""
-type channel_monitor_mutation_response {
-  """number of rows affected by the mutation"""
-  affected_rows: Int!
-
-  """data from the rows affected by the mutation"""
-  returning: [channel_monitor!]!
-}
-
-"""
-on_conflict condition type for table "channel_monitor"
-"""
-input channel_monitor_on_conflict {
-  constraint: channel_monitor_constraint!
-  update_columns: [channel_monitor_update_column!]! = []
-  where: channel_monitor_bool_exp
-}
-
-"""Ordering options when selecting data from "channel_monitor"."""
-input channel_monitor_order_by {
-  channelId: order_by
-  encryptedChannelMonitor: order_by
-  encryptedDeviceInfo: order_by
-  installationId: order_by
-  timestamp: order_by
-  walletId: order_by
-}
-
-"""
-select columns of table "channel_monitor"
-"""
-enum channel_monitor_select_column {
-  """column name"""
-  channelId
-
-  """column name"""
-  encryptedChannelMonitor
-
-  """column name"""
-  encryptedDeviceInfo
-
-  """column name"""
-  installationId
-
-  """column name"""
-  timestamp
-
-  """column name"""
-  walletId
-}
-
-"""
-Streaming cursor of the table "channel_monitor"
-"""
-input channel_monitor_stream_cursor_input {
-  """Stream column input with initial value"""
-  initial_value: channel_monitor_stream_cursor_value_input!
-
-  """cursor ordering"""
-  ordering: cursor_ordering
-}
-
-"""Initial value of the column from where the streaming should start"""
-input channel_monitor_stream_cursor_value_input {
-  channelId: bytea
-  encryptedChannelMonitor: bytea
-  encryptedDeviceInfo: bytea
-  installationId: String
-  timestamp: timestamptz
-  walletId: uuid
-}
-
-"""
-placeholder for update columns of table "channel_monitor" (current role has no relevant permissions)
-"""
-enum channel_monitor_update_column {
-  """placeholder (do not use)"""
-  _PLACEHOLDER
-}
-
 """
 columns and relationships of "country"
 """
@@ -832,35 +586,33 @@ enum cursor_ordering {
 
 """mutation root"""
 type mutation_root {
+  """
+  execute VOLATILE function "accept_terms" which returns "accepted_terms_conditions"
+  """
+  accept_terms(
+    """
+    input parameters for function "accept_terms"
+    """
+    args: accept_terms_args!
+
+    """distinct select on columns"""
+    distinct_on: [accepted_terms_conditions_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [accepted_terms_conditions_order_by!]
+
+    """filter the rows returned"""
+    where: accepted_terms_conditions_bool_exp
+  ): accepted_terms_conditions
   accept_terms_conditions(args: ServiceProviderInputInput): AcceptTermsResponse
   accept_wallet_acl_by_pk(pk_columns: AcceptWalletPkRequestInput!): WalletAcl
   create_backup(encryptedBackup: String!, schemaName: String!, schemaVersion: String!): CreateBackupResponse
-
-  """
-  delete data from the table: "channel_manager"
-  """
-  delete_channel_manager(
-    """filter the rows which have to be deleted"""
-    where: channel_manager_bool_exp!
-  ): channel_manager_mutation_response
-
-  """
-  delete single row from the table: "channel_manager"
-  """
-  delete_channel_manager_by_pk(timestamp: timestamptz!, walletId: uuid!): channel_manager
-
-  """
-  delete data from the table: "channel_monitor"
-  """
-  delete_channel_monitor(
-    """filter the rows which have to be deleted"""
-    where: channel_monitor_bool_exp!
-  ): channel_monitor_mutation_response
-
-  """
-  delete single row from the table: "channel_monitor"
-  """
-  delete_channel_monitor_by_pk(channelId: bytea!, timestamp: timestamptz!, walletId: uuid!): channel_monitor
   hide_topup(id: String!): String
 
   """
@@ -884,50 +636,6 @@ type mutation_root {
     """upsert condition"""
     on_conflict: accepted_terms_conditions_on_conflict
   ): accepted_terms_conditions
-
-  """
-  insert data into the table: "channel_manager"
-  """
-  insert_channel_manager(
-    """the rows to be inserted"""
-    objects: [channel_manager_insert_input!]!
-
-    """upsert condition"""
-    on_conflict: channel_manager_on_conflict
-  ): channel_manager_mutation_response
-
-  """
-  insert a single row into the table: "channel_manager"
-  """
-  insert_channel_manager_one(
-    """the row to be inserted"""
-    object: channel_manager_insert_input!
-
-    """upsert condition"""
-    on_conflict: channel_manager_on_conflict
-  ): channel_manager
-
-  """
-  insert data into the table: "channel_monitor"
-  """
-  insert_channel_monitor(
-    """the rows to be inserted"""
-    objects: [channel_monitor_insert_input!]!
-
-    """upsert condition"""
-    on_conflict: channel_monitor_on_conflict
-  ): channel_monitor_mutation_response
-
-  """
-  insert a single row into the table: "channel_monitor"
-  """
-  insert_channel_monitor_one(
-    """the row to be inserted"""
-    object: channel_monitor_insert_input!
-
-    """upsert condition"""
-    on_conflict: channel_monitor_on_conflict
-  ): channel_monitor
   migrate_funds(base16InvoiceSignature: String, invoice: String, ldkNodePubKey: String): Boolean!
   recover_backup(schemaName: String!): RecoverBackupResponse
   refresh_session(refreshToken: String!): TokenContainer
@@ -1003,52 +711,6 @@ type query_root {
   ): [accepted_terms_conditions!]!
   auth_challenge: String
   backup_service_version: String
-
-  """
-  fetch data from the table: "channel_manager"
-  """
-  channel_manager(
-    """distinct select on columns"""
-    distinct_on: [channel_manager_select_column!]
-
-    """limit the number of rows returned"""
-    limit: Int
-
-    """skip the first n rows. Use only with order_by"""
-    offset: Int
-
-    """sort the rows by one or more columns"""
-    order_by: [channel_manager_order_by!]
-
-    """filter the rows returned"""
-    where: channel_manager_bool_exp
-  ): [channel_manager!]!
-
-  """fetch data from the table: "channel_manager" using primary key columns"""
-  channel_manager_by_pk(timestamp: timestamptz!, walletId: uuid!): channel_manager
-
-  """
-  fetch data from the table: "channel_monitor"
-  """
-  channel_monitor(
-    """distinct select on columns"""
-    distinct_on: [channel_monitor_select_column!]
-
-    """limit the number of rows returned"""
-    limit: Int
-
-    """skip the first n rows. Use only with order_by"""
-    offset: Int
-
-    """sort the rows by one or more columns"""
-    order_by: [channel_monitor_order_by!]
-
-    """filter the rows returned"""
-    where: channel_monitor_bool_exp
-  ): [channel_monitor!]!
-
-  """fetch data from the table: "channel_monitor" using primary key columns"""
-  channel_monitor_by_pk(channelId: bytea!, timestamp: timestamptz!, walletId: uuid!): channel_monitor
   consumer_service_version: String
 
   """
@@ -1226,80 +888,6 @@ type subscription_root {
     """filter the rows returned"""
     where: accepted_terms_conditions_bool_exp
   ): [accepted_terms_conditions!]!
-
-  """
-  fetch data from the table: "channel_manager"
-  """
-  channel_manager(
-    """distinct select on columns"""
-    distinct_on: [channel_manager_select_column!]
-
-    """limit the number of rows returned"""
-    limit: Int
-
-    """skip the first n rows. Use only with order_by"""
-    offset: Int
-
-    """sort the rows by one or more columns"""
-    order_by: [channel_manager_order_by!]
-
-    """filter the rows returned"""
-    where: channel_manager_bool_exp
-  ): [channel_manager!]!
-
-  """fetch data from the table: "channel_manager" using primary key columns"""
-  channel_manager_by_pk(timestamp: timestamptz!, walletId: uuid!): channel_manager
-
-  """
-  fetch data from the table in a streaming manner: "channel_manager"
-  """
-  channel_manager_stream(
-    """maximum number of rows returned in a single batch"""
-    batch_size: Int!
-
-    """cursor to stream the results returned by the query"""
-    cursor: [channel_manager_stream_cursor_input]!
-
-    """filter the rows returned"""
-    where: channel_manager_bool_exp
-  ): [channel_manager!]!
-
-  """
-  fetch data from the table: "channel_monitor"
-  """
-  channel_monitor(
-    """distinct select on columns"""
-    distinct_on: [channel_monitor_select_column!]
-
-    """limit the number of rows returned"""
-    limit: Int
-
-    """skip the first n rows. Use only with order_by"""
-    offset: Int
-
-    """sort the rows by one or more columns"""
-    order_by: [channel_monitor_order_by!]
-
-    """filter the rows returned"""
-    where: channel_monitor_bool_exp
-  ): [channel_monitor!]!
-
-  """fetch data from the table: "channel_monitor" using primary key columns"""
-  channel_monitor_by_pk(channelId: bytea!, timestamp: timestamptz!, walletId: uuid!): channel_monitor
-
-  """
-  fetch data from the table in a streaming manner: "channel_monitor"
-  """
-  channel_monitor_stream(
-    """maximum number of rows returned in a single batch"""
-    batch_size: Int!
-
-    """cursor to stream the results returned by the query"""
-    cursor: [channel_monitor_stream_cursor_input]!
-
-    """filter the rows returned"""
-    where: channel_monitor_bool_exp
-  ): [channel_monitor!]!
 
   """
   fetch data from the table: "country"

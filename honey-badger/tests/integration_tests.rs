@@ -186,8 +186,14 @@ fn test_accept_terms_and_conditions() {
         auth_keypair,
     )
     .unwrap();
-    auth.accept_terms_and_conditions(TermsAndConditions::Lipa)
+    auth.accept_terms_and_conditions(TermsAndConditions::Lipa, 1)
         .unwrap();
+    assert_eq!(
+        auth.get_terms_and_conditions_status(TermsAndConditions::Lipa)
+            .unwrap()
+            .version,
+        1
+    );
 
     let (wallet_keypair, auth_keypair) = generate_keys();
     let auth = Auth::new(
@@ -197,7 +203,7 @@ fn test_accept_terms_and_conditions() {
         auth_keypair,
     )
     .unwrap();
-    let result = auth.accept_terms_and_conditions(TermsAndConditions::Lipa);
+    let result = auth.accept_terms_and_conditions(TermsAndConditions::Lipa, 2);
     assert!(matches!(result, Err(Error::InvalidInput { .. })));
 
     let (wallet_keypair, auth_keypair) = generate_keys();
@@ -208,8 +214,14 @@ fn test_accept_terms_and_conditions() {
         auth_keypair,
     )
     .unwrap();
-    auth.accept_terms_and_conditions(TermsAndConditions::Pocket)
+    auth.accept_terms_and_conditions(TermsAndConditions::Pocket, 3)
         .unwrap();
+    assert_eq!(
+        auth.get_terms_and_conditions_status(TermsAndConditions::Pocket)
+            .unwrap()
+            .version,
+        3
+    );
 
     let (wallet_keypair, auth_keypair) = generate_keys();
     let auth = Auth::new(
@@ -219,7 +231,7 @@ fn test_accept_terms_and_conditions() {
         auth_keypair,
     )
     .unwrap();
-    let result = auth.accept_terms_and_conditions(TermsAndConditions::Pocket);
+    let result = auth.accept_terms_and_conditions(TermsAndConditions::Pocket, 4);
     assert!(matches!(result, Err(Error::InvalidInput { .. })));
 }
 

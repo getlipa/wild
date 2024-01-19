@@ -38,11 +38,12 @@ mutation UnlockWallet($challenge: String!, $challengeSignature: String!, $prepar
   }
 }
 
-mutation AcceptTermsAndConditions($serviceProvider: String!) {
-  accept_terms_conditions(args: {service_provider: $serviceProvider}) {
+mutation AcceptTermsAndConditions($serviceProvider: String!, $version: Int!) {
+  accept_terms_conditions(args: {service_provider: $serviceProvider, version: $version}) {
     serviceProvider
     acceptedTerms
     acceptDate
+    version
   }
 }
 
@@ -51,6 +52,7 @@ query GetTermsAndConditionsStatus($serviceProvider: ServiceProviderEnum!) {
    serviceProvider
    acceptedTerms
    acceptDate
+   version
  }
 }
 
@@ -84,45 +86,6 @@ query GetAllExchangeRates {
 query ListCurrencyCodes {
   currency(order_by: {currencyCode: asc}) {
     currencyCode
-  }
-}
-
-# [mole] Channel state persistence
-
-mutation InsertChannelMonitorOne($channelId: bytea!, $encryptedChannelMonitor: bytea!, $installationId: String!, $encryptedDeviceInfo: bytea!) {
-  insert_channel_monitor_one(object: {
-        channelId: $channelId,
-        encryptedChannelMonitor: $encryptedChannelMonitor,
-        installationId: $installationId,
-        encryptedDeviceInfo: $encryptedDeviceInfo,
-    }) {
-      channelId
-  }
-}
-
-query GetChannelMonitorChannelIds {
-  channel_monitor(distinct_on: channelId, order_by: {channelId: desc}) {
-    channelId
-  }
-}
-
-query GetLatestChannelMonitor($channelId: bytea!) {
-  channel_monitor(order_by: {timestamp: desc}, where: {channelId: {_eq: $channelId}}, limit: 1) {
-    encryptedChannelMonitor
-  }
-}
-
-mutation InsertChannelManagerOne($encryptedChannelManager: bytea!) {
-  insert_channel_manager_one(object: {
-        encryptedChannelManager: $encryptedChannelManager,
-    }) {
-      walletId
-  }
-}
-
-query GetLatestChannelManager {
-  channel_manager(order_by: {timestamp: desc}, limit: 1) {
-      encryptedChannelManager,
   }
 }
 

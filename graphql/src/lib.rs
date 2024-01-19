@@ -123,7 +123,7 @@ fn is_502_status(status: Option<StatusCode>) -> bool {
 fn get_response_data<Data>(response: Response<Data>, backend_url: &str) -> Result<Data> {
     if let Some(errors) = response.errors {
         let error = errors
-            .get(0)
+            .first()
             .ok_or_permanent_failure("Unexpected backend response: errors empty")?;
         let code = error
             .extensions
