@@ -5,6 +5,7 @@ members = [
     "graphql",
     "honey-badger",
     "squirrel",
+    "squirrel-mock",
     "parrot",
 ]
 
