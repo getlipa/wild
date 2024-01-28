@@ -11,14 +11,6 @@ that you can use in your HTTP header as a bearer token.
 The chameleon can change its color very quickly, it knows everything about exchange rates.
 So it will fetch fiat exchange rates for you.
 
-## Mole
-The mole lives within channels and knows everything about them.    
-Therefore, it is the perfect agent to deal with a users channel states.  
-It stores a users *channel manager* and *channel monitors* in encrypted form in the GraphQL backend
-and always returns the latest state of them when requested.
-
-*Caution: The library does not encrypt the data itself. It expects to retrieve the data in an already encrypted form.*
-
 ## Crow
 Crows are known for their love to collect stuff.
 The library allows to register for and list withdraw collect offers (e.g. Lightning Address).
