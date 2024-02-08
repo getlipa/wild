@@ -71,8 +71,18 @@ impl Auth {
             .ok_or_permanent_failure("Newly refreshed token is not valid long enough")
     }
 
-    pub fn get_wallet_pubkey_id(&self) -> Option<String> {
-        self.provider.lock().unwrap().get_wallet_pubkey_id()
+    pub fn get_wallet_pubkey_id(&self) -> Result<String> {
+        match self.provider.lock().unwrap().get_wallet_pubkey_id() {
+            Some(id) => Ok(id),
+            None => {
+                self.query_token()?;
+                self.provider
+                    .lock()
+                    .unwrap()
+                    .get_wallet_pubkey_id()
+                    .ok_or_permanent_failure("Failed to get pubkey id for an authenticated wallet")
+            }
+        }
     }
 
     // Not exposed in UDL, used in tests.
