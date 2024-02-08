@@ -142,6 +142,17 @@ fn get_response_data<Data>(response: Response<Data>, backend_url: &str) -> Resul
     }
 }
 
+pub trait ToRfc3339 {
+    fn to_rfc3339(&self) -> String;
+}
+
+impl ToRfc3339 for SystemTime {
+    fn to_rfc3339(&self) -> String {
+        let datetime: DateTime<Utc> = DateTime::from(*self);
+        datetime.to_rfc3339()
+    }
+}
+
 fn map_error_code(code: &str) -> Error {
     const AUTH_EXCEPTION_CODE: &str = "authentication-exception";
     const INVALID_JWT_ERROR_CODE: &str = "invalid-jwt";
@@ -201,16 +212,5 @@ mod tests {
             .unwrap()
             .as_secs();
         assert_eq!(timestamp, 1695314361 + 2 * 3600);
-    }
-}
-
-pub trait ToRfc3339 {
-    fn to_rfc3339(&self) -> String;
-}
-
-impl ToRfc3339 for SystemTime {
-    fn to_rfc3339(&self) -> String {
-        let datetime: DateTime<Utc> = DateTime::from(*self);
-        datetime.to_rfc3339()
     }
 }
