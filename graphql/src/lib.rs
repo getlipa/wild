@@ -59,7 +59,7 @@ pub fn build_async_client(access_token: Option<&str>) -> Result<reqwest::Client>
 
 pub fn post_blocking<Query: graphql_client::GraphQLQuery>(
     client: &Client,
-    backend_url: &String,
+    backend_url: &str,
     variables: Query::Variables,
 ) -> Result<Query::ResponseData> {
     let response = match post_graphql_blocking::<Query, _>(client, backend_url, variables) {
@@ -83,7 +83,7 @@ pub fn post_blocking<Query: graphql_client::GraphQLQuery>(
 
 pub async fn post<Query: graphql_client::GraphQLQuery>(
     client: &reqwest::Client,
-    backend_url: &String,
+    backend_url: &str,
     variables: Query::Variables,
 ) -> Result<Query::ResponseData> {
     let response = match post_graphql::<Query, _>(client, backend_url, variables).await {
