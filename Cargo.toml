@@ -4,8 +4,9 @@ members = [
     "crow",
     "graphql",
     "honey-badger",
-    "squirrel",
     "parrot",
+    "pigeon",
+    "squirrel",
 ]
 
 resolver = "2"

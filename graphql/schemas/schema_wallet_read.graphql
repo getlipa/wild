@@ -1,3 +1,6 @@
+# Updated at 2024-02-23_11:14:36
+# Hasura Role: WALLET_READ
+
 schema {
   query: query_root
   mutation: mutation_root
@@ -63,6 +66,11 @@ type GetTermsConditionsStatusResponse {
   acceptedTerms: Boolean!
   serviceProvider: ServiceProviderEnum!
   version: Int!
+}
+
+type LightningAddressResponse {
+  address: String!
+  assignedAt: DateTime!
 }
 
 type MigrationBalanceResponse {
@@ -584,6 +592,59 @@ enum cursor_ordering {
   DESC
 }
 
+"""
+columns and relationships of "lightning_address"
+"""
+type lightning_address {
+  address: String!
+  assignedAt: timestamptz!
+}
+
+"""
+Boolean expression to filter rows from the table "lightning_address". All fields are combined with a logical 'AND'.
+"""
+input lightning_address_bool_exp {
+  _and: [lightning_address_bool_exp!]
+  _not: lightning_address_bool_exp
+  _or: [lightning_address_bool_exp!]
+  address: String_comparison_exp
+  assignedAt: timestamptz_comparison_exp
+}
+
+"""Ordering options when selecting data from "lightning_address"."""
+input lightning_address_order_by {
+  address: order_by
+  assignedAt: order_by
+}
+
+"""
+select columns of table "lightning_address"
+"""
+enum lightning_address_select_column {
+  """column name"""
+  address
+
+  """column name"""
+  assignedAt
+}
+
+"""
+Streaming cursor of the table "lightning_address"
+"""
+input lightning_address_stream_cursor_input {
+  """Stream column input with initial value"""
+  initial_value: lightning_address_stream_cursor_value_input!
+
+  """cursor ordering"""
+  ordering: cursor_ordering
+}
+
+"""Initial value of the column from where the streaming should start"""
+input lightning_address_stream_cursor_value_input {
+  address: String
+  assignedAt: timestamptz
+}
+
 """mutation root"""
 type mutation_root {
   """
@@ -612,6 +673,7 @@ type mutation_root {
   ): accepted_terms_conditions
   accept_terms_conditions(args: ServiceProviderInputInput): AcceptTermsResponse
   accept_wallet_acl_by_pk(pk_columns: AcceptWalletPkRequestInput!): WalletAcl
+  assign_lightning_address: LightningAddressResponse
   create_backup(encryptedBackup: String!, schemaName: String!, schemaVersion: String!): CreateBackupResponse
   hide_topup(id: String!): String
 
@@ -762,6 +824,27 @@ type query_root {
     currencyCode: String!
   ): currency
   get_terms_conditions_status(args: GetTermsConditionsStatusInputInput): GetTermsConditionsStatusResponse
+
+  """
+  fetch data from the table: "lightning_address"
+  """
+  lightning_address(
+    """distinct select on columns"""
+    distinct_on: [lightning_address_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [lightning_address_order_by!]
+
+    """filter the rows returned"""
+    where: lightning_address_bool_exp
+  ): [lightning_address!]!
+  lightning_address_service_version: String
   migration_balance(nodePubKey: String): MigrationBalanceResponse
   notification_service_version: String
   payment_service_version: String
@@ -965,6 +1048,40 @@ type subscription_root {
     """filter the rows returned"""
     where: currency_bool_exp
   ): [currency!]!
+
+  """
+  fetch data from the table: "lightning_address"
+  """
+  lightning_address(
+    """distinct select on columns"""
+    distinct_on: [lightning_address_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [lightning_address_order_by!]
+
+    """filter the rows returned"""
+    where: lightning_address_bool_exp
+  ): [lightning_address!]!
+
+  """
+  fetch data from the table in a streaming manner: "lightning_address"
+  """
+  lightning_address_stream(
+    """maximum number of rows returned in a single batch"""
+    batch_size: Int!
+
+    """cursor to stream the results returned by the query"""
+    cursor: [lightning_address_stream_cursor_input]!
+
+    """filter the rows returned"""
+    where: lightning_address_bool_exp
+  ): [lightning_address!]!
 
   """
   fetch data from the table: "token"
