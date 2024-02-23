@@ -157,3 +157,10 @@ mutation ReportPaymentTelemetry($telemetryId: String!, $events: PaymentTelemetry
     payFailed
   }
 }
+
+mutation AssignLightningAddress {
+  assign_lightning_address {
+	address
+	assignedAt
+  }
+}

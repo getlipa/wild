@@ -1,9 +1,20 @@
+use graphql::perro::OptionToError;
+use graphql::schema::{assign_lightning_address, AssignLightningAddress};
 use graphql::{build_async_client, post};
 use honey_badger::asynchronous::Auth;
 
-pub async fn assign_lightning_address(_backend_url: &str, auth: &Auth) -> graphql::Result<String> {
+pub async fn assign_lightning_address(backend_url: &str, auth: &Auth) -> graphql::Result<String> {
     let token = auth.query_token().await?;
-    let _client = build_async_client(Some(&token))?;
-    //    post::<ReportPaymentTelemetry>(&client, backend_url, graphql_client::GraphQLQuery::Variables {}).await?;
-    Ok("satoshi@lipa.swiss".to_string())
+    let client = build_async_client(Some(&token))?;
+    let data = post::<AssignLightningAddress>(
+        &client,
+        backend_url,
+        assign_lightning_address::Variables {},
+    )
+    .await?;
+    let address = data
+        .assign_lightning_address
+        .ok_or_permanent_failure("Unexpected backend response: empty")?
+        .address;
+    Ok(address)
 }
