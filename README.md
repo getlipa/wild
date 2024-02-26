@@ -22,3 +22,7 @@ The library allows backups of local data to be created.
 ## Parrot
 This feathered companion, similar to its namesakes, repeats what he hears and as such delivers, 
 important analytics data about payments to the backend. This data is pseudonymized and used to improve our services.
+
+## Pigeon
+Pigeons excel in orientation and have a remarkable ability to navigate addresses.
+The library allows to register Lightning addresses.
