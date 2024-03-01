@@ -146,7 +146,8 @@ fn test_employee_with_no_owner_auth() {
     )
     .unwrap();
 
-    let _id = auth.get_wallet_pubkey_id().unwrap();
+    let result = auth.get_wallet_pubkey_id();
+    assert!(matches!(result, Err(Error::InvalidInput { .. })));
 
     let result = auth.query_token();
     assert!(matches!(result, Err(Error::InvalidInput { .. })));
