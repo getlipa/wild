@@ -72,7 +72,8 @@ impl Auth {
     }
 
     pub fn get_wallet_pubkey_id(&self) -> Result<String> {
-        match self.provider.lock().unwrap().get_wallet_pubkey_id() {
+        let pubkey_id = self.provider.lock().unwrap().get_wallet_pubkey_id();
+        match pubkey_id {
             Some(id) => Ok(id),
             None => {
                 self.query_token()?;
