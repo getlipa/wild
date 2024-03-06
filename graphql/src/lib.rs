@@ -15,6 +15,7 @@ use reqwest::header::{HeaderValue, AUTHORIZATION};
 use reqwest::StatusCode;
 use std::time::{Duration, SystemTime};
 
+#[derive(PartialEq, Eq, Debug, Clone)]
 pub struct ExchangeRate {
     pub currency_code: String,
     pub sats_per_unit: u32,
