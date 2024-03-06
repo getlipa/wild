@@ -13,7 +13,7 @@ use graphql::perro::runtime_error;
 pub use isocountry::CountryCode;
 pub use isolanguage_1::LanguageCode;
 
-#[derive(Debug, PartialEq)]
+#[derive(PartialEq, Eq, Debug, Clone)]
 pub enum TopupStatus {
     READY,
     FAILED,
@@ -47,6 +47,7 @@ pub enum TopupError {
     PermanentFailure { code: PermanentFailureCode },
 }
 
+#[derive(PartialEq, Eq, Debug, Clone)]
 pub struct TopupInfo {
     pub id: String,
     pub status: TopupStatus,
