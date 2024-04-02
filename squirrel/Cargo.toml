@@ -11,7 +11,7 @@ honey-badger = { path = "../honey-badger" }
 bdk = { version = "0.29.0", features = ["keys-bip39"] }
 
 [dev-dependencies]
-bitcoin = { version = "0.29.2" }
+bitcoin = { version = "0.31.2" }
 ctor = "0.2.0"
 rand = "0.8.5"
 simplelog = { version ="0.12.0", features = ["test"] }
