@@ -10,4 +10,4 @@ isocountry = { version = "0.3.2" }
 isolanguage-1 = { version = "0.2.2" }
 
 [dev-dependencies]
-bitcoin = { version = "0.30.1" }
+bitcoin = { version = "0.32.0" }
