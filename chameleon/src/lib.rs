@@ -2,7 +2,7 @@ use graphql::perro::OptionToError;
 use graphql::schema::*;
 use graphql::{build_client, post_blocking};
 use graphql::{errors::*, parse_from_rfc3339};
-use honey_badger::Auth;
+use honeybadger::Auth;
 use std::sync::Arc;
 use std::time::SystemTime;
 

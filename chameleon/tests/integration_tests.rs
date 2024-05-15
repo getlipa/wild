@@ -1,8 +1,8 @@
 use bitcoin::Network;
 use chameleon::ExchangeRateProvider;
 use graphql::perro::Error;
-use honey_badger::secrets::{derive_keys, generate_keypair, generate_mnemonic};
-use honey_badger::{Auth, AuthLevel};
+use honeybadger::secrets::{derive_keys, generate_keypair, generate_mnemonic};
+use honeybadger::{Auth, AuthLevel};
 use simplelog::TestLogger;
 use std::env;
 use std::sync::{Arc, Once};

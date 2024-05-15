@@ -1,5 +1,5 @@
 [package]
-name = "honey-badger"
+name = "honeybadger"
 version = "1.0.1"
 edition = "2021"
 

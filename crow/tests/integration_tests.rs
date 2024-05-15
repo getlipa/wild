@@ -1,7 +1,7 @@
 use bitcoin::Network;
 use crow::OfferManager;
-use honey_badger::secrets::{derive_keys, generate_keypair, generate_mnemonic};
-use honey_badger::{Auth, AuthLevel};
+use honeybadger::secrets::{derive_keys, generate_keypair, generate_mnemonic};
+use honeybadger::{Auth, AuthLevel};
 use isocountry::CountryCode;
 use isolanguage_1::LanguageCode;
 use std::env;

@@ -5,7 +5,7 @@ use graphql::schema::{
     ListUncompletedTopups, RegisterNotificationToken, RegisterTopup,
 };
 use graphql::{build_client, parse_from_rfc3339, post_blocking, ExchangeRate};
-use honey_badger::Auth;
+use honeybadger::Auth;
 use std::sync::Arc;
 use std::time::SystemTime;
 

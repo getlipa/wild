@@ -5,7 +5,7 @@ edition = "2021"
 
 [dependencies]
 graphql = { path = "../graphql" }
-honey-badger = { path = "../honey-badger" }
+honeybadger = { path = "../honeybadger" }
 
 [dev-dependencies]
 bitcoin = { version = "0.30.1" }

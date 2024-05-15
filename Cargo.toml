@@ -3,7 +3,7 @@ members = [
     "chameleon",
     "crow",
     "graphql",
-    "honey-badger",
+    "honeybadger",
     "parrot",
     "pigeon",
     "squirrel",

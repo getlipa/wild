@@ -1,9 +1,9 @@
 use bdk::bitcoin::Network;
 use graphql::perro::Error::RuntimeError;
 use graphql::GraphQlRuntimeErrorCode;
-use honey_badger::asynchronous::Auth;
-use honey_badger::secrets::{derive_keys, generate_keypair, generate_mnemonic};
-use honey_badger::AuthLevel;
+use honeybadger::asynchronous::Auth;
+use honeybadger::secrets::{derive_keys, generate_keypair, generate_mnemonic};
+use honeybadger::AuthLevel;
 use rand::random;
 use simplelog::TestLogger;
 use squirrel::{Backup, RemoteBackupClient};
