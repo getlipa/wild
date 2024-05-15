@@ -2,7 +2,7 @@ use graphql::errors::*;
 use graphql::perro::{MapToError, OptionToError};
 use graphql::schema::*;
 use graphql::{build_async_client, post};
-use honey_badger::asynchronous::Auth;
+use honeybadger::asynchronous::Auth;
 use std::sync::Arc;
 
 #[derive(Debug, PartialEq)]

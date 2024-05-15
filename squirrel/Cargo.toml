@@ -7,7 +7,7 @@ edition = "2021"
 hex = "0.4.3"
 
 graphql = { path = "../graphql" }
-honey-badger = { path = "../honey-badger" }
+honeybadger = { path = "../honeybadger" }
 bdk = { version = "0.29.0", features = ["keys-bip39"] }
 
 [dev-dependencies]

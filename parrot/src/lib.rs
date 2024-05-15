@@ -4,7 +4,7 @@ use graphql::schema::report_payment_telemetry::{
 };
 use graphql::schema::{report_payment_telemetry, ReportPaymentTelemetry};
 use graphql::{build_async_client, post, ToRfc3339};
-use honey_badger::asynchronous::Auth;
+use honeybadger::asynchronous::Auth;
 use std::sync::Arc;
 use std::time::SystemTime;
 

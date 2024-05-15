@@ -5,7 +5,7 @@ edition = "2021"
 
 [dependencies]
 graphql = { path = "../graphql" }
-honey-badger = { path = "../honey-badger" }
+honeybadger = { path = "../honeybadger" }
 isocountry = { version = "0.3.2" }
 isolanguage-1 = { version = "0.2.2" }
 

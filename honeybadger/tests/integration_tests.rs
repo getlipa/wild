@@ -1,7 +1,7 @@
 use bdk::bitcoin::Network;
 use graphql::errors::{Error, GraphQlRuntimeErrorCode};
-use honey_badger::secrets::{derive_keys, generate_keypair, generate_mnemonic, KeyPair};
-use honey_badger::{Auth, AuthLevel, TermsAndConditions};
+use honeybadger::secrets::{derive_keys, generate_keypair, generate_mnemonic, KeyPair};
+use honeybadger::{Auth, AuthLevel, TermsAndConditions};
 use simplelog::TestLogger;
 use std::env;
 use std::sync::Once;

@@ -1,7 +1,7 @@
 use graphql::perro::OptionToError;
 use graphql::schema::{assign_lightning_address, AssignLightningAddress};
 use graphql::{build_async_client, post};
-use honey_badger::asynchronous::Auth;
+use honeybadger::asynchronous::Auth;
 
 pub async fn assign_lightning_address(backend_url: &str, auth: &Auth) -> graphql::Result<String> {
     let token = auth.query_token().await?;
