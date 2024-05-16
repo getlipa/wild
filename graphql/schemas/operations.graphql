@@ -164,3 +164,7 @@ mutation AssignLightningAddress {
 	assignedAt
   }
 }
+
+mutation SubmitLnurlPayInvoice($id: String!, $invoice: String!) {
+  submit_lnurl_pay_invoice(id: $id, invoice: $invoice)
+}

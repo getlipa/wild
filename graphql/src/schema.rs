@@ -7,6 +7,7 @@ type numeric = float8;
 type timestamptz = String;
 #[allow(non_camel_case_types)]
 type uuid = String;
+type Void = ();
 
 #[derive(GraphQLQuery)]
 #[graphql(
@@ -181,3 +182,11 @@ pub struct ReportPaymentTelemetry;
     response_derives = "Debug"
 )]
 pub struct AssignLightningAddress;
+
+#[derive(GraphQLQuery)]
+#[graphql(
+    schema_path = "schemas/schema_wallet_read.graphql",
+    query_path = "schemas/operations.graphql",
+    response_derives = "Debug"
+)]
+pub struct SubmitLnurlPayInvoice;

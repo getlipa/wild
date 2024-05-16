@@ -1,6 +1,3 @@
-# Updated at 2024-02-23_11:14:36
-# Hasura Role: WALLET_READ
-
 schema {
   query: query_root
   mutation: mutation_root
@@ -15,6 +12,19 @@ directive @cached(
   """refresh the cache entry"""
   refresh: Boolean! = false
 ) on QUERY
+
+input AcceptTermsConditionsV2Input {
+  fingerprint: String!
+  service: Service
+  version: Int!
+}
+
+type AcceptTermsConditionsV2Response {
+  acceptDate: DateTime
+  accepted: Boolean!
+  service: Service!
+  version: Int!
+}
 
 type AcceptTermsResponse {
   acceptDate: DateTime
@@ -65,6 +75,17 @@ type GetTermsConditionsStatusResponse {
   acceptDate: DateTime
   acceptedTerms: Boolean!
   serviceProvider: ServiceProviderEnum!
+  version: Int!
+}
+
+input GetTermsConditionsStatusV2Input {
+  service: Service
+}
+
+type GetTermsConditionsStatusV2Response {
+  acceptDate: DateTime
+  accepted: Boolean!
+  service: Service!
   version: Int!
 }
 
@@ -157,6 +178,11 @@ input RequestSucceededInput {
   paymentReceivedAt: DateTime!
 }
 
+enum Service {
+  LIPA_WALLET
+  POCKET_EXCHANGE
+}
+
 enum ServiceProviderEnum {
   LIPA_WALLET
   POCKET_EXCHANGE
@@ -238,6 +264,8 @@ type TokenContainer {
   refreshToken: String
 }
 
+scalar Void
+
 type WalletAcl {
   accessExpiresAt: DateTime
   displayName: String
@@ -254,16 +282,6 @@ type WalletConfiguration {
   pubKeyId: String
 }
 
-type WalletEmail {
-  email: String
-  walletPubKeyId: String
-}
-
-type WalletNode {
-  nodePubKey: String
-  walletPubKeyId: String
-}
-
 input accept_terms_args {
   pubkey_id: uuid
 }
@@ -273,8 +291,8 @@ columns and relationships of "accepted_terms_conditions"
 """
 type accepted_terms_conditions {
   acceptDate: timestamptz
-  acceptedTerms: Boolean!
-  serviceProvider: service_provider_enum!
+  accepted: Boolean!
+  service: service_enum!
 }
 
 """
@@ -285,8 +303,8 @@ input accepted_terms_conditions_bool_exp {
   _not: accepted_terms_conditions_bool_exp
   _or: [accepted_terms_conditions_bool_exp!]
   acceptDate: timestamptz_comparison_exp
-  acceptedTerms: Boolean_comparison_exp
-  serviceProvider: service_provider_enum_comparison_exp
+  accepted: Boolean_comparison_exp
+  service: service_enum_comparison_exp
 }
 
 """
@@ -294,7 +312,7 @@ unique or primary key constraints on table "accepted_terms_conditions"
 """
 enum accepted_terms_conditions_constraint {
   """
-  unique or primary key constraint on columns "serviceProvider", "id"
+  unique or primary key constraint on columns "id", "service"
   """
   accepted_terms_conditions_pkey
 }
@@ -303,7 +321,7 @@ enum accepted_terms_conditions_constraint {
 input type for inserting data into table "accepted_terms_conditions"
 """
 input accepted_terms_conditions_insert_input {
-  serviceProvider: service_provider_enum
+  service: service_enum
 }
 
 """
@@ -329,8 +347,8 @@ input accepted_terms_conditions_on_conflict {
 """Ordering options when selecting data from "accepted_terms_conditions"."""
 input accepted_terms_conditions_order_by {
   acceptDate: order_by
-  acceptedTerms: order_by
-  serviceProvider: order_by
+  accepted: order_by
+  service: order_by
 }
 
 """
@@ -341,10 +359,10 @@ enum accepted_terms_conditions_select_column {
   acceptDate
 
   """column name"""
-  acceptedTerms
+  accepted
 
   """column name"""
-  serviceProvider
+  service
 }
 
 """
@@ -361,8 +379,8 @@ input accepted_terms_conditions_stream_cursor_input {
 """Initial value of the column from where the streaming should start"""
 input accepted_terms_conditions_stream_cursor_value_input {
   acceptDate: timestamptz
-  acceptedTerms: Boolean
-  serviceProvider: service_provider_enum
+  accepted: Boolean
+  service: service_enum
 }
 
 """
@@ -672,6 +690,7 @@ type mutation_root {
     where: accepted_terms_conditions_bool_exp
   ): accepted_terms_conditions
   accept_terms_conditions(args: ServiceProviderInputInput): AcceptTermsResponse
+  accept_terms_conditions_v2(args: AcceptTermsConditionsV2Input): AcceptTermsConditionsV2Response
   accept_wallet_acl_by_pk(pk_columns: AcceptWalletPkRequestInput!): WalletAcl
   assign_lightning_address: LightningAddressResponse
   create_backup(encryptedBackup: String!, schemaName: String!, schemaVersion: String!): CreateBackupResponse
@@ -702,8 +721,6 @@ type mutation_root {
   recover_backup(schemaName: String!): RecoverBackupResponse
   refresh_session(refreshToken: String!): TokenContainer
   refresh_session_v2(refreshToken: String!): SessionPermit
-  register_email(email: String): WalletEmail
-  register_node(nodePubKey: String): WalletNode
   register_notification_token(language: String!, notificationToken: String!): Token
   register_topup(email: String, orderId: String!): RegisterTopupResponse
   report_payment_telemetry(events: PaymentTelemetryEventsInput, telemetryId: String!): ReportPaymentTelemetryResponse
@@ -711,6 +728,7 @@ type mutation_root {
   start_prepared_session_v2(challenge: String!, challengeSignature: String!, challengeSignatureType: ChallengeSignatureType, preparedPermissionToken: String!): SessionPermit
   start_session(authPubKey: String!, challenge: String!, challengeSignature: String!, challengeSignatureType: ChallengeSignatureType, signedAuthPubKey: String!, walletPubKey: String!): TokenContainer
   start_session_v2(authPubKey: String!, challenge: String!, challengeSignature: String!, challengeSignatureType: ChallengeSignatureType, signedAuthPubKey: String!, walletPubKey: String!): SessionPermit
+  submit_lnurl_pay_invoice(id: String!, invoice: String!): Void
 }
 
 scalar numeric
@@ -824,6 +842,7 @@ type query_root {
     currencyCode: String!
   ): currency
   get_terms_conditions_status(args: GetTermsConditionsStatusInputInput): GetTermsConditionsStatusResponse
+  get_terms_conditions_status_v2(args: GetTermsConditionsStatusV2Input): GetTermsConditionsStatusV2Response
 
   """
   fetch data from the table: "lightning_address"
@@ -921,20 +940,20 @@ type query_root {
   wallet_acl_by_pk(id: uuid!): wallet_acl
 }
 
-enum service_provider_enum {
+enum service_enum {
   LIPA_WALLET
   POCKET_EXCHANGE
 }
 
 """
-Boolean expression to compare columns of type "service_provider_enum". All fields are combined with logical 'AND'.
+Boolean expression to compare columns of type "service_enum". All fields are combined with logical 'AND'.
 """
-input service_provider_enum_comparison_exp {
-  _eq: service_provider_enum
-  _in: [service_provider_enum!]
+input service_enum_comparison_exp {
+  _eq: service_enum
+  _in: [service_enum!]
   _is_null: Boolean
-  _neq: service_provider_enum
-  _nin: [service_provider_enum!]
+  _neq: service_enum
+  _nin: [service_enum!]
 }
 
 type subscription_root {
