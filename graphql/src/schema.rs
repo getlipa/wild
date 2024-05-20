@@ -190,3 +190,27 @@ pub struct AssignLightningAddress;
     response_derives = "Debug"
 )]
 pub struct SubmitLnurlPayInvoice;
+
+#[derive(GraphQLQuery)]
+#[graphql(
+    schema_path = "schemas/schema_wallet_read.graphql",
+    query_path = "schemas/operations.graphql",
+    response_derives = "Debug"
+)]
+pub struct RequestPhoneNumberVerification;
+
+#[derive(GraphQLQuery)]
+#[graphql(
+    schema_path = "schemas/schema_wallet_read.graphql",
+    query_path = "schemas/operations.graphql",
+    response_derives = "Debug"
+)]
+pub struct VerifyPhoneNumber;
+
+#[derive(GraphQLQuery)]
+#[graphql(
+    schema_path = "schemas/schema_wallet_read.graphql",
+    query_path = "schemas/operations.graphql",
+    response_derives = "Debug"
+)]
+pub struct VerifiedPhoneNumber;

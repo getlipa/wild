@@ -25,4 +25,4 @@ important analytics data about payments to the backend. This data is pseudonymiz
 
 ## Pigeon
 Pigeons excel in orientation and have a remarkable ability to navigate addresses.
-The library allows to register Lightning addresses and processing incoming payments sent to a Lightning address.
+The library allows to register Lightning addresses and phone numbers as well as processing incoming payments sent to an address or number.
