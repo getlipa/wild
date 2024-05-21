@@ -48,12 +48,12 @@ mutation AcceptTermsAndConditions($serviceProvider: String!, $version: Int!) {
 }
 
 query GetTermsAndConditionsStatus($serviceProvider: ServiceProviderEnum!) {
- get_terms_conditions_status(args: {service_provider: $serviceProvider}) {
-   serviceProvider
-   acceptedTerms
-   acceptDate
-   version
- }
+  get_terms_conditions_status(args: {service_provider: $serviceProvider}) {
+    serviceProvider
+    acceptedTerms
+    acceptDate
+    version
+  }
 }
 
 # Employee
@@ -130,7 +130,7 @@ query ListUncompletedTopups {
 
 query MigrationBalance($nodePubKey: String) {
   migration_balance(nodePubKey: $nodePubKey) {
-	balanceAmountSat
+    balanceAmountSat
   }
 }
 
@@ -160,11 +160,25 @@ mutation ReportPaymentTelemetry($telemetryId: String!, $events: PaymentTelemetry
 
 mutation AssignLightningAddress {
   assign_lightning_address {
-	address
-	assignedAt
+    address
+    assignedAt
   }
 }
 
 mutation SubmitLnurlPayInvoice($id: String!, $invoice: String!) {
   submit_lnurl_pay_invoice(id: $id, invoice: $invoice)
+}
+
+mutation RequestPhoneNumberVerification($number: String!) {
+  request_phone_number_verification(number: $number)
+}
+
+mutation VerifyPhoneNumber($number: String!, $otp: String!) {
+  verify_phone_number(number: $number, otp: $otp)
+}
+
+query VerifiedPhoneNumber {
+  verified_phone_number {
+    phoneNumber
+  }
 }

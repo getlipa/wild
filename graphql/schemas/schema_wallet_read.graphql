@@ -721,6 +721,16 @@ type mutation_root {
   recover_backup(schemaName: String!): RecoverBackupResponse
   refresh_session(refreshToken: String!): TokenContainer
   refresh_session_v2(refreshToken: String!): SessionPermit
+  """
+  Allows registering even if a previous registration is verified or pending verification.
+  """
+  request_phone_number_verification(number: String!): Void
+
+  """
+  If a distinct phone number was previously registered, expire it in case this
+  new one gets verified.
+  """
+  verify_phone_number(number: String!, otp: String!): Void
   register_notification_token(language: String!, notificationToken: String!): Token
   register_topup(email: String, orderId: String!): RegisterTopupResponse
   report_payment_telemetry(events: PaymentTelemetryEventsInput, telemetryId: String!): ReportPaymentTelemetryResponse
@@ -815,6 +825,12 @@ type query_root {
 
   """fetch data from the table: "country" using primary key columns"""
   country_by_pk(countryCode: String!): country
+
+  """
+  Returns the PhoneNumberResponse corresponding to the VERIFIED registration.
+  If there's no VERIFIED registration, it returns null.
+  """
+  verified_phone_number: PhoneNumberResponse
 
   """
   fetch data from the table: "currency"
@@ -938,6 +954,10 @@ type query_root {
 
   """fetch data from the table: "wallet_acl" using primary key columns"""
   wallet_acl_by_pk(id: uuid!): wallet_acl
+}
+
+type PhoneNumberResponse {
+  phoneNumber: String!
 }
 
 enum service_enum {

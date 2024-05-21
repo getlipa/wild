@@ -2,7 +2,7 @@ use bitcoin::Network;
 use honeybadger::asynchronous::Auth;
 use honeybadger::secrets::{derive_keys, generate_keypair, generate_mnemonic};
 use honeybadger::AuthLevel;
-use pigeon::assign_lightning_address;
+use pigeon::{assign_lightning_address, submit_lnurl_pay_invoice};
 use simplelog::TestLogger;
 use std::env;
 use std::sync::Once;
@@ -31,6 +31,19 @@ async fn test_assigning_lightning_address() {
         .await
         .unwrap();
     assert_ne!(address, address_for_another_user);
+}
+
+#[tokio::test]
+async fn test_submit_lnurl_pay_invoice() {
+    let (backend_url, auth) = build_client();
+    submit_lnurl_pay_invoice(
+        &backend_url,
+        &auth,
+        "5fab1a65-3486-4dfd-bba8-dad2c1a1b98e".to_string(),
+        "invoice".to_string(),
+    )
+    .await
+    .unwrap();
 }
 
 fn build_client() -> (String, Auth) {
