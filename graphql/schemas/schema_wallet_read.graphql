@@ -738,7 +738,7 @@ type mutation_root {
   start_prepared_session_v2(challenge: String!, challengeSignature: String!, challengeSignatureType: ChallengeSignatureType, preparedPermissionToken: String!): SessionPermit
   start_session(authPubKey: String!, challenge: String!, challengeSignature: String!, challengeSignatureType: ChallengeSignatureType, signedAuthPubKey: String!, walletPubKey: String!): TokenContainer
   start_session_v2(authPubKey: String!, challenge: String!, challengeSignature: String!, challengeSignatureType: ChallengeSignatureType, signedAuthPubKey: String!, walletPubKey: String!): SessionPermit
-  submit_lnurl_pay_invoice(id: String!, invoice: String!): Void
+  submit_lnurl_pay_invoice(id: String!, invoice: String): Void
 }
 
 scalar numeric

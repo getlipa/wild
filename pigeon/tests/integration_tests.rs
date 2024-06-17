@@ -40,7 +40,16 @@ async fn test_submit_lnurl_pay_invoice() {
         &backend_url,
         &auth,
         "5fab1a65-3486-4dfd-bba8-dad2c1a1b98e".to_string(),
-        "invoice".to_string(),
+        Some("invoice".to_string()),
+    )
+    .await
+    .unwrap();
+
+    submit_lnurl_pay_invoice(
+        &backend_url,
+        &auth,
+        "44872a5a-8be9-4a27-a80f-2ec66ff1f5b6".to_string(),
+        None,
     )
     .await
     .unwrap();
