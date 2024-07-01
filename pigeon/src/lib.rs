@@ -31,7 +31,7 @@ pub async fn submit_lnurl_pay_invoice(
     backend_url: &str,
     auth: &Auth,
     id: String,
-    invoice: String,
+    invoice: Option<String>,
 ) -> graphql::Result<()> {
     let token = auth.query_token().await?;
     let client = build_async_client(Some(&token))?;
