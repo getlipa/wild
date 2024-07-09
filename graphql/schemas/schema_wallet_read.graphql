@@ -264,6 +264,10 @@ type TokenContainer {
   refreshToken: String
 }
 
+type VerifiedPhoneNumberResponse {
+  encryptedPhoneNumber: String!
+}
+
 scalar Void
 
 type WalletAcl {
@@ -721,24 +725,16 @@ type mutation_root {
   recover_backup(schemaName: String!): RecoverBackupResponse
   refresh_session(refreshToken: String!): TokenContainer
   refresh_session_v2(refreshToken: String!): SessionPermit
-  """
-  Allows registering even if a previous registration is verified or pending verification.
-  """
-  request_phone_number_verification(number: String!): Void
-
-  """
-  If a distinct phone number was previously registered, expire it in case this
-  new one gets verified.
-  """
-  verify_phone_number(number: String!, otp: String!): Void
   register_notification_token(language: String!, notificationToken: String!): Token
   register_topup(email: String, orderId: String!): RegisterTopupResponse
   report_payment_telemetry(events: PaymentTelemetryEventsInput, telemetryId: String!): ReportPaymentTelemetryResponse
+  request_phone_number_verification(encryptedNumber: String!, number: String!): Void
   start_prepared_session(challenge: String!, challengeSignature: String!, challengeSignatureType: ChallengeSignatureType, preparedPermissionToken: String!): TokenContainer
   start_prepared_session_v2(challenge: String!, challengeSignature: String!, challengeSignatureType: ChallengeSignatureType, preparedPermissionToken: String!): SessionPermit
   start_session(authPubKey: String!, challenge: String!, challengeSignature: String!, challengeSignatureType: ChallengeSignatureType, signedAuthPubKey: String!, walletPubKey: String!): TokenContainer
   start_session_v2(authPubKey: String!, challenge: String!, challengeSignature: String!, challengeSignatureType: ChallengeSignatureType, signedAuthPubKey: String!, walletPubKey: String!): SessionPermit
   submit_lnurl_pay_invoice(id: String!, invoice: String): Void
+  verify_phone_number(number: String!, otp: String!): Void
 }
 
 scalar numeric
@@ -827,12 +823,6 @@ type query_root {
   country_by_pk(countryCode: String!): country
 
   """
-  Returns the PhoneNumberResponse corresponding to the VERIFIED registration.
-  If there's no VERIFIED registration, it returns null.
-  """
-  verified_phone_number: PhoneNumberResponse
-
-  """
   fetch data from the table: "currency"
   """
   currency(
@@ -884,6 +874,7 @@ type query_root {
   notification_service_version: String
   payment_service_version: String
   prepare_wallet_session(challenge: String!, ownerPubKeyId: String!, signature: String!): String
+  sms_service_version: String
 
   """
   fetch data from the table: "token"
@@ -931,6 +922,7 @@ type query_root {
   """fetch data from the table: "topup" using primary key columns"""
   topup_by_pk(id: uuid!): topup
   topup_service_version: String
+  verified_phone_number: VerifiedPhoneNumberResponse
 
   """
   fetch data from the table: "wallet_acl"
@@ -954,10 +946,6 @@ type query_root {
 
   """fetch data from the table: "wallet_acl" using primary key columns"""
   wallet_acl_by_pk(id: uuid!): wallet_acl
-}
-
-type PhoneNumberResponse {
-  phoneNumber: String!
 }
 
 enum service_enum {

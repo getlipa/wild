@@ -169,8 +169,8 @@ mutation SubmitLnurlPayInvoice($id: String!, $invoice: String) {
   submit_lnurl_pay_invoice(id: $id, invoice: $invoice)
 }
 
-mutation RequestPhoneNumberVerification($number: String!) {
-  request_phone_number_verification(number: $number)
+mutation RequestPhoneNumberVerification($encryptedNumber: String!, $number: String!) {
+  request_phone_number_verification(encryptedNumber: $encryptedNumber, number: $number)
 }
 
 mutation VerifyPhoneNumber($number: String!, $otp: String!) {
@@ -179,6 +179,6 @@ mutation VerifyPhoneNumber($number: String!, $otp: String!) {
 
 query VerifiedPhoneNumber {
   verified_phone_number {
-    phoneNumber
+    encryptedPhoneNumber
   }
 }

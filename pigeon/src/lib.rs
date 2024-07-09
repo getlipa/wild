@@ -48,13 +48,17 @@ pub async fn request_phone_number_verification(
     backend_url: &str,
     auth: &Auth,
     number: String,
+    encrypted_number: String,
 ) -> graphql::Result<()> {
     let token = auth.query_token().await?;
     let client = build_async_client(Some(&token))?;
     let _data = post::<RequestPhoneNumberVerification>(
         &client,
         backend_url,
-        request_phone_number_verification::Variables { number },
+        request_phone_number_verification::Variables {
+            encrypted_number,
+            number,
+        },
     )
     .await?;
     Ok(())
@@ -86,5 +90,5 @@ pub async fn query_verified_phone_number(
     let data =
         post::<VerifiedPhoneNumber>(&client, backend_url, verified_phone_number::Variables {})
             .await?;
-    Ok(data.verified_phone_number.map(|n| n.phone_number))
+    Ok(data.verified_phone_number.map(|n| n.encrypted_phone_number))
 }
