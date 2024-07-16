@@ -1,9 +1,10 @@
 use graphql::perro::OptionToError;
-use graphql::schema::VerifiedPhoneNumber;
+use graphql::schema::report_feature_flag::ToggleableFeature;
 use graphql::schema::{
     assign_lightning_address, submit_lnurl_pay_invoice, AssignLightningAddress,
     SubmitLnurlPayInvoice,
 };
+use graphql::schema::{report_feature_flag, ReportFeatureFlag, VerifiedPhoneNumber};
 use graphql::schema::{
     request_phone_number_verification, verified_phone_number, verify_phone_number,
     RequestPhoneNumberVerification, VerifyPhoneNumber,
@@ -91,4 +92,23 @@ pub async fn query_verified_phone_number(
         post::<VerifiedPhoneNumber>(&client, backend_url, verified_phone_number::Variables {})
             .await?;
     Ok(data.verified_phone_number.map(|n| n.encrypted_phone_number))
+}
+pub async fn report_feature_flag(
+    backend_url: &str,
+    auth: &Auth,
+    toggleable_feature: ToggleableFeature,
+    enabled: bool,
+) -> graphql::Result<()> {
+    let token = auth.query_token().await?;
+    let client = build_async_client(Some(&token))?;
+    post::<ReportFeatureFlag>(
+        &client,
+        backend_url,
+        report_feature_flag::Variables {
+            toggleable_feature,
+            enabled,
+        },
+    )
+    .await?;
+    Ok(())
 }

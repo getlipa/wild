@@ -182,3 +182,7 @@ query VerifiedPhoneNumber {
     encryptedPhoneNumber
   }
 }
+
+mutation ReportFeatureFlag($toggleable_feature: ToggleableFeature!, $enabled: Boolean!) {
+  report_feature_flag(toggleable_feature: $toggleable_feature, enabled: $enabled)
+}

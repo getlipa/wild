@@ -1,8 +1,9 @@
 use bitcoin::Network;
+use graphql::schema::report_feature_flag::ToggleableFeature;
 use honeybadger::asynchronous::Auth;
 use honeybadger::secrets::{derive_keys, generate_keypair, generate_mnemonic};
 use honeybadger::AuthLevel;
-use pigeon::{assign_lightning_address, submit_lnurl_pay_invoice};
+use pigeon::{assign_lightning_address, report_feature_flag, submit_lnurl_pay_invoice};
 use simplelog::TestLogger;
 use std::env;
 use std::sync::Once;
@@ -53,6 +54,37 @@ async fn test_submit_lnurl_pay_invoice() {
     )
     .await
     .unwrap();
+}
+
+#[ignore] // TODO: enable when report mutation is available
+#[tokio::test]
+async fn test_report_feature_flag() {
+    let (backend_url, auth) = build_client();
+    report_feature_flag(
+        &backend_url,
+        &auth,
+        ToggleableFeature::LIGHTNING_ADDRESS,
+        true,
+    )
+    .await
+    .unwrap();
+
+    report_feature_flag(
+        &backend_url,
+        &auth,
+        ToggleableFeature::LIGHTNING_ADDRESS,
+        false,
+    )
+    .await
+    .unwrap();
+
+    report_feature_flag(&backend_url, &auth, ToggleableFeature::PHONE_NUMBER, true)
+        .await
+        .unwrap();
+
+    report_feature_flag(&backend_url, &auth, ToggleableFeature::PHONE_NUMBER, false)
+        .await
+        .unwrap();
 }
 
 fn build_client() -> (String, Auth) {

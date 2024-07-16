@@ -667,6 +667,11 @@ input lightning_address_stream_cursor_value_input {
   assignedAt: timestamptz
 }
 
+enum ToggleableFeature {
+  LIGHTNING_ADDRESS
+  PHONE_NUMBER
+}
+
 """mutation root"""
 type mutation_root {
   """
@@ -728,6 +733,7 @@ type mutation_root {
   register_notification_token(language: String!, notificationToken: String!): Token
   register_topup(email: String, orderId: String!): RegisterTopupResponse
   report_payment_telemetry(events: PaymentTelemetryEventsInput, telemetryId: String!): ReportPaymentTelemetryResponse
+  report_feature_flag(toggleable_feature: ToggleableFeature!, enabled: Boolean!): Void
   request_phone_number_verification(encryptedNumber: String!, number: String!): Void
   start_prepared_session(challenge: String!, challengeSignature: String!, challengeSignatureType: ChallengeSignatureType, preparedPermissionToken: String!): TokenContainer
   start_prepared_session_v2(challenge: String!, challengeSignature: String!, challengeSignatureType: ChallengeSignatureType, preparedPermissionToken: String!): SessionPermit
