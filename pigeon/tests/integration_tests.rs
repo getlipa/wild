@@ -2,7 +2,10 @@ use bitcoin::Network;
 use honeybadger::asynchronous::Auth;
 use honeybadger::secrets::{derive_keys, generate_keypair, generate_mnemonic};
 use honeybadger::AuthLevel;
-use pigeon::{assign_lightning_address, submit_lnurl_pay_invoice};
+use pigeon::{
+    assign_lightning_address, disable_lightning_addresses, enable_lightning_addresses,
+    submit_lnurl_pay_invoice,
+};
 use simplelog::TestLogger;
 use std::env;
 use std::sync::Once;
@@ -31,6 +34,37 @@ async fn test_assigning_lightning_address() {
         .await
         .unwrap();
     assert_ne!(address, address_for_another_user);
+}
+
+#[tokio::test]
+async fn test_disable_enable_lightning_addresses() {
+    let (backend_url, auth) = build_client();
+    let address = assign_lightning_address(&backend_url, &auth).await.unwrap();
+    println!("Assigned address is: {address}");
+    disable_lightning_addresses(&backend_url, &auth, vec![address.clone()])
+        .await
+        .unwrap();
+    // Disabling again.
+    disable_lightning_addresses(&backend_url, &auth, vec![address.clone()])
+        .await
+        .unwrap();
+
+    enable_lightning_addresses(&backend_url, &auth, vec![address.clone()])
+        .await
+        .unwrap();
+    // Enabling again.
+    enable_lightning_addresses(&backend_url, &auth, vec![address.clone()])
+        .await
+        .unwrap();
+
+    let (backend_url, another_auth) = build_client();
+    // Disabling/enabling an address of another user.
+    disable_lightning_addresses(&backend_url, &another_auth, vec![address.clone()])
+        .await
+        .unwrap_err();
+    enable_lightning_addresses(&backend_url, &another_auth, vec![address.clone()])
+        .await
+        .unwrap_err();
 }
 
 #[tokio::test]

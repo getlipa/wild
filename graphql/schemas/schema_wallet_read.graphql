@@ -698,6 +698,8 @@ type mutation_root {
   accept_wallet_acl_by_pk(pk_columns: AcceptWalletPkRequestInput!): WalletAcl
   assign_lightning_address: LightningAddressResponse
   create_backup(encryptedBackup: String!, schemaName: String!, schemaVersion: String!): CreateBackupResponse
+  disable_lightning_addresses(addresses: [String!]!): Void
+  enable_lightning_addresses(addresses: [String!]!): Void
   hide_topup(id: String!): String
 
   """
