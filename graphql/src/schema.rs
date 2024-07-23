@@ -214,3 +214,19 @@ pub struct VerifyPhoneNumber;
     response_derives = "Debug"
 )]
 pub struct VerifiedPhoneNumber;
+
+#[derive(GraphQLQuery)]
+#[graphql(
+    schema_path = "schemas/schema_wallet_read.graphql",
+    query_path = "schemas/operations.graphql",
+    response_derives = "Debug"
+)]
+pub struct DisableLightningAddresses;
+
+#[derive(GraphQLQuery)]
+#[graphql(
+    schema_path = "schemas/schema_wallet_read.graphql",
+    query_path = "schemas/operations.graphql",
+    response_derives = "Debug"
+)]
+pub struct EnableLightningAddresses;

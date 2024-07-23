@@ -1,12 +1,10 @@
 use graphql::perro::OptionToError;
-use graphql::schema::VerifiedPhoneNumber;
 use graphql::schema::{
-    assign_lightning_address, submit_lnurl_pay_invoice, AssignLightningAddress,
-    SubmitLnurlPayInvoice,
-};
-use graphql::schema::{
-    request_phone_number_verification, verified_phone_number, verify_phone_number,
-    RequestPhoneNumberVerification, VerifyPhoneNumber,
+    assign_lightning_address, disable_lightning_addresses, enable_lightning_addresses,
+    request_phone_number_verification, submit_lnurl_pay_invoice, verified_phone_number,
+    verify_phone_number, AssignLightningAddress, DisableLightningAddresses,
+    EnableLightningAddresses, RequestPhoneNumberVerification, SubmitLnurlPayInvoice,
+    VerifiedPhoneNumber, VerifyPhoneNumber,
 };
 use graphql::{build_async_client, post};
 use honeybadger::asynchronous::Auth;
@@ -91,4 +89,36 @@ pub async fn query_verified_phone_number(
         post::<VerifiedPhoneNumber>(&client, backend_url, verified_phone_number::Variables {})
             .await?;
     Ok(data.verified_phone_number.map(|n| n.encrypted_phone_number))
+}
+
+pub async fn disable_lightning_addresses(
+    backend_url: &str,
+    auth: &Auth,
+    addresses: Vec<String>,
+) -> graphql::Result<()> {
+    let token = auth.query_token().await?;
+    let client = build_async_client(Some(&token))?;
+    post::<DisableLightningAddresses>(
+        &client,
+        backend_url,
+        disable_lightning_addresses::Variables { addresses },
+    )
+    .await?;
+    Ok(())
+}
+
+pub async fn enable_lightning_addresses(
+    backend_url: &str,
+    auth: &Auth,
+    addresses: Vec<String>,
+) -> graphql::Result<()> {
+    let token = auth.query_token().await?;
+    let client = build_async_client(Some(&token))?;
+    post::<EnableLightningAddresses>(
+        &client,
+        backend_url,
+        enable_lightning_addresses::Variables { addresses },
+    )
+    .await?;
+    Ok(())
 }

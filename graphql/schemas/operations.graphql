@@ -182,3 +182,11 @@ query VerifiedPhoneNumber {
     encryptedPhoneNumber
   }
 }
+
+mutation DisableLightningAddresses($addresses: [String!]!) {
+  disable_lightning_addresses(addresses: $addresses)
+}
+
+mutation EnableLightningAddresses($addresses: [String!]!) {
+  enable_lightning_addresses(addresses: $addresses)
+}
