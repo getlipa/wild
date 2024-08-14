@@ -67,6 +67,7 @@ impl AuthProvider {
         access_token: String,
         terms: TermsAndConditions,
         version: i64,
+        fingerprint: String,
     ) -> Result<()> {
         info!("Accepting T&C ({:?})...", terms);
         ensure!(
@@ -74,17 +75,19 @@ impl AuthProvider {
             invalid_input("Accepting T&C not supported for auth levels other than Pseudonymous")
         );
 
-        let variables = accept_terms_and_conditions::Variables {
-            service_provider: terms.into(),
+        let variables = accept_terms_and_conditions_v2::Variables {
+            fingerprint,
+            service: Some(terms.into()),
             version,
         };
         let client = build_async_client(Some(&access_token))?;
-        let data = post::<AcceptTermsAndConditions>(&client, &self.backend_url, variables).await?;
+        let data =
+            post::<AcceptTermsAndConditionsV2>(&client, &self.backend_url, variables).await?;
         ensure!(
             matches!(
-                data.accept_terms_conditions,
+                data.accept_terms_conditions_v2,
                 Some(
-                    accept_terms_and_conditions::AcceptTermsAndConditionsAcceptTermsConditions { .. }
+                    accept_terms_and_conditions_v2::AcceptTermsAndConditionsV2AcceptTermsConditionsV2 { .. }
                 )
             ),
             permanent_failure("Backend rejected accepting Terms and Conditions")

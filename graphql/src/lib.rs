@@ -9,7 +9,7 @@ pub use reqwest;
 use chrono::{DateTime, Utc};
 use graphql_client::reqwest::{post_graphql, post_graphql_blocking};
 use graphql_client::Response;
-use perro::{permanent_failure, runtime_error, MapToError, OptionToError};
+use perro::{invalid_input, permanent_failure, runtime_error, MapToError, OptionToError};
 use reqwest::blocking::Client;
 use reqwest::header::{HeaderValue, AUTHORIZATION};
 use reqwest::StatusCode;
@@ -160,6 +160,7 @@ fn map_error_code(code: &str) -> Error {
     const MISSING_HTTP_HEADER_EXCEPTION_CODE: &str = "http-header-missing-exception";
     const INVALID_INVITATION_EXCEPTION_CODE: &str = "invalid-invitation-exception";
     const REMOTE_SCHEMA_ERROR_CODE: &str = "remote-schema-error";
+    const INVALID_FINGERPRINT: &str = "invalid-fingerprint";
 
     match code {
         AUTH_EXCEPTION_CODE => runtime_error(
@@ -179,6 +180,7 @@ fn map_error_code(code: &str) -> Error {
         REMOTE_SCHEMA_ERROR_CODE => {
             permanent_failure("A remote schema call has failed on the backend")
         }
+        INVALID_FINGERPRINT => invalid_input("The provided fingerprint is invalid"),
         _ => permanent_failure(format!(
             "Unexpected backend response: unknown error code: {code}"
         )),

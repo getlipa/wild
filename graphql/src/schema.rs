@@ -55,7 +55,7 @@ pub struct RefreshSession;
     query_path = "schemas/operations.graphql",
     response_derives = "Debug"
 )]
-pub struct AcceptTermsAndConditions;
+pub struct AcceptTermsAndConditionsV2;
 
 #[derive(GraphQLQuery)]
 #[graphql(
