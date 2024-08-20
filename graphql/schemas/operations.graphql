@@ -38,11 +38,11 @@ mutation UnlockWallet($challenge: String!, $challengeSignature: String!, $prepar
   }
 }
 
-mutation AcceptTermsAndConditions($serviceProvider: String!, $version: Int!) {
-  accept_terms_conditions(args: {service_provider: $serviceProvider, version: $version}) {
-    serviceProvider
-    acceptedTerms
+mutation AcceptTermsAndConditionsV2($fingerprint: String!, $service: Service, $version: Int!) {
+  accept_terms_conditions_v2(args: {fingerprint: $fingerprint, service: $service, version: $version}) {
     acceptDate
+    accepted
+    service
     version
   }
 }

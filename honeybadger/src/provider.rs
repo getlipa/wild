@@ -4,6 +4,7 @@ use crate::signing::sign;
 use crate::TermsAndConditionsStatus;
 use graphql::perro::{ensure, invalid_input, permanent_failure, runtime_error, OptionToError};
 use graphql::reqwest::blocking::Client;
+use graphql::schema::accept_terms_and_conditions_v2::Service;
 use graphql::schema::get_terms_and_conditions_status::ServiceProviderEnum;
 use graphql::schema::*;
 use graphql::{build_client, perro, post_blocking};
@@ -24,13 +25,12 @@ pub enum TermsAndConditions {
     Pocket,
 }
 
-impl From<TermsAndConditions> for String {
+impl From<TermsAndConditions> for Service {
     fn from(value: TermsAndConditions) -> Self {
         match value {
-            TermsAndConditions::Lipa => "LIPA_WALLET",
-            TermsAndConditions::Pocket => "POCKET_EXCHANGE",
+            TermsAndConditions::Lipa => Service::LIPA_WALLET,
+            TermsAndConditions::Pocket => Service::POCKET_EXCHANGE,
         }
-        .to_string()
     }
 }
 
@@ -114,6 +114,7 @@ impl AuthProvider {
         access_token: String,
         terms: TermsAndConditions,
         version: i64,
+        fingerprint: String,
     ) -> Result<()> {
         info!("Accepting T&C ({:?})...", terms);
         ensure!(
@@ -121,18 +122,19 @@ impl AuthProvider {
             invalid_input("Accepting T&C not supported for auth levels other than Pseudonymous")
         );
 
-        let variables = accept_terms_and_conditions::Variables {
-            service_provider: terms.into(),
+        let variables = accept_terms_and_conditions_v2::Variables {
+            fingerprint,
+            service: Some(terms.into()),
             version,
         };
         let client = build_client(Some(&access_token))?;
         let data =
-            post_blocking::<AcceptTermsAndConditions>(&client, &self.backend_url, variables)?;
+            post_blocking::<AcceptTermsAndConditionsV2>(&client, &self.backend_url, variables)?;
         ensure!(
             matches!(
-                data.accept_terms_conditions,
+                data.accept_terms_conditions_v2,
                 Some(
-                    accept_terms_and_conditions::AcceptTermsAndConditionsAcceptTermsConditions { .. }
+                    accept_terms_and_conditions_v2::AcceptTermsAndConditionsV2AcceptTermsConditionsV2 { .. }
                 )
             ),
             permanent_failure("Backend rejected accepting Terms and Conditions")

@@ -99,10 +99,11 @@ impl Auth {
         &self,
         terms: TermsAndConditions,
         version: i64,
+        fingerprint: String,
     ) -> Result<()> {
         let token = self.query_token()?;
         let provider = self.provider.lock().unwrap();
-        provider.accept_terms_and_conditions(token, terms, version)
+        provider.accept_terms_and_conditions(token, terms, version, fingerprint)
     }
 
     pub fn get_terms_and_conditions_status(

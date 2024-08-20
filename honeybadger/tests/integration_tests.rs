@@ -192,38 +192,14 @@ fn test_accept_terms_and_conditions() {
         auth_keypair,
     )
     .unwrap();
-    auth.accept_terms_and_conditions(TermsAndConditions::Lipa, 1)
-        .unwrap();
+    auth.accept_terms_and_conditions(
+        TermsAndConditions::Lipa,
+        3,
+        "dcceac0c67d2946e3ea44ccbb439a5b33ee9d36d79df2b0f9070b66938".into(),
+    )
+    .unwrap();
     assert_eq!(
         auth.get_terms_and_conditions_status(TermsAndConditions::Lipa)
-            .unwrap()
-            .version,
-        1
-    );
-
-    let (wallet_keypair, auth_keypair) = generate_keys();
-    let auth = Auth::new(
-        get_backend_url(),
-        AuthLevel::Owner,
-        wallet_keypair,
-        auth_keypair,
-    )
-    .unwrap();
-    let result = auth.accept_terms_and_conditions(TermsAndConditions::Lipa, 2);
-    assert!(matches!(result, Err(Error::InvalidInput { .. })));
-
-    let (wallet_keypair, auth_keypair) = generate_keys();
-    let auth = Auth::new(
-        get_backend_url(),
-        AuthLevel::Pseudonymous,
-        wallet_keypair,
-        auth_keypair,
-    )
-    .unwrap();
-    auth.accept_terms_and_conditions(TermsAndConditions::Pocket, 3)
-        .unwrap();
-    assert_eq!(
-        auth.get_terms_and_conditions_status(TermsAndConditions::Pocket)
             .unwrap()
             .version,
         3
@@ -237,8 +213,39 @@ fn test_accept_terms_and_conditions() {
         auth_keypair,
     )
     .unwrap();
-    let result = auth.accept_terms_and_conditions(TermsAndConditions::Pocket, 4);
-    assert!(matches!(result, Err(Error::InvalidInput { .. })));
+    let result =
+        auth.accept_terms_and_conditions(TermsAndConditions::Lipa, 3, "fingerprint2".into());
+    assert!(
+        matches!(result, Err(Error::InvalidInput { msg }) if msg.contains("Accepting T&C not supported for auth levels other than Pseudonymous"))
+    );
+
+    let (wallet_keypair, auth_keypair) = generate_keys();
+    let auth = Auth::new(
+        get_backend_url(),
+        AuthLevel::Pseudonymous,
+        wallet_keypair,
+        auth_keypair,
+    )
+    .unwrap();
+    let result =
+        auth.accept_terms_and_conditions(TermsAndConditions::Pocket, 3, "fingerprint3".into());
+    assert!(
+        matches!(result, Err(Error::InvalidInput { msg }) if msg.contains("The provided fingerprint is invalid"))
+    );
+
+    let (wallet_keypair, auth_keypair) = generate_keys();
+    let auth = Auth::new(
+        get_backend_url(),
+        AuthLevel::Owner,
+        wallet_keypair,
+        auth_keypair,
+    )
+    .unwrap();
+    let result =
+        auth.accept_terms_and_conditions(TermsAndConditions::Pocket, 4, "fingerprint4".into());
+    assert!(
+        matches!(result, Err(Error::InvalidInput { msg }) if msg.contains("Accepting T&C not supported for auth levels other than Pseudonymous"))
+    );
 }
 
 fn generate_keys() -> (KeyPair, KeyPair) {

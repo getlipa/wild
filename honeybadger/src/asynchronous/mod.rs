@@ -69,11 +69,12 @@ impl Auth {
         &self,
         terms: TermsAndConditions,
         version: i64,
+        fingerprint: String,
     ) -> Result<()> {
         let token = self.query_token().await?;
         let provider = self.provider.lock().await;
         provider
-            .accept_terms_and_conditions(token, terms, version)
+            .accept_terms_and_conditions(token, terms, version, fingerprint)
             .await
     }
 

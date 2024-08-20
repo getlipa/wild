@@ -62,7 +62,7 @@ jobs:
         uses: actions/checkout@v3
       - name: Linelint
         uses: fernandrone/linelint@master
-        id: linelint  
+        id: linelint
   unused_dependencies:
     name: Look for unused dependencies
     runs-on: ubuntu-latest
@@ -70,11 +70,11 @@ jobs:
       - name: rust-toolchain
         uses: actions-rs/toolchain@v1.0.6
         with:
-          toolchain: nightly-2023-12-28
+          toolchain: nightly-2024-08-14
           override: true
       - name: Install unused dependency checker
         run: cargo install cargo-udeps --locked
       - name: Checkout
         uses: actions/checkout@v3
       - name: Run unused dependency checker
-        run: cargo +nightly-2023-12-28 udeps
+        run: cargo +nightly-2024-08-14 udeps
