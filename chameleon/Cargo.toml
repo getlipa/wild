@@ -8,6 +8,6 @@ graphql = { path = "../graphql" }
 honeybadger = { path = "../honeybadger" }
 
 [dev-dependencies]
-bitcoin = { version = "0.30.1" }
+bitcoin = { version = "0.32.4" }
 ctor = "0.2.0"
 simplelog = { version ="0.12.0", features = ["test"] }
