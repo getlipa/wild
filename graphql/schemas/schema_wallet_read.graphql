@@ -667,6 +667,38 @@ input lightning_address_stream_cursor_value_input {
   assignedAt: timestamptz
 }
 
+input StartTopupSetupRequest {
+  node_pubkey: String!
+  provider: String!
+  source_iban: String!
+  user_currency: String!
+  email: String
+}
+
+type StartTopupSetupResponse {
+  id: String!
+  challenge: String!
+}
+
+type CompleteTopupSetupResponse {
+  id: String!
+  debitor_iban: String!
+  creditor_reference: String!
+  creditor_iban: String!
+  creditor_bank_name: String!
+  creditor_bank_street: String!
+  creditor_bank_postal_code: String!
+  creditor_bank_town: String!
+  creditor_bank_country: String!
+  creditor_bank_bic: String!
+  creditor_name: String!
+  creditor_street: String!
+  creditor_postal_code: String!
+  creditor_town: String!
+  creditor_country: String!
+  currency: String!
+}
+
 """mutation root"""
 type mutation_root {
   """
@@ -697,6 +729,7 @@ type mutation_root {
   accept_terms_conditions_v2(args: AcceptTermsConditionsV2Input): AcceptTermsConditionsV2Response
   accept_wallet_acl_by_pk(pk_columns: AcceptWalletPkRequestInput!): WalletAcl
   assign_lightning_address: LightningAddressResponse
+  complete_topup_setup(id: String!, signed_challenge: String!): CompleteTopupSetupResponse!
   create_backup(encryptedBackup: String!, schemaName: String!, schemaVersion: String!): CreateBackupResponse
   disable_lightning_addresses(addresses: [String!]!): Void
   enable_lightning_addresses(addresses: [String!]!): Void
@@ -735,6 +768,7 @@ type mutation_root {
   start_prepared_session_v2(challenge: String!, challengeSignature: String!, challengeSignatureType: ChallengeSignatureType, preparedPermissionToken: String!): SessionPermit
   start_session(authPubKey: String!, challenge: String!, challengeSignature: String!, challengeSignatureType: ChallengeSignatureType, signedAuthPubKey: String!, walletPubKey: String!): TokenContainer
   start_session_v2(authPubKey: String!, challenge: String!, challengeSignature: String!, challengeSignatureType: ChallengeSignatureType, signedAuthPubKey: String!, walletPubKey: String!): SessionPermit
+  start_topup_setup(startTopupSetupRequest: StartTopupSetupRequest!): StartTopupSetupResponse!
   submit_lnurl_pay_invoice(id: String!, invoice: String): Void
   verify_phone_number(number: String!, otp: String!): Void
 }
