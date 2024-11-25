@@ -190,3 +190,31 @@ mutation DisableLightningAddresses($addresses: [String!]!) {
 mutation EnableLightningAddresses($addresses: [String!]!) {
   enable_lightning_addresses(addresses: $addresses)
 }
+
+mutation StartTopupSetup($request: StartTopupSetupRequest!) {
+  start_topup_setup(startTopupSetupRequest: $request) {
+    id
+    challenge
+  }
+}
+
+mutation CompleteTopupSetup($id: String!, $signedChallenge: String!) {
+  complete_topup_setup(id: $id, signed_challenge: $signedChallenge) {
+    id
+    debitor_iban
+    creditor_reference
+    creditor_iban
+    creditor_bank_name
+    creditor_bank_street
+    creditor_bank_postal_code
+    creditor_bank_town
+    creditor_bank_country
+    creditor_bank_bic
+    creditor_name
+    creditor_street
+    creditor_postal_code
+    creditor_town
+    creditor_country
+    currency
+  }
+}
