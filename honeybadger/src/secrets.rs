@@ -18,7 +18,7 @@ pub fn generate_mnemonic() -> Vec<String> {
     let entropy = generate_random_bytes();
     let mnemonic = Mnemonic::from_entropy(&entropy).unwrap();
 
-    let mnemonic: Vec<String> = mnemonic.word_iter().map(|s| s.to_string()).collect();
+    let mnemonic: Vec<String> = mnemonic.words().map(|s| s.to_string()).collect();
 
     mnemonic
 }
