@@ -673,6 +673,7 @@ input StartTopupSetupRequest {
   source_iban: String!
   user_currency: String!
   email: String
+  referral_code: String
 }
 
 type StartTopupSetupResponse {

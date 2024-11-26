@@ -2,8 +2,8 @@ use graphql::perro::{ensure, permanent_failure};
 use graphql::schema::list_uncompleted_topups::{topup_status_enum, ListUncompletedTopupsTopup};
 use graphql::schema::{
     complete_topup_setup, hide_topup, list_uncompleted_topups, register_notification_token,
-    register_topup, start_topup_setup, CompleteTopupSetup, HideTopup, ListUncompletedTopups,
-    RegisterNotificationToken, RegisterTopup, StartTopupSetup,
+    start_topup_setup, CompleteTopupSetup, HideTopup, ListUncompletedTopups,
+    RegisterNotificationToken, StartTopupSetup,
 };
 use graphql::{build_client, parse_from_rfc3339, post_blocking, ExchangeRate};
 use honeybadger::Auth;
@@ -135,6 +135,7 @@ impl OfferManager {
         source_iban: String,
         user_currency: String,
         email: Option<String>,
+        referral_code: Option<String>,
     ) -> graphql::Result<FiatTopupSetupChallenge> {
         let variables = start_topup_setup::Variables {
             request: StartTopupSetupRequest {
@@ -143,6 +144,7 @@ impl OfferManager {
                 source_iban,
                 user_currency,
                 email,
+                referral_code,
             },
         };
         let access_token = self.auth.query_token()?;
@@ -169,21 +171,6 @@ impl OfferManager {
         let data = post_blocking::<CompleteTopupSetup>(&client, &self.backend_url, variables)?;
 
         Ok(data.complete_topup_setup.into())
-    }
-
-    pub fn register_topup(&self, order_id: String, email: Option<String>) -> graphql::Result<()> {
-        let variables = register_topup::Variables { order_id, email };
-        let access_token = self.auth.query_token()?;
-        let client = build_client(Some(&access_token))?;
-        let data = post_blocking::<RegisterTopup>(&client, &self.backend_url, variables)?;
-        ensure!(
-            matches!(
-                data.register_topup,
-                Some(register_topup::RegisterTopupRegisterTopup { .. })
-            ),
-            permanent_failure("Backend rejected topup registration")
-        );
-        Ok(())
     }
 
     pub fn register_notification_token(
