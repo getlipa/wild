@@ -73,7 +73,7 @@ pub struct FiatTopupSetupChallenge {
 
 /// Information about a fiat top-up registration
 #[derive(Debug, Clone, PartialEq)]
-pub struct FiatTopupInfo {
+pub struct FiatTopupSetupInfo {
     pub order_id: String,
     /// The user should transfer fiat from this IBAN
     pub debitor_iban: String,
@@ -95,7 +95,7 @@ pub struct FiatTopupInfo {
     pub currency: String,
 }
 
-impl From<CompleteTopupSetupCompleteTopupSetup> for FiatTopupInfo {
+impl From<CompleteTopupSetupCompleteTopupSetup> for FiatTopupSetupInfo {
     fn from(value: CompleteTopupSetupCompleteTopupSetup) -> Self {
         Self {
             order_id: value.id,
@@ -161,7 +161,7 @@ impl OfferManager {
         &self,
         id: String,
         signed_challenge: String,
-    ) -> graphql::Result<FiatTopupInfo> {
+    ) -> graphql::Result<FiatTopupSetupInfo> {
         let variables = complete_topup_setup::Variables {
             id,
             signed_challenge,
