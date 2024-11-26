@@ -195,7 +195,7 @@ fn test_accept_terms_and_conditions() {
     auth.accept_terms_and_conditions(
         TermsAndConditions::Lipa,
         3,
-        "dcceac0c67d2946e3ea44ccbb439a5b33ee9d36d79df2b0f9070b66938".into(),
+        "b90025a5df2b7e45b458181289c74d74c4e74b2d7a5589b4af89d952c3e1181c".into(),
     )
     .unwrap();
     assert_eq!(
