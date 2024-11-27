@@ -198,8 +198,8 @@ mutation StartTopupSetup($request: StartTopupSetupRequest!) {
   }
 }
 
-mutation CompleteTopupSetup($id: String!, $signedChallenge: String!) {
-  complete_topup_setup(id: $id, signed_challenge: $signedChallenge) {
+mutation CompleteTopupSetup($id: String!, $signedChallenge: String!, $sourceIban: String!) {
+  complete_topup_setup(id: $id, signed_challenge: $signedChallenge, source_iban: $sourceIban) {
     id
     debitor_iban
     creditor_reference

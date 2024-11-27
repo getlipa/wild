@@ -161,10 +161,12 @@ impl OfferManager {
         &self,
         id: String,
         signed_challenge: String,
+        source_iban: String,
     ) -> graphql::Result<FiatTopupSetupInfo> {
         let variables = complete_topup_setup::Variables {
             id,
             signed_challenge,
+            source_iban,
         };
         let access_token = self.auth.query_token()?;
         let client = build_client(Some(&access_token))?;

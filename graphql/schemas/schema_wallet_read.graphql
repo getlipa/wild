@@ -730,7 +730,7 @@ type mutation_root {
   accept_terms_conditions_v2(args: AcceptTermsConditionsV2Input): AcceptTermsConditionsV2Response
   accept_wallet_acl_by_pk(pk_columns: AcceptWalletPkRequestInput!): WalletAcl
   assign_lightning_address: LightningAddressResponse
-  complete_topup_setup(id: String!, signed_challenge: String!): CompleteTopupSetupResponse!
+  complete_topup_setup(id: String!, signed_challenge: String!, source_iban: String!): CompleteTopupSetupResponse!
   create_backup(encryptedBackup: String!, schemaName: String!, schemaVersion: String!): CreateBackupResponse
   disable_lightning_addresses(addresses: [String!]!): Void
   enable_lightning_addresses(addresses: [String!]!): Void
