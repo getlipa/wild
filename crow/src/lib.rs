@@ -12,7 +12,6 @@ use std::time::SystemTime;
 
 use graphql::perro::runtime_error;
 use graphql::schema::complete_topup_setup::CompleteTopupSetupCompleteTopupSetup;
-use graphql::schema::start_topup_setup::StartTopupSetupRequest;
 pub use isocountry::CountryCode;
 pub use isolanguage_1::LanguageCode;
 
@@ -138,14 +137,12 @@ impl OfferManager {
         referral_code: Option<String>,
     ) -> graphql::Result<FiatTopupSetupChallenge> {
         let variables = start_topup_setup::Variables {
-            request: StartTopupSetupRequest {
-                node_pubkey,
-                provider,
-                source_iban,
-                user_currency,
-                email,
-                referral_code,
-            },
+            email,
+            node_pubkey,
+            provider,
+            referral_code,
+            source_iban,
+            user_currency,
         };
         let access_token = self.auth.query_token()?;
         let client = build_client(Some(&access_token))?;
