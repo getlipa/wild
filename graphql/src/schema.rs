@@ -230,3 +230,19 @@ pub struct DisableLightningAddresses;
     response_derives = "Debug"
 )]
 pub struct EnableLightningAddresses;
+
+#[derive(GraphQLQuery)]
+#[graphql(
+    schema_path = "schemas/schema_wallet_read.graphql",
+    query_path = "schemas/operations.graphql",
+    response_derives = "Debug"
+)]
+pub struct StartTopupSetup;
+
+#[derive(GraphQLQuery)]
+#[graphql(
+    schema_path = "schemas/schema_wallet_read.graphql",
+    query_path = "schemas/operations.graphql",
+    response_derives = "Debug"
+)]
+pub struct CompleteTopupSetup;

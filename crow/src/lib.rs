@@ -1,8 +1,9 @@
 use graphql::perro::{ensure, permanent_failure};
 use graphql::schema::list_uncompleted_topups::{topup_status_enum, ListUncompletedTopupsTopup};
 use graphql::schema::{
-    hide_topup, list_uncompleted_topups, register_notification_token, register_topup, HideTopup,
-    ListUncompletedTopups, RegisterNotificationToken, RegisterTopup,
+    complete_topup_setup, hide_topup, list_uncompleted_topups, register_notification_token,
+    start_topup_setup, CompleteTopupSetup, HideTopup, ListUncompletedTopups,
+    RegisterNotificationToken, StartTopupSetup,
 };
 use graphql::{build_client, parse_from_rfc3339, post_blocking, ExchangeRate};
 use honeybadger::Auth;
@@ -10,6 +11,7 @@ use std::sync::Arc;
 use std::time::SystemTime;
 
 use graphql::perro::runtime_error;
+use graphql::schema::complete_topup_setup::CompleteTopupSetupCompleteTopupSetup;
 pub use isocountry::CountryCode;
 pub use isolanguage_1::LanguageCode;
 
@@ -63,6 +65,58 @@ pub struct TopupInfo {
     pub error: Option<TopupError>,
 }
 
+pub struct FiatTopupSetupChallenge {
+    pub id: String,
+    pub challenge: String,
+}
+
+/// Information about a fiat top-up registration
+#[derive(Debug, Clone, PartialEq)]
+pub struct FiatTopupSetupInfo {
+    pub order_id: String,
+    /// The user should transfer fiat from this IBAN
+    pub debitor_iban: String,
+    /// This reference should be included in the fiat transfer reference
+    pub creditor_reference: String,
+    /// The user should transfer fiat to this IBAN
+    pub creditor_iban: String,
+    pub creditor_bank_name: String,
+    pub creditor_bank_street: String,
+    pub creditor_bank_postal_code: String,
+    pub creditor_bank_town: String,
+    pub creditor_bank_country: String,
+    pub creditor_bank_bic: String,
+    pub creditor_name: String,
+    pub creditor_street: String,
+    pub creditor_postal_code: String,
+    pub creditor_town: String,
+    pub creditor_country: String,
+    pub currency: String,
+}
+
+impl From<CompleteTopupSetupCompleteTopupSetup> for FiatTopupSetupInfo {
+    fn from(value: CompleteTopupSetupCompleteTopupSetup) -> Self {
+        Self {
+            order_id: value.id,
+            debitor_iban: value.debitor_iban,
+            creditor_reference: value.creditor_reference,
+            creditor_iban: value.creditor_iban,
+            creditor_bank_name: value.creditor_bank_name,
+            creditor_bank_street: value.creditor_bank_street,
+            creditor_bank_postal_code: value.creditor_bank_postal_code,
+            creditor_bank_town: value.creditor_bank_town,
+            creditor_bank_country: value.creditor_bank_country,
+            creditor_bank_bic: value.creditor_bank_bic,
+            creditor_name: value.creditor_name,
+            creditor_street: value.creditor_street,
+            creditor_postal_code: value.creditor_postal_code,
+            creditor_town: value.creditor_town,
+            creditor_country: value.creditor_country,
+            currency: value.currency,
+        }
+    }
+}
+
 pub struct OfferManager {
     backend_url: String,
     auth: Arc<Auth>,
@@ -73,28 +127,49 @@ impl OfferManager {
         Self { backend_url, auth }
     }
 
-    pub fn register_topup(
+    pub fn start_topup_setup(
         &self,
-        order_id: String,
+        node_pubkey: String,
+        provider: String,
+        source_iban: String,
+        user_currency: String,
         email: Option<String>,
         referral_code: Option<String>,
-    ) -> graphql::Result<()> {
-        let variables = register_topup::Variables {
-            order_id,
+    ) -> graphql::Result<FiatTopupSetupChallenge> {
+        let variables = start_topup_setup::Variables {
             email,
+            node_pubkey,
+            provider,
             referral_code,
+            source_iban,
+            user_currency,
         };
         let access_token = self.auth.query_token()?;
         let client = build_client(Some(&access_token))?;
-        let data = post_blocking::<RegisterTopup>(&client, &self.backend_url, variables)?;
-        ensure!(
-            matches!(
-                data.register_topup,
-                Some(register_topup::RegisterTopupRegisterTopup { .. })
-            ),
-            permanent_failure("Backend rejected topup registration")
-        );
-        Ok(())
+        let data = post_blocking::<StartTopupSetup>(&client, &self.backend_url, variables)?;
+
+        Ok(FiatTopupSetupChallenge {
+            id: data.start_topup_setup.id,
+            challenge: data.start_topup_setup.challenge,
+        })
+    }
+
+    pub fn complete_topup_setup(
+        &self,
+        id: String,
+        signed_challenge: String,
+        source_iban: String,
+    ) -> graphql::Result<FiatTopupSetupInfo> {
+        let variables = complete_topup_setup::Variables {
+            id,
+            signed_challenge,
+            source_iban,
+        };
+        let access_token = self.auth.query_token()?;
+        let client = build_client(Some(&access_token))?;
+        let data = post_blocking::<CompleteTopupSetup>(&client, &self.backend_url, variables)?;
+
+        Ok(data.complete_topup_setup.into())
     }
 
     pub fn register_notification_token(
