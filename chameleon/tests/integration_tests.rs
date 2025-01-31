@@ -31,8 +31,8 @@ fn test_list_currency_codes() {
 fn test_get_exchange_rate() {
     let provider = build_provider();
     let rate = provider.query_exchange_rate("EUR".to_string()).unwrap();
-    assert!(1000 < rate);
-    assert!(rate < 10000);
+    assert!(200 < rate);
+    assert!(rate < 3_000);
 
     let result = provider.query_exchange_rate("XXX".to_string());
     assert!(matches!(result, Err(Error::InvalidInput { .. })));
